@@ -1,0 +1,24 @@
+# worker/Dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends 
+    git 
+    docker.io 
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install poetry
+
+COPY pyproject.toml poetry.lock* ./
+
+RUN poetry config virtualenvs.create false 
+    && poetry install --no-interaction --no-ansi
+
+COPY . .
+
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+# Worker might listen to a queue or just run one-off tasks
+CMD ["python", "-m", "orchestrator.src.core.worker"] 

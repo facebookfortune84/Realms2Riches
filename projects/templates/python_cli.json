@@ -1,0 +1,9 @@
+{
+  "name": "template-python-cli",
+  "type": "cli",
+  "files": [
+    "README.md",
+    "pyproject.toml",
+    "src/main.py"
+  ]
+}

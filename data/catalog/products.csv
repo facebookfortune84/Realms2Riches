@@ -1,0 +1,5 @@
+id,name,description,category
+prod_starter,Starter Plan,Basic access for individuals,subscription
+prod_pro,Pro Plan,Advanced features for small teams,subscription
+prod_enterprise,Enterprise Plan,Full suite for large organizations,subscription
+prod_consulting,Custom Consulting,One-off consulting hours,service

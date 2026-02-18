@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Orchestrator Voice Client</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        #log { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
+        .user { color: blue; }
+        .system { color: green; }
+        .event { color: #888; font-style: italic; }
+    </style>
+</head>
+<body>
+    <h1>Voice Client (Simulated)</h1>
+    <div id="log"></div>
+    <button id="startBtn">Start Session</button>
+    <button id="speakBtn" disabled>Simulate Speech ("Hello")</button>
+    <button id="interruptBtn" disabled>Barge In ("Stop!")</button>
+    <button id="stopBtn" disabled>Stop Session</button>
+
+    <script>
+        const log = document.getElementById('log');
+        const startBtn = document.getElementById('startBtn');
+        const speakBtn = document.getElementById('speakBtn');
+        const interruptBtn = document.getElementById('interruptBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        
+        let ws;
+
+        function addLog(msg, type='event') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = msg;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        startBtn.onclick = () => {
+            ws = new WebSocket('ws://localhost:8000/ws/voice');
+            
+            ws.onopen = () => {
+                addLog('Connected to server');
+                startBtn.disabled = true;
+                speakBtn.disabled = false;
+                interruptBtn.disabled = false;
+                stopBtn.disabled = false;
+            };
+
+            ws.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'transcript') {
+                    addLog(`User: ${msg.text}`, 'user');
+                } else if (msg.type === 'text') {
+                    addLog(`System: ${msg.text}`, 'system');
+                } else if (msg.type === 'state') {
+                    addLog(`State: ${msg.state}`, 'event');
+                } else if (msg.type === 'audio') {
+                    // In a real app, play audio here.
+                    // msg.data is hex string in our mock implementation
+                    addLog(`[Audio Chunk Received: ${msg.data.length} bytes]`, 'event');
+                }
+            };
+
+            ws.onclose = () => {
+                addLog('Disconnected');
+                startBtn.disabled = false;
+                speakBtn.disabled = true;
+                interruptBtn.disabled = true;
+                stopBtn.disabled = true;
+            };
+        };
+
+        speakBtn.onclick = () => {
+            // Send "Hello world" as mock audio
+            if (ws) {
+                const mockAudio = "Hello world from browser"; 
+                // We send it as a JSON payload for this demo
+                ws.send(JSON.stringify({
+                    type: "audio_chunk",
+                    data: mockAudio
+                }));
+                addLog('Sent mock audio: "Hello world..."', 'event');
+            }
+        };
+
+        interruptBtn.onclick = () => {
+            // Simulate barge-in by sending audio while system is speaking
+            if (ws) {
+                const mockAudio = "Wait a second!";
+                ws.send(JSON.stringify({
+                    type: "audio_chunk",
+                    data: mockAudio
+                }));
+                addLog('Sent barge-in audio: "Wait a second!"', 'event');
+            }
+        };
+
+        stopBtn.onclick = () => {
+            if (ws) {
+                ws.close();
+            }
+        };
+    </script>
+</body>
+</html>

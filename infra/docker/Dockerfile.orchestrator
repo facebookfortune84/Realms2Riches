@@ -1,0 +1,30 @@
+# orchestrator/Dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends 
+    git 
+    curl 
+    && rm -rf /var/lib/apt/lists/*
+
+# Install poetry
+RUN pip install poetry
+
+# Copy dependency files
+COPY pyproject.toml poetry.lock* ./
+
+# Install dependencies
+RUN poetry config virtualenvs.create false 
+    && poetry install --no-interaction --no-ansi
+
+# Copy source code
+COPY . .
+
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+# Command to run the orchestrator
+CMD ["python", "-m", "orchestrator.src.core.orchestrator"]

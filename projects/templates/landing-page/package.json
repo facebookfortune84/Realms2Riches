@@ -1,0 +1,12 @@
+{
+  "name": "realms2riches-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "serve .",
+    "build": "echo 'No build step needed for static files'"
+  },
+  "dependencies": {
+    "serve": "^14.2.4"
+  }
+}

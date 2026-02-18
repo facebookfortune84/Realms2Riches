@@ -1,0 +1,5 @@
+product_id,price,currency,interval
+prod_starter,29.00,USD,month
+prod_pro,99.00,USD,month
+prod_enterprise,499.00,USD,month
+prod_consulting,150.00,USD,one_time
