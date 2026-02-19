@@ -7,6 +7,8 @@ import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 import Affiliates from './pages/Affiliates';
 import Store from './pages/Store';
+import Chamber from './pages/Chamber';
+import LaunchControl from './pages/LaunchControl';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import AffiliateDisclosure from './pages/AffiliateDisclosure';
@@ -31,6 +33,8 @@ function App() {
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/affiliates" element={<Affiliates />} />
             <Route path="/store" element={<Store />} />
+            <Route path="/chamber" element={<Chamber />} />
+            <Route path="/sovereign" element={<LaunchControl />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />

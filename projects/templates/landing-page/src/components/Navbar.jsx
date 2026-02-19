@@ -8,7 +8,9 @@ export default function Navbar() {
     { name: 'Pricing', path: '/pricing' },
     { name: 'Cockpit', path: '/cockpit' },
     { name: 'Blog', path: '/blog' },
-    { name: 'Dashboard', path: '/dashboard' }
+    { name: 'Dashboard', path: '/dashboard' },
+    { name: 'Chamber', path: '/chamber' },
+    { name: 'Command', path: '/sovereign' }
   ];
 
   return (
