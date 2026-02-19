@@ -41,7 +41,7 @@ async def add_ngrok_skip_header(request: Request, call_next):
     return response
 
 # Sovereign System State
-swarm_active = False
+swarm_active = True
 
 # Shared Core Instances
 orchestrator = Orchestrator()
