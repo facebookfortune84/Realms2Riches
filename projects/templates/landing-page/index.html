@@ -13,19 +13,77 @@
 <body>
     <h1>Realms2Riches</h1>
     <p>Powered by Titan Forge</p>
+    
+    <div id="pricing" class="status">
+        <h3>Product Catalog</h3>
+        <ul id="product-list">Loading products...</ul>
+    </div>
+
+    <div id="cockpit" class="status">
+        <h3>Agent Cockpit</h3>
+        <div id="voice-status">Voice: Inactive</div>
+        <button id="start-voice">Start Voice Session</button>
+        <button id="stop-voice" disabled>Stop Voice Session</button>
+        <div id="transcript" style="margin-top:10px; color: #888;"></div>
+    </div>
+
     <div id="backend-status" class="status">Checking backend connectivity...</div>
 
     <script>
-        // BACKEND_URL will be injected or assumed from localhost for now
-        const BACKEND_URL = 'http://localhost:8000';
+        const BACKEND_URL = window.BACKEND_URL || 'https://glowfly-sizeable-lazaro.ngrok-free.dev';
+        
+        // Connectivity
         fetch(`${BACKEND_URL}/health`)
             .then(res => res.json())
             .then(data => {
                 document.getElementById('backend-status').innerText = `Backend Status: ${data.status || 'Connected'}`;
             })
             .catch(err => {
-                document.getElementById('backend-status').innerText = 'Backend Status: Local backend not reachable (this is expected if backend is not exposed)';
+                document.getElementById('backend-status').innerText = 'Backend Status: Local backend not reachable via public tunnel';
             });
+
+        // Load Products
+        // Assuming there's a products endpoint
+        fetch(`${BACKEND_URL}/products`)
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById('product-list');
+                list.innerHTML = data.map(p => `<li>${p.name} - $${p.prices[0].price}</li>`).join('');
+            })
+            .catch(() => {
+                document.getElementById('product-list').innerText = 'Error loading products';
+            });
+
+        // Voice Socket
+        let socket;
+        const startBtn = document.getElementById('start-voice');
+        const stopBtn = document.getElementById('stop-voice');
+        const vStatus = document.getElementById('voice-status');
+
+        startBtn.onclick = () => {
+            const wsUrl = BACKEND_URL.replace('https', 'wss').replace('http', 'ws');
+            socket = new WebSocket(`${wsUrl}/ws/voice`);
+            socket.onopen = () => {
+                vStatus.innerText = 'Voice: Connected';
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+            };
+            socket.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'transcript') {
+                    document.getElementById('transcript').innerText = `User: ${msg.text}`;
+                }
+            };
+            socket.onclose = () => {
+                vStatus.innerText = 'Voice: Disconnected';
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            };
+        };
+
+        stopBtn.onclick = () => {
+            if (socket) socket.close();
+        };
     </script>
 </body>
 </html>
