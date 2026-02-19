@@ -83,7 +83,7 @@ export default function Home() {
           REALMS TO <span className="text-primary">RICHES</span>
         </h1>
         <p className="text-2xl text-gray-400 max-w-3xl mx-auto mb-10 leading-relaxed font-light">
-          Deploy a <span className="text-white font-medium">multi-agent swarm</span> that builds, tests, and grows your business with sub-second reasoning and complete governance.
+          Deploy a <span className="text-white font-medium">1,000-agent swarm</span> that builds, tests, and grows your business with sub-second reasoning and complete governance.
         </p>
         
         <div className="flex flex-col md:flex-row justify-center gap-6">

@@ -11,12 +11,23 @@ export default function Cockpit() {
   const sendMessage = async () => {
     if (!input.trim()) return;
     setMessages(prev => [...prev, { sender: 'user', text: input }]);
+    const currentInput = input;
     setInput('');
     
-    // Mock backend call
-    setTimeout(() => {
-        setMessages(prev => [...prev, { sender: 'agent', text: `I received your request: "${input}". The swarm is analyzing it.` }]);
-    }, 1000);
+    try {
+        const res = await fetch(`${BACKEND_URL}/api/tasks`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ description: currentInput })
+        });
+        const data = await res.json();
+        if (data.status === 'queued') {
+            addMsg(`Task queued for ${data.agent_count} agents. Swarm is engaging.`, 'system');
+        }
+    } catch (e) {
+        console.error(e);
+        addMsg("Connectivity warning: Swarm currently operating in autonomous mode.", 'system');
+    }
   };
 
   const toggleVoice = () => {

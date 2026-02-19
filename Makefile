@@ -20,6 +20,9 @@ launch-check:
 verify:
 	poetry run python infra/scripts/full_cycle_test.py
 
+diagnose:
+	poetry run python infra/scripts/healthcheck_backend.py
+
 hash-registry:
 	poetry run python infra/scripts/hash_registry.py
 

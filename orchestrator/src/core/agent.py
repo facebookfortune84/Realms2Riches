@@ -22,11 +22,14 @@ class Agent:
         logger.info(f"Agent {self.config.name} processing task: {task.description}")
         
         try:
-            # 1. Retrieve context
-            context_docs = self.memory.search(task.description)
-            context_text = "\n".join([doc["text"] for doc in context_docs])
+            # 1. RAG Context Injection
+            context_docs = self.memory.search(task.description, limit=3)
+            context_text = "\n".join([f"- {doc['text']}" for doc in context_docs]) if context_docs else "No specific context found."
             
-            # 2. Formulate plan
+            # Record this task in RAG for future recursive learning
+            self.memory.add(f"Task: {task.description}", {"agent": self.config.id, "type": "task_log"})
+
+            # 2. Formulate plan with injected context
             plan = self._call_llm(task.description, context_text)
             
             # 3. Execute tools based on plan

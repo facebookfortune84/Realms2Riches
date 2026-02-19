@@ -23,17 +23,26 @@ export default function Pricing() {
 
   const handleCheckout = async (priceId) => {
     try {
+      setLoading(true);
       const res = await fetch(`${BACKEND_URL}/api/checkout/session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ priceId })
       });
+      
+      if (!res.ok) throw new Error("Stripe session creation failed");
+      
       const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else alert("Checkout initialization failed.");
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Failed to initiate secure checkout.");
+      }
     } catch (e) {
       console.error(e);
-      alert("Payment error. Please try again.");
+      alert("Billing gateway currently unavailable. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 

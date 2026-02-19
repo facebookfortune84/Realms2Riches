@@ -1,0 +1,14 @@
+.git
+.pytest_cache
+venv
+node_modules
+dist
+data/vector_store
+orchestrator.db
+*.pyc
+__pycache__
+.env
+.env.prod
+.env.prod.bak
+projects/templates/landing-page/node_modules
+projects/templates/landing-page/dist
