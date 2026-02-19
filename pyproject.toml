@@ -24,6 +24,7 @@ python-dotenv = "^1.0.0"
 docker = "^7.0.0"
 gitpython = "^3.1.40"
 tenacity = "^8.2.3"
+pydantic-settings = "^2.2.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
