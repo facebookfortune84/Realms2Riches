@@ -23,7 +23,7 @@ while ($attempt -lt $maxAttempts) {
     try {
         $response = Invoke-WebRequest -Uri "http://localhost:8000/health" -UseBasicParsing -TimeoutSec 2
         if ($response.StatusCode -eq 200) {
-            Write-Host "💓 API is healthy!" -ForegroundColor Green
+            Write-Host "API is healthy ❤️" -ForegroundColor Green
             $apiHealthy = $true
             break
         }
