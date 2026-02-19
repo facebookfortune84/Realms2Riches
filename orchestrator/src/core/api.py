@@ -19,10 +19,16 @@ logger = get_logger(__name__)
 
 app = FastAPI(title="Sovereign API", version="3.1.0")
 
-# Robust CORS for Ngrok and Vercel
+# ---------------------------------------------------------
+# FIXED CORS CONFIGURATION (Vercel + Ngrok compatible)
+# ---------------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://frontend-two-xi-gal9lkptfi.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*", "ngrok-skip-browser-warning"],
@@ -30,8 +36,6 @@ app.add_middleware(
 
 @app.middleware("http")
 async def add_ngrok_skip_header(request: Request, call_next):
-    # This ensures that automated probes and browser requests 
-    # don't get stuck on the ngrok landing page
     response = await call_next(request)
     response.headers["ngrok-skip-browser-warning"] = "true"
     return response
@@ -63,9 +67,9 @@ async def startup_event():
 @app.get("/health")
 async def health():
     return {
-        "status": "ok", 
+        "status": "ok",
         "swarm_active": swarm_active,
-        "agents": len(orchestrator.agents), 
+        "agents": len(orchestrator.agents),
         "rag_docs": len(orchestrator.memory.documents)
     }
 
@@ -91,12 +95,12 @@ async def process_task_and_alchemize(desc, project_id):
 async def submit_task(request: Request, background_tasks: BackgroundTasks):
     if not swarm_active:
         raise HTTPException(status_code=403, detail="SYSTEM RESTRICTED: Activation Required via Command Console")
-        
+
     data = await request.json()
     desc = data.get("description")
     if not desc:
         raise HTTPException(status_code=400, detail="Description required")
-    
+
     background_tasks.add_task(process_task_and_alchemize, desc, data.get("project_id", "adhoc"))
     return {"status": "queued", "agent_count": len(orchestrator.agents)}
 
@@ -110,7 +114,14 @@ async def create_checkout_session(request: Request):
         data = await request.json()
         price_id = data.get("priceId", "default")
         session = stripe.checkout.Session.create(
-            line_items=[{'price_data': {'currency': 'usd', 'product_data': {'name': price_id}, 'unit_amount': 2900}, 'quantity': 1}],
+            line_items=[{
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {'name': price_id},
+                    'unit_amount': 2900
+                },
+                'quantity': 1
+            }],
             mode='payment',
             success_url=f"{settings.FRONTEND_URL}/success",
             cancel_url=f"{settings.FRONTEND_URL}/pricing",
@@ -124,20 +135,14 @@ async def create_checkout_session(request: Request):
 async def sovereign_launch(request: Request):
     global swarm_active
     client_ip = request.client.host
-    
-    # 1. Cryptographic Signature Verification
+
     data = await request.json()
     signature = data.get("signature")
     master_key = settings.REALM_MASTER_KEY
-    
-    # Secure Signature Check:
-    # We verify the signature provided by the Command Console.
-    # This allows you to bypass DHCP/IP changes because only someone with 
-    # your MASTER_KEY can generate this specific handshake.
+
     if signature == "verified_mock_signature" or signature == hashlib.sha256(master_key.encode()).hexdigest():
         swarm_active = True
-        
-        # Record the launch in the Lineage Ledger for audit
+
         launch_record = {
             "event": "SOVEREIGN_IGNITION",
             "authorized_ip": client_ip,
@@ -145,11 +150,10 @@ async def sovereign_launch(request: Request):
             "status": "SUCCESS"
         }
         logger.info(f"🚀 SOVEREIGN SYSTEM ACTIVATED via Signature Handshake from IP: {client_ip}")
-        
-        # Save to local lineage file
+
         with open("data/lineage/launch_manifest.json", "a") as f:
             f.write(json.dumps(launch_record) + "\n")
-            
+
         return {"status": "activated", "authorized_session": True}
     else:
         logger.warning(f"BLOCKING UNAUTHORIZED LAUNCH ATTEMPT FROM: {client_ip}")
@@ -170,7 +174,8 @@ async def chamber_socket(websocket: WebSocket):
             ]
             await websocket.send_text(random.choice(events))
             await asyncio.sleep(0.05)
-    except Exception: pass
+    except Exception:
+        pass
 
 @app.websocket("/ws/voice")
 async def websocket_endpoint(websocket: WebSocket):
@@ -183,12 +188,15 @@ async def websocket_endpoint(websocket: WebSocket):
             msg = json.loads(data)
             if msg.get("type") == "audio_chunk":
                 await session.add_input({"type": "audio", "data": msg.get("data", "").encode("utf-8")})
-    except Exception: pass
-    finally: output_task.cancel()
+    except Exception:
+        pass
+    finally:
+        output_task.cancel()
 
 async def send_output(websocket: WebSocket, session):
     try:
         while True:
             event = await session.output_queue.get()
             await websocket.send_json(event)
-    except Exception: pass
+    except Exception:
+        pass
