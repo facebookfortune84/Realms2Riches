@@ -1,18 +1,36 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 export default function Navbar() {
+  const location = useLocation();
+  
+  const links = [
+    { name: 'Pricing', path: '/pricing' },
+    { name: 'Cockpit', path: '/cockpit' },
+    { name: 'Blog', path: '/blog' },
+    { name: 'Dashboard', path: '/dashboard' }
+  ];
+
   return (
-    <nav className="border-b border-gray-800 py-4">
+    <nav className="border-b border-gray-800 py-6 sticky top-0 bg-bg/80 backdrop-blur-xl z-50">
       <div className="container mx-auto px-4 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold text-primary">Realms to Riches</Link>
-        <div className="space-x-6">
-          <Link to="/pricing" className="hover:text-primary">Pricing</Link>
-          <Link to="/cockpit" className="hover:text-primary">Cockpit</Link>
-          <Link to="/blog" className="hover:text-primary">Blog</Link>
-          <Link to="/store" className="hover:text-primary">Store</Link>
-          <Link to="/affiliates" className="hover:text-primary">Affiliates</Link>
-          <Link to="/dashboard" className="hover:text-primary">Dashboard</Link>
+        <Link to="/" className="text-2xl font-black tracking-tighter text-white hover:text-primary transition-colors">
+          REALMS2<span className="text-primary">RICHES</span>
+        </Link>
+        <div className="hidden md:flex space-x-8">
+          {links.map(link => (
+            <Link 
+              key={link.path} 
+              to={link.path} 
+              className={`text-sm font-bold uppercase tracking-widest hover:text-primary transition-colors ${location.pathname === link.path ? 'text-primary' : 'text-gray-400'}`}
+            >
+              {link.name}
+            </Link>
+          ))}
         </div>
+        <Link to="/cockpit" className="bg-primary text-black px-6 py-2 rounded-full font-bold text-sm hover:scale-105 transition-transform">
+          LAUNCH
+        </Link>
       </div>
     </nav>
   );

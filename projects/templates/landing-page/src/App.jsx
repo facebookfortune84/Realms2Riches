@@ -10,6 +10,8 @@ import Store from './pages/Store';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import AffiliateDisclosure from './pages/AffiliateDisclosure';
+import Success from './pages/Success';
+import Cancel from './pages/Cancel';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import CookieBanner from './components/CookieBanner';
@@ -32,6 +34,8 @@ function App() {
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
+            <Route path="/success" element={<Success />} />
+            <Route path="/cancel" element={<Cancel />} />
           </Routes>
         </main>
         <Footer />

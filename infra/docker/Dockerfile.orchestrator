@@ -4,9 +4,9 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends 
-    git 
-    curl 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install poetry
@@ -16,8 +16,8 @@ RUN pip install poetry
 COPY pyproject.toml poetry.lock* ./
 
 # Install dependencies
-RUN poetry config virtualenvs.create false 
-    && poetry install --no-interaction --no-ansi
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi --no-root
 
 # Copy source code
 COPY . .
@@ -26,5 +26,5 @@ COPY . .
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 
-# Command to run the orchestrator
-CMD ["python", "-m", "orchestrator.src.core.orchestrator"]
+# Command to run the orchestrator API
+CMD ["uvicorn", "orchestrator.src.core.api:app", "--host", "0.0.0.0", "--port", "8000"]

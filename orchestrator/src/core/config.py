@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     GOOGLE_API_KEY: Optional[str] = None
     GITHUB_TOKEN: Optional[str] = None
     STRIPE_API_KEY: Optional[str] = None
+    STRIPE_WEBHOOK_SECRET: Optional[str] = None
     LINER_API_KEY: Optional[str] = None # Assuming LINEAR_API_KEY from scan
     
     @property
