@@ -31,6 +31,7 @@ class Agent:
 
             # 2. Formulate plan with injected context
             plan = self._call_llm(task.description, context_text)
+            reasoning = plan.get("reasoning", "Executing swarm logic...")
             
             # 3. Execute tools based on plan
             results = []
@@ -56,6 +57,7 @@ class Agent:
             return {
                 "status": "completed", 
                 "results": results, 
+                "reasoning": reasoning,
                 "agent_id": self.config.id,
                 "timestamp": datetime.utcnow().isoformat()
             }
@@ -64,7 +66,7 @@ class Agent:
             return {"status": "failed", "error": str(e), "agent_id": self.config.id}
 
     def _call_llm(self, prompt: str, context: str) -> Dict[str, Any]:
-        system_msg = f"{self.config.system_prompt}\n\nContext:\n{context}\n\nOutput ONLY a JSON object with a 'steps' list."
+        system_msg = f"{self.config.system_prompt}\n\nContext:\n{context}\n\nOutput ONLY a JSON object with a 'reasoning' string and a 'steps' list."
         user_msg = f"Task: {prompt}"
         
         messages = [

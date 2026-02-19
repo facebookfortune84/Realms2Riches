@@ -1,0 +1,28 @@
+{
+  "name": "realms2riches",
+  "version": "1.0.0",
+  "description": "A fully autonomous, multi-agent system powered by **Groq** for high-speed agentic reasoning. Capable of generating complete, tested, and containerized software projects from high-level specifications, now with **Barge-In Voice** capabilities.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/facebookfortune84/Realms2Riches.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/facebookfortune84/Realms2Riches/issues"
+  },
+  "homepage": "https://github.com/facebookfortune84/Realms2Riches#readme",
+  "devDependencies": {
+    "@google/gemini-cli": "^0.29.5"
+  }
+}

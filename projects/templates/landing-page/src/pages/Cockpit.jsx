@@ -18,6 +18,10 @@ export default function Cockpit() {
     const currentInput = input;
     setInput('');
     
+    // Add a temporary "processing" message
+    const processingId = Date.now();
+    setMessages(prev => [...prev, { id: processingId, sender: 'system', text: 'Swarm is analyzing your request...' }]);
+
     try {
         const res = await fetch(`${BACKEND_URL}/api/tasks`, {
             method: 'POST',
@@ -25,11 +29,35 @@ export default function Cockpit() {
             body: JSON.stringify({ description: currentInput })
         });
         const data = await res.json();
-        if (data.status === 'queued') {
-            addMsg(`Task queued for ${data.agent_count} agents. Swarm is engaging.`, 'system');
+        
+        // Remove processing message
+        setMessages(prev => prev.filter(m => m.id !== processingId));
+
+        if (data.status === 'completed') {
+            const agentId = data.result?.agent_id || 'Agent';
+            const status = data.result?.status || 'completed';
+            const reasoning = data.result?.reasoning || 'Thinking...';
+            
+            let resultText = `[${agentId}] Task ${status}.\n\n`;
+            resultText += `REASONING: ${reasoning}\n\n`;
+            
+            if (data.result?.results && data.result.results.length > 0) {
+                resultText += "ACTIONS TAKEN:\n";
+                data.result.results.forEach(r => {
+                    const output = r.output_data?.result || r.output_data?.error || 'No detail available';
+                    resultText += `- ${r.tool_id}: ${output}\n`;
+                });
+            } else {
+                resultText += "SYSTEM NOTE: Internal logic cycle complete. No external tools were required to fulfill this request.";
+            }
+            
+            addMsg(resultText, 'agent');
+        } else {
+            addMsg(`Error: ${data.error || 'Task failed to complete.'}`, 'system');
         }
     } catch (e) {
         console.error(e);
+        setMessages(prev => prev.filter(m => m.id !== processingId));
         addMsg("Connectivity warning: Swarm currently operating in autonomous mode.", 'system');
     }
   };

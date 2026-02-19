@@ -86,23 +86,28 @@ async def diagnostics():
 
 from orchestrator.src.core.alchemy_engine import generate_autonomous_blog_post
 
-async def process_task_and_alchemize(desc, project_id):
-    result = orchestrator.submit_task(desc, project_id)
-    if result.get("status") == "completed":
-        generate_autonomous_blog_post(result)
-
 @app.post("/api/tasks")
-async def submit_task(request: Request, background_tasks: BackgroundTasks):
+async def submit_task(request: Request):
     if not swarm_active:
         raise HTTPException(status_code=403, detail="SYSTEM RESTRICTED: Activation Required via Command Console")
 
     data = await request.json()
     desc = data.get("description")
+    project_id = data.get("project_id", "adhoc")
     if not desc:
         raise HTTPException(status_code=400, detail="Description required")
 
-    background_tasks.add_task(process_task_and_alchemize, desc, data.get("project_id", "adhoc"))
-    return {"status": "queued", "agent_count": len(orchestrator.agents)}
+    logger.info(f"Processing synchronous task: {desc}")
+    result = orchestrator.submit_task(desc, project_id)
+    
+    if result.get("status") == "completed":
+        generate_autonomous_blog_post(result)
+        
+    return {
+        "status": "completed", 
+        "agent_count": len(orchestrator.agents),
+        "result": result
+    }
 
 @app.get("/products")
 async def get_products():
