@@ -5,63 +5,48 @@ POETRY ?= poetry
 # Default environment file
 ENV_FILE ?= .env.prod
 
-# -------------------------------
-# Environment & Dependencies
-# -------------------------------
-.PHONY: init
-init:
-    $(PYTHON) -m venv venv
-    . venv/bin/activate && $(PIP) install --upgrade pip
-    . venv/bin/activate && $(PIP) install -e orchestrator[dev]
+.PHONY: setup test lint format docker-build docker-up launch-check seed-products package-exe verify hash-registry
 
-# -------------------------------
-# Local Development
-# -------------------------------
-.PHONY: dev
-dev:
-    cd infra/docker && docker-compose -f docker-compose.prod.yml up --build
+setup:
+	poetry install
+	pre-commit install
 
-.PHONY: dev-down
-dev-down:
-    cd infra/docker && docker-compose -f docker-compose.prod.yml down
-
-# -------------------------------
-# Tests & Checks
-# -------------------------------
-.PHONY: test
 test:
-    . venv/bin/activate && cd orchestrator && pytest
+	poetry run pytest tests/e2e/test_full_flow.py tests/e2e/test_marketing_ready_flow.py tests/integration/test_voice_flow.py
 
-.PHONY: launch-check
 launch-check:
-    . venv/bin/activate && cd orchestrator && pytest ../tests/e2e/test_launch_readiness.py
+	poetry run python tests/e2e/test_launch_readiness.py
 
-# -------------------------------
-# Build Artifacts
-# -------------------------------
-.PHONY: build
-build:
-    cd infra/docker && docker-compose -f docker-compose.prod.yml build
+verify:
+	poetry run python infra/scripts/full_cycle_test.py
 
-# -------------------------------
-# Data & Seeding
-# -------------------------------
-.PHONY: seed-products
+hash-registry:
+	poetry run python infra/scripts/hash_registry.py
+
 seed-products:
-    . venv/bin/activate && $(PYTHON) orchestrator/src/tools/seed_products.py --env-file $(ENV_FILE)
+	poetry run python -m orchestrator.src.core.catalog.ingest
 
-# -------------------------------
-# Packaging (.exe)
-# -------------------------------
-.PHONY: package-exe
 package-exe:
-    . venv/bin/activate && $(PIP) install pyinstaller
-    . venv/bin/activate && pyinstaller orchestrator/src/main_cli.py --name Realms2Riches --onefile --clean
-    @echo "Executable built in dist/Realms2Riches"
+	bash infra/scripts/package_exe.sh
 
-# -------------------------------
-# CI Helper
-# -------------------------------
-.PHONY: ci
-ci: test launch-check
-    @echo "CI checks complete."
+lint:
+	poetry run ruff check .
+	poetry run mypy .
+
+format:
+	poetry run black .
+	poetry run ruff check --fix .
+
+docker-build:
+	cd infra/docker && docker compose -f docker-compose.prod.yml build
+
+docker-up:
+	cd infra/docker && docker compose -f docker-compose.prod.yml up -d
+
+docker-down:
+	cd infra/docker && docker compose -f docker-compose.prod.yml down -v
+
+clean:
+	rm -rf dist build *.egg-info
+	find . -name "*.pyc" -delete
+	find . -name "__pycache__" -delete

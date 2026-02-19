@@ -7,7 +7,11 @@ The system is designed as a centralized orchestrator managing a swarm of financi
 ### Components
 
 1.  **Orchestrator Core**: The brain. It receives tasks, decomposes them, and routes them to agents. Uses a provider-agnostic LLM interface.
-2.  **Agents**: Stateless entities that combine a role (System Prompt), a set of Tools, and access to Memory. They interact with LLMs via the `BaseLLMProvider`.
+2.  **System Integrity Layer**:
+    *   **Cryptographic Hashing**: Every source file, configuration, and task artifact is tracked via SHA-256 hashes.
+    *   **Lineage Tracking**: Hashes are stored in `data/lineage/integrity_manifest.json` and recorded in SQL for auditability.
+    *   **Docker Labeling**: Container images are tagged with build-time hashes.
+3.  **Agents**: Stateless entities that combine a role (System Prompt), a set of Tools, and access to Memory. They interact with LLMs via the `BaseLLMProvider`.
 3.  **LLM Providers**:
     *   **GroqProvider**: Default provider using Groq's high-speed inference (OpenAI-compatible).
 4.  **Voice & Barge-In**:

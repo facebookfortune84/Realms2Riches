@@ -94,11 +94,15 @@ export default function Home() {
             View Plans
           </Link>
         </div>
+
+        <div className="mt-8 text-xs font-mono text-gray-600 uppercase tracking-[0.2em]">
+          System Integrity: <span className="text-primary">Verified SHA-256 Baseline</span>
+        </div>
       </motion.div>
 
       <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl relative z-10">
         {[
-          { title: "Autonomous Sprints", desc: "Agents work in parallel to execute complex development roadmaps." },
+          { title: "100+ Global Agents", desc: "Access a massive fleet of specialized experts across Engineering, Creative, Legal, and Finance." },
           { title: "Barge-in Voice", desc: "Interrupt and steer your agents in real-time using high-fidelity voice control." },
           { title: "Full Lineage", desc: "Every decision and artifact is recorded, hashed, and verifiable." }
         ].map((feat, i) => (

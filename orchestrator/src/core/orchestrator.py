@@ -10,6 +10,9 @@ from orchestrator.src.memory.vector_store import VectorStore
 from orchestrator.src.memory.sql_store import SQLStore
 from orchestrator.src.logging.logger import get_logger
 
+from orchestrator.src.agents.fleet import generate_fleet_configs
+from orchestrator.src.tools.universal_tools import get_universal_tools
+
 logger = get_logger(__name__)
 
 class Orchestrator:
@@ -22,7 +25,7 @@ class Orchestrator:
         self._initialize_agents()
 
     def _initialize_agents(self):
-        # Define standard tools
+        # 1. Define standard & universal tools
         git_tool = GitTool(ToolConfig(
             tool_id="git_tool", name="Git", description="Git operations", 
             parameters_schema={}, allowed_agents=["*"]
@@ -35,20 +38,24 @@ class Orchestrator:
             tool_id="docker_tool", name="Docker", description="Docker operations", 
             parameters_schema={}, allowed_agents=["devops"]
         ))
+        
+        all_tools = [git_tool, file_tool, docker_tool] + get_universal_tools()
 
-        tools = [git_tool, file_tool, docker_tool]
-
-        # Define Agents
-        # In a real system, these would load from YAML configs in data/schemas
+        # 2. Instantiate Core Agents
         pm_config = AgentConfig(name="Project Manager", role="PM", description="Oversees project", system_prompt="You are a PM.", allowed_tool_ids=["git_tool", "file_tool"])
         dev_config = AgentConfig(name="Developer", role="Dev", description="Writes code", system_prompt="You are a Dev.", allowed_tool_ids=["git_tool", "file_tool"])
         devops_config = AgentConfig(name="DevOps", role="DevOps", description="Deployments", system_prompt="You are DevOps.", allowed_tool_ids=["git_tool", "file_tool", "docker_tool"])
 
-        self.agents["pm"] = Agent(pm_config, tools, self.memory, self.llm_provider)
-        self.agents["dev"] = Agent(dev_config, tools, self.memory, self.llm_provider)
-        self.agents["devops"] = Agent(devops_config, tools, self.memory, self.llm_provider)
+        self.agents["pm"] = Agent(pm_config, all_tools, self.memory, self.llm_provider)
+        self.agents["dev"] = Agent(dev_config, all_tools, self.memory, self.llm_provider)
+        self.agents["devops"] = Agent(devops_config, all_tools, self.memory, self.llm_provider)
 
-        logger.info("Orchestrator initialized with agents and Groq provider")
+        # 3. Instantiate Global Fleet (100+ Specialized Agents)
+        fleet_configs = generate_fleet_configs()
+        for config in fleet_configs:
+            self.agents[config.id] = Agent(config, all_tools, self.memory, self.llm_provider)
+
+        logger.info(f"Orchestrator initialized with {len(self.agents)} agents and expanded toolset")
 
     def submit_task(self, task_description: str, project_id: str):
         # Create Task

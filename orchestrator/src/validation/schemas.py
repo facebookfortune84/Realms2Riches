@@ -9,6 +9,7 @@ class BaseEntity(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+    integrity_hash: Optional[str] = None # SHA-256 of the record content
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -54,7 +55,7 @@ class Artifact(BaseEntity):
     project_id: str
     path: str
     type: Literal["code", "docker_image", "config", "data", "test_report"]
-    sha256: str
+    sha256: str # Cryptographic hash of the actual file/asset
     content_preview: Optional[str] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
     producing_agent_id: str
@@ -67,8 +68,9 @@ class LineageRecord(BaseEntity):
     tool_id: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     details: Dict[str, Any] = Field(default_factory=dict)
+    artifact_sha256: Optional[str] = None # Hash capture at time of lineage recording
 
-# --- Project Specs ---
+# --- Project & Marketing Specs ---
 
 class MarketingConfig(BaseModel):
     brand_name: str = Field(default="My Brand", alias="BRAND_NAME")

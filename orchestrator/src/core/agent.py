@@ -1,5 +1,7 @@
 from typing import List, Dict, Any, Optional
 import json
+import hashlib
+from datetime import datetime
 from orchestrator.src.validation.schemas import AgentConfig, TaskSpec, ToolInvocation
 from orchestrator.src.tools.base import BaseTool
 from orchestrator.src.memory.vector_store import VectorStore
@@ -19,29 +21,44 @@ class Agent:
     def process_task(self, task: TaskSpec) -> Dict[str, Any]:
         logger.info(f"Agent {self.config.name} processing task: {task.description}")
         
-        # 1. Retrieve context
-        context_docs = self.memory.search(task.description)
-        context_text = "\n".join([doc["text"] for doc in context_docs])
-        
-        # 2. Formulate plan
-        plan = self._call_llm(task.description, context_text)
-        
-        # 3. Execute tools based on plan
-        results = []
-        for step in plan.get("steps", []):
-            tool_id = step.get("tool_id")
-            if tool_id in self.tools:
-                invocation = ToolInvocation(
-                    tool_id=tool_id,
-                    agent_id=self.config.id,
-                    input_data=step.get("inputs", {})
-                )
-                result = self.tools[tool_id].run(invocation)
-                results.append(result.model_dump(mode="json"))
-            else:
-                logger.warning(f"Tool {tool_id} not found or allowed for {self.config.name}")
+        try:
+            # 1. Retrieve context
+            context_docs = self.memory.search(task.description)
+            context_text = "\n".join([doc["text"] for doc in context_docs])
+            
+            # 2. Formulate plan
+            plan = self._call_llm(task.description, context_text)
+            
+            # 3. Execute tools based on plan
+            results = []
+            for step in plan.get("steps", []):
+                tool_id = step.get("tool_id")
+                if tool_id in self.tools:
+                    invocation = ToolInvocation(
+                        tool_id=tool_id,
+                        agent_id=self.config.id,
+                        input_data=step.get("inputs", {})
+                    )
+                    result = self.tools[tool_id].run(invocation)
+                    
+                    # Cryptographic Integrity: Hash the output
+                    result_data = result.model_dump_json()
+                    result.integrity_hash = hashlib.sha256(result_data.encode()).hexdigest()
+                    
+                    results.append(result.model_dump(mode="json"))
+                else:
+                    if tool_id:
+                        logger.warning(f"Tool {tool_id} not found or allowed for {self.config.name}")
 
-        return {"status": "completed", "results": results}
+            return {
+                "status": "completed", 
+                "results": results, 
+                "agent_id": self.config.id,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Agent {self.config.name} failed task: {e}")
+            return {"status": "failed", "error": str(e), "agent_id": self.config.id}
 
     def _call_llm(self, prompt: str, context: str) -> Dict[str, Any]:
         system_msg = f"{self.config.system_prompt}\n\nContext:\n{context}\n\nOutput ONLY a JSON object with a 'steps' list."

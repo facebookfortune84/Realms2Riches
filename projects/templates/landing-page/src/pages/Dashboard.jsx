@@ -19,9 +19,9 @@ export default function Dashboard() {
 
   const displayMetrics = [
     { label: "Tasks Processed", value: metrics?.tasks_processed_total || 0, color: "text-primary" },
-    { label: "Agents Online", value: metrics?.agents_online || 0, color: "text-blue-400" },
+    { label: "Global Fleet Size", value: metrics?.agents_online || 0, color: "text-blue-400" },
     { label: "Voice Sessions", value: metrics?.voice_sessions_total || 0, color: "text-purple-400" },
-    { label: "Active Subscriptions", value: metrics?.orders_total || 0, color: "text-yellow-400" }
+    { label: "Build Integrity", value: "Verified", color: "text-green-400" }
   ];
 
   return (

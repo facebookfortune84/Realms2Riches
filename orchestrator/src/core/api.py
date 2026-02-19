@@ -60,6 +60,14 @@ from orchestrator.src.validation.schemas import TaskSpec
 # Note: orchestrator.agents is populated in orchestrator.__init__
 forge = ForgeOrchestrator(orchestrator.agents)
 
+@app.get("/api/integrity")
+async def get_system_integrity():
+    manifest_path = "data/lineage/integrity_manifest.json"
+    if os.path.exists(manifest_path):
+        with open(manifest_path, "r") as f:
+            return json.load(f)
+    return {"status": "error", "message": "Manifest not found"}
+
 @app.get("/metrics")
 async def get_metrics():
     # Placeholder for real metrics aggregation
