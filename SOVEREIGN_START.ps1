@@ -11,6 +11,11 @@ docker compose -f infra/docker/docker-compose.prod.yml up -d --build
 Write-Host "[2/3] Waiting for API Heartbeat..." -ForegroundColor Yellow
 Start-Sleep -Seconds 10
 
+# DHCP Awareness
+$CurrentIP = (Invoke-RestMethod -Uri "https://api.ipify.org")
+Write-Host "📡 System identified current IP as: $CurrentIP" -ForegroundColor Gray
+Write-Host "🔐 Security: Signature-First Auth Active (DHCP Enabled)" -ForegroundColor Cyan
+
 # 3. Seed Catalog
 Write-Host "[3/3] Seeding Product Catalog..." -ForegroundColor Yellow
 $env:PYTHONPATH="."
