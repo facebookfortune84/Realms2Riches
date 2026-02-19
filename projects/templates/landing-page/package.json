@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "serve .",
-    "build": "mkdir dist & copy index.html dist\\"
+    "build": "mkdir -p dist && cp index.html dist/"
   },
   "dependencies": {
     "serve": "^14.2.4"
