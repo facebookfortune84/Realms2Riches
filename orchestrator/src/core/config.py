@@ -26,7 +26,7 @@ class Settings(BaseSettings):
 
     # LLM
     GROQ_API_KEY: str = "placeholder"
-    GROQ_MODEL: str = "llama3-8b-8192"
+    GROQ_MODEL: str = "llama-3.1-8b-instant"
     GROQ_BASE_URL: str = "https://api.groq.com/openai/v1"
     
     # Voice

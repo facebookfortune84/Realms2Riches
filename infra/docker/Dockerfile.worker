@@ -21,4 +21,5 @@ ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 
 # Worker might listen to a queue or just run one-off tasks
-CMD ["python", "-m", "orchestrator.src.core.worker"] 
+CMD ["python", "-m", "orchestrator.src.core.orchestrator"]
+ 

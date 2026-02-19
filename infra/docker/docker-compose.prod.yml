@@ -17,9 +17,6 @@ services:
       - ../../.env.prod
     environment:
       - POSTGRES_HOST=postgres
-      - DATABASE_URL
-      - GROQ_API_KEY
-      - ELEVENLABS_API_KEY
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
@@ -39,9 +36,6 @@ services:
       - ../../.env.prod
     environment:
       - POSTGRES_HOST=postgres
-      - DATABASE_URL
-      - GROQ_API_KEY
-      - ELEVENLABS_API_KEY
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
@@ -51,10 +45,6 @@ services:
     image: postgres:15
     env_file:
       - ../../.env.prod
-    environment:
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-      - POSTGRES_DB
     ports:
       - "5432:5432"
     volumes:
