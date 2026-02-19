@@ -25,8 +25,16 @@ app.add_middleware(
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*", "ngrok-skip-browser-warning"],
 )
+
+@app.middleware("http")
+async def add_ngrok_skip_header(request: Request, call_next):
+    # This ensures that automated probes and browser requests 
+    # don't get stuck on the ngrok landing page
+    response = await call_next(request)
+    response.headers["ngrok-skip-browser-warning"] = "true"
+    return response
 
 # Sovereign System State
 swarm_active = False
