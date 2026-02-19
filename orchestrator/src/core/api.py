@@ -24,15 +24,18 @@ app = FastAPI(title="Sovereign API", version="3.1.0")
 # ---------------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://frontend-two-xi-gal9lkptfi.vercel.app",
-        "http://localhost:5173",
-        "http://localhost:3000",
-    ],
+    allow_origins=["*"],  # Broaden for debug phase, will tighten later
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*", "ngrok-skip-browser-warning"],
 )
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.info(f"📥 Incoming Request: {request.method} {request.url}")
+    response = await call_next(request)
+    logger.info(f"📤 Response Status: {response.status_code}")
+    return response
 
 @app.middleware("http")
 async def add_ngrok_skip_header(request: Request, call_next):
