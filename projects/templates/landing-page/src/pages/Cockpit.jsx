@@ -8,9 +8,13 @@ export default function Cockpit() {
   const [voiceStatus, setVoiceStatus] = useState('Inactive');
   const socketRef = useRef(null);
 
+  const addMsg = (text, sender) => {
+    setMessages(prev => [...prev, { sender, text }]);
+  };
+
   const sendMessage = async () => {
     if (!input.trim()) return;
-    setMessages(prev => [...prev, { sender: 'user', text: input }]);
+    addMsg(input, 'user');
     const currentInput = input;
     setInput('');
     
@@ -42,8 +46,8 @@ export default function Cockpit() {
             socket.onopen = () => setVoiceStatus('Connected');
             socket.onmessage = (e) => {
                 const msg = JSON.parse(e.data);
-                if (msg.type === 'transcript') setMessages(prev => [...prev, { sender: 'user', text: msg.text }]);
-                if (msg.type === 'text') setMessages(prev => [...prev, { sender: 'agent', text: msg.text }]);
+                if (msg.type === 'transcript') addMsg(msg.text, 'user');
+                if (msg.type === 'text') addMsg(msg.text, 'agent');
             };
             socket.onclose = () => setVoiceStatus('Disconnected');
             socketRef.current = socket;
