@@ -35,10 +35,8 @@ class GroqProvider(BaseLLMProvider):
             # In production this might raise, in dev/test we might want to allow mock
             # raise ValueError("GROQ_API_KEY is required for GroqProvider")
             
-        self.client = Groq(
-            api_key=self.api_key if self.api_key != "placeholder" else "dummy",
-            base_url=self.base_url
-        )
+        self.client = Groq( api_key=settings.GROQ_API_KEY )
+        
         logger.info(f"Initialized GroqProvider with model {self.default_model}")
 
     def generate_response(
