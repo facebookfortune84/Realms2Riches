@@ -5,6 +5,8 @@ import Cockpit from './pages/Cockpit';
 import Dashboard from './pages/Dashboard';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
+import Affiliates from './pages/Affiliates';
+import Store from './pages/Store';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import CookieBanner from './components/CookieBanner';
@@ -22,6 +24,8 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/affiliates" element={<Affiliates />} />
+            <Route path="/store" element={<Store />} />
           </Routes>
         </main>
         <Footer />
