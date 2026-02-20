@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Check, Zap, Rocket, Shield } from 'lucide-react';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev";
 
@@ -29,51 +31,75 @@ export default function Pricing() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ priceId })
       });
-      
-      if (!res.ok) throw new Error("Stripe session creation failed");
-      
       const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Failed to initiate secure checkout.");
-      }
+      if (data.url) window.location.href = data.url;
     } catch (e) {
       console.error(e);
-      alert("Billing gateway currently unavailable. Please try again.");
+      alert("Secure gateway currently syncing. Please wait.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="py-10">
-      <h2 className="text-4xl font-bold text-center mb-4">Plans & Pricing</h2>
-      <p className="text-center text-gray-400 mb-12 max-w-2xl mx-auto">Scale your development with our autonomous agent swarm.</p>
+    <div className="py-20 max-w-7xl mx-auto px-4 font-mono">
+      <div className="text-center mb-20">
+        <h2 className="text-6xl font-black tracking-tighter uppercase italic mb-4">Pricing <span className="text-primary">Matrix</span></h2>
+        <p className="text-gray-500 uppercase tracking-widest text-xs">Invest in the autonomous future.</p>
+      </div>
       
-      {loading && <div className="text-center">Loading live catalog...</div>}
-      {error && <div className="text-center text-red-500">{error}</div>}
-      
-      {!loading && !error && (
+      {loading && (
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <span className="text-[10px] text-gray-600 uppercase tracking-[0.3em]">Syncing Catalog...</span>
+        </div>
+      )}
+
+      {!loading && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {products.map((p, i) => {
              const price = p.prices && p.prices.length > 0 ? p.prices[0] : null;
-             if (!price) return null; // Skip invalid products
+             if (!price) return null;
 
              return (
-              <div key={i} className="bg-card-bg p-8 rounded-xl border border-gray-800 hover:border-primary transition-all hover:scale-105 flex flex-col">
-                <h3 className="text-2xl font-bold mb-2">{p.name}</h3>
-                <div className="text-4xl font-bold text-primary mb-4">
-                  ${price.price}<span className="text-base text-gray-500 font-normal">/{price.interval || 'mo'}</span>
+              <motion.div 
+                key={i} 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-black border-2 border-white/5 p-10 rounded-3xl hover:border-primary/30 transition-all flex flex-col relative group"
+              >
+                {i === 1 && <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-black text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-widest">Most Popular</div>}
+                
+                <h3 className="text-2xl font-bold mb-2 uppercase text-white">{p.name}</h3>
+                <div className="flex items-baseline gap-2 mb-8">
+                    <span className="text-5xl font-black text-primary">${price.price}</span>
+                    <span className="text-gray-600 text-xs uppercase">/{price.interval}</span>
                 </div>
-                <p className="text-gray-400 mb-8 flex-grow">{p.description || "Full access to agent swarm features."}</p>
+                
+                <p className="text-gray-400 text-sm mb-10 leading-relaxed">{p.description}</p>
+                
+                <div className="space-y-4 mb-12 flex-grow">
+                    {[
+                        "1000 Specialized Agents",
+                        "Voice Barge-In Access",
+                        "Real-time Neural Telemetry",
+                        "Sovereign Legal Protection"
+                    ].map((feat, j) => (
+                        <div key={j} className="flex items-center gap-3 text-xs text-gray-500">
+                            <Check size={14} className="text-primary" />
+                            {feat}
+                        </div>
+                    ))}
+                </div>
+
                 <button 
-                  onClick={() => handleCheckout(price.product_id)} // Using product_id as proxy for price_id key in simplified DB
-                  className="w-full bg-white text-black py-3 rounded font-bold hover:bg-gray-200 transition-colors"
+                  onClick={() => handleCheckout(price.product_id)}
+                  className="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary transition-colors active:scale-95"
                 >
-                  Choose Plan
+                  Acquire License
                 </button>
-              </div>
+              </motion.div>
             );
           })}
         </div>
