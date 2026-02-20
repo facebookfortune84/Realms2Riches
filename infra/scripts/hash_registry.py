@@ -1,47 +1,47 @@
-import hashlib
-import os
+from cryptography.hazmat.primitives.asymmetric import ed25519
+from cryptography.hazmat.primitives import serialization
 import json
-from datetime import datetime
+import base64
+import time
+import sys
 
-def calculate_sha256(filepath):
-    hasher = hashlib.sha256()
-    with open(filepath, 'rb') as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hasher.update(chunk)
-    return hasher.hexdigest()
+def generate_keys():
+    private_key = ed25519.Ed25519PrivateKey.generate()
+    public_key = private_key.public_key()
 
-def generate_integrity_manifest():
-    manifest = {
-        "timestamp": datetime.utcnow().isoformat(),
-        "files": {},
-        "version": "1.0.0-verified"
+    priv_pem = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption()
+    )
+    
+    pub_pem = public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+    
+    print("\n=== SAVE THIS PRIVATE KEY SECURELY (OFFLINE) ===")
+    print(priv_pem.decode())
+    print("\n=== EMBED THIS PUBLIC KEY IN APP ===")
+    print(pub_pem.decode())
+    return private_key
+
+def mint_license(private_key, customer_email, tier="PRO", days=365):
+    payload = {
+        "sub": customer_email,
+        "tier": tier,
+        "exp": int(time.time() + (days * 86400)),
+        "features": ["swarm", "voice", "api"] if tier == "PRO" else ["swarm"]
     }
+    payload_bytes = json.dumps(payload).encode()
+    signature = private_key.sign(payload_bytes)
     
-    # Files to track
-    include_dirs = ['orchestrator', 'infra', 'data', 'projects', 'docs', 'tests']
-    exclude_extensions = ['.pyc', '.db', '.log', '.vercel', '.lock']
-    exclude_dirs = ['venv', 'node_modules', '__pycache__', '.git', '.pytest_cache', 'dist']
-
-    for root_dir in include_dirs:
-        for root, dirs, files in os.walk(root_dir):
-            # Skip excluded dirs
-            dirs[:] = [d for d in dirs if d not in exclude_dirs]
-            
-            for file in files:
-                if any(file.endswith(ext) for ext in exclude_extensions):
-                    continue
-                
-                filepath = os.path.join(root, file)
-                rel_path = os.path.relpath(filepath, '.')
-                manifest["files"][rel_path] = calculate_sha256(filepath)
-
-    manifest_path = "data/lineage/integrity_manifest.json"
-    os.makedirs(os.path.dirname(manifest_path), exist_ok=True)
-    with open(manifest_path, 'w') as f:
-        json.dump(manifest, f, indent=2)
-    
-    print(f"✅ Integrity Manifest generated with {len(manifest['files'])} hashed files.")
-    return manifest_path
+    license_key = base64.b64encode(signature + payload_bytes).decode()
+    return license_key
 
 if __name__ == "__main__":
-    generate_integrity_manifest()
+    print("Generating Sovereign Keys...")
+    priv = generate_keys()
+    
+    print("\n--- TEST LICENSE (1 Year) ---")
+    print(mint_license(priv, "test@realms2riches.ai"))
