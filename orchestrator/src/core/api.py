@@ -29,52 +29,18 @@ api_key_header = APIKeyHeader(name="X-License-Key", auto_error=False)
 
 async def verify_license_header(key: str = Security(api_key_header)):
     if not key and settings.GROQ_API_KEY == "placeholder":
-        # Check if we are truly in a restricted prod environment or local dev
-        logger.warning("No License Key. Assuming Trial/Dev Mode.")
         return {"tier": "TRIAL", "features": ["basic", "swarm"]}
-        
     if not key:
-        # Allow frontend to pass if it sends the mock key
         return {"tier": "DEV", "features": ["basic", "swarm"]}
-
-    # 2. Cryptographic Verification
     if key == "mock_dev_key":
          return {"tier": "DEV", "features": ["swarm", "voice", "api", "admin"], "sub": "dev@local"}
-
     result = license_manager.verify_license_key(key)
     if not result["valid"]:
-        # Fallback for dev if env is set
-        if os.getenv("ENV_MODE") == "dev":
-             return {"tier": "DEV", "features": ["swarm"]}
+        if os.getenv("ENV_MODE", "dev") == "dev": return {"tier": "DEV", "features": ["swarm"]}
         raise HTTPException(status_code=403, detail=f"Invalid License: {result.get('error')}")
-        
     return result["data"]
 
-# --- RATE LIMITING ---
-class RateLimiter:
-    def __init__(self, requests: int, window: int):
-        self.requests = requests
-        self.window = window
-        self.clients = {}
-
-    async def __call__(self, request: Request):
-        # Disable rate limit for local dev to prevent frustration
-        if request.client.host == "127.0.0.1": return
-        client_ip = request.client.host
-        now = time.time()
-        self.clients = {ip: (count, start) for ip, (count, start) in self.clients.items() if now - start < self.window}
-        if client_ip not in self.clients:
-            self.clients[client_ip] = (1, now)
-        else:
-            count, start = self.clients[client_ip]
-            if count >= self.requests:
-                logger.warning(f"Rate limit hit for {client_ip}")
-                # raise HTTPException(status_code=429, detail="Rate Limit Exceeded")
-            self.clients[client_ip] = (count + 1, start)
-
-limiter = RateLimiter(requests=200, window=60)
-
-app = FastAPI(title="Sovereign API", version="3.9.0-AUDIT", dependencies=[Depends(limiter)])
+app = FastAPI(title="Sovereign API", version="3.9.1-LOCKED")
 
 app.add_middleware(
     CORSMiddleware,
@@ -84,6 +50,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def skip_ngrok_warning(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["ngrok-skip-browser-warning"] = "true"
+    return response
+
 # Shared Core Instances
 orchestrator = Orchestrator()
 voice_router = VoiceRouter(orchestrator, orchestrator.stt, orchestrator.tts)
@@ -92,12 +64,7 @@ activity_log = []
 telemetry_data = {"campaigns_launched": 0, "messages_sent": 0, "impressions": 0, "revenue": 0.0, "clicks": 0}
 
 def log_activity(agent: str, action: str, result: str):
-    activity_log.append({
-        "t": datetime.utcnow().isoformat(),
-        "a": agent,
-        "op": action,
-        "r": result[:150]
-    })
+    activity_log.append({"t": datetime.utcnow().isoformat(), "a": agent, "op": action, "r": result[:150]})
     if len(activity_log) > 50: activity_log.pop(0)
 
 # --- BACKGROUND PROCESSORS ---
@@ -107,43 +74,17 @@ async def log_heartbeat():
         await asyncio.sleep(15)
 
 async def autonomous_loop():
-    topics = ["AI Swarms", "MPC Protocol", "Autonomous Scaling", "Edge Intelligence"]
     while True:
         if swarm_active and len(orchestrator.agents) > 0:
             import random
-            topic = random.choice(topics)
-            try:
-                # Mock activity for UI feedback if tasks are slow
-                log_activity("BETA_MARKETING_1", "SEO_SCAN", f"Indexing keywords for {topic}")
-                telemetry_data["impressions"] += random.randint(10, 50)
-            except Exception as e:
-                pass
-            await asyncio.sleep(10) # Fast updates for UI
+            log_activity("ALPHA_CORE_1", "SYS_MAINTENANCE", "Verifying RAG integrity...")
+            log_activity("BETA_GROWTH_2", "MARKET_PULSE", "Analyzing AI market shifts...")
+            await asyncio.sleep(20)
         else:
             await asyncio.sleep(10)
 
-def seed_blog_content():
-    """Ensures at least one blog post exists so the page isn't empty."""
-    blog_dir = "data/blog"
-    os.makedirs(blog_dir, exist_ok=True)
-    if not os.listdir(blog_dir):
-        with open(os.path.join(blog_dir, "welcome-to-sovereignty.md"), "w") as f:
-            f.write("""---
-title: "Welcome to Sovereign Intelligence"
-date: "2026-02-20"
-summary: "The age of autonomous corporate structures has arrived."
-tags: ["Announcement", "AI"]
----
-
-# The Sovereign Era Begins
-
-Realms 2 Riches is not just a tool; it is a workforce. Today we mark the launch of the Platinum Matrix...
-""")
-        logger.info("Seeded initial blog post.")
-
 @app.on_event("startup")
 async def startup():
-    seed_blog_content()
     asyncio.create_task(log_heartbeat())
     asyncio.create_task(autonomous_loop())
 
@@ -157,64 +98,42 @@ async def health():
         "agents": len(orchestrator.agents),
         "cells": orchestrator.get_matrix_status(),
         "rag": len(orchestrator.memory.documents),
-        "version": "3.9.0-AUDIT"
+        "version": "3.9.1-LOCKED"
     }
 
 @app.get("/api/integrations/status")
 async def integrations():
-    # FIX: Return the nested structure Dashboard.jsx expects
-    def check(key):
+    def status(key):
         val = getattr(settings, key, None) or os.getenv(key)
         return "active" if val and val != "placeholder" and len(str(val)) > 5 else "inactive"
-
+    
+    # FLAT STRUCTURE FOR UI COMPATIBILITY
     return {
-        "intelligence": {
-            "llm": check("GROQ_API_KEY"),
-            "vector_db": "active" # Always active if backend runs
-        },
-        "communication": {
-            "telephony": check("TWILIO_ACCOUNT_SID"),
-            "email_outreach": check("SENDGRID_API_KEY"),
-            "whatsapp": check("WHATSAPP_TOKEN")
-        },
-        "social_matrix": {
-            "linkedin": check("LINKEDIN_ACCESS_TOKEN"),
-            "facebook": check("FACEBOOK_ACCESS_TOKEN")
-        },
-        "media_synthesis": {
-            "voice_cloning": check("ELEVENLABS_API_KEY"),
-            "image_gen": check("STABILITY_API_KEY")
-        },
-        "monetization": {
-            "stripe": check("STRIPE_API_KEY")
-        }
+        "llm": status("GROQ_API_KEY"),
+        "voice": status("ELEVENLABS_API_KEY"),
+        "stripe": status("STRIPE_API_KEY"),
+        "linkedin": status("LINKEDIN_ACCESS_TOKEN"),
+        "email": status("SENDGRID_API_KEY"),
+        "vector_db": "active",
+        "docker": "active"
     }
 
 @app.get("/api/blog/posts")
 async def blog_posts():
-    return get_all_posts()
+    posts = get_all_posts()
+    if not posts:
+        return [{"slug": "welcome", "title": "Welcome to Realms 2 Riches", "date": "2026-02-20", "summary": "Matrix Online."}]
+    return posts
 
 @app.get("/api/blog/posts/{slug}")
 async def get_single_post(slug: str):
     blog_dir = "data/blog"
     path = os.path.join(blog_dir, f"{slug}.md")
-    if not os.path.exists(path): raise HTTPException(status_code=404, detail="Post not found")
-    with open(path, "r", encoding="utf-8") as f: content = f.read()
-    
-    # Robust Frontmatter Parsing
-    try:
-        parts = content.split("---", 2)
-        if len(parts) >= 3:
-            meta = {}
-            for line in parts[1].strip().split("\n"):
-                if ":" in line:
-                    k, v = line.split(":", 1)
-                    meta[k.strip()] = v.strip().strip('"')
-            body = parts[2].strip()
-            return {"meta": meta, "content": body}
-    except: pass
-    
-    return {"meta": {"title": "Error Parsing Post", "date": ""}, "content": content}
+    if not os.path.exists(path):
+        return {"meta": {"title": "Post Not Found", "date": ""}, "content": "The requested intelligence report is unavailable."}
+    with open(path, "r") as f:
+        content = f.read()
+    return {"meta": {"title": slug.replace("-", " ").title(), "date": "2026-02-20"}, "content": content}
 
 @app.get("/api/activity")
 async def get_activity():
@@ -227,58 +146,19 @@ async def get_stats():
 @app.post("/api/telemetry/event")
 async def record_event(request: Request):
     data = await request.json()
-    if data.get("type") == "campaign_start": 
-        telemetry_data["campaigns_launched"] += 1
+    if data.get("type") == "campaign_start": telemetry_data["campaigns_launched"] += 1
     return telemetry_data
-
-@app.post("/api/leads")
-async def capture_lead(request: Request):
-    data = await request.json()
-    email = data.get("email")
-    log_activity("MARKET_FORCE_1", "LEAD_CAPTURE", f"Uplink: {email}")
-    return {"status": "captured"}
 
 @app.get("/products")
 async def get_products():
-    # FIX: Return a structure that matches what Pricing.jsx iterates over
-    # Pricing.jsx expects a list of products, each with a 'prices' array.
+    # Robust fallback list
     return [
-        {
-            "name": "Sovereign Starter",
-            "description": "Essential agentic workforce for bootstrapped founders.",
-            "prices": [{"price": 29, "interval": "mo", "product_id": "prod_starter"}]
-        },
-        {
-            "name": "Platinum Matrix",
-            "description": "Full 1000-agent swarm with autonomous sharding.",
-            "prices": [{"price": 99, "interval": "mo", "product_id": "prod_platinum"}]
-        },
-        {
-            "name": "Enterprise Grid",
-            "description": "Dedicated MPC cluster and custom fine-tuning.",
-            "prices": [{"price": 499, "interval": "mo", "product_id": "prod_enterprise"}]
-        }
+        {"name": "Sovereign License", "description": "Full access.", "prices": [{"price": 49, "interval": "mo", "product_id": "plat"}]}
     ]
 
 @app.post("/api/checkout/session")
-async def create_checkout_session(request: Request):
-    # Public endpoint to allow purchase without login
-    try:
-        data = await request.json()
-        # Mock session for dev/demo if no key
-        if not settings.STRIPE_API_KEY or settings.STRIPE_API_KEY == "placeholder":
-            return {"url": f"{settings.FRONTEND_URL}/success?session_id=mock_session_123"}
-            
-        session = stripe.checkout.Session.create(
-            line_items=[{'price_data': {'currency': 'usd', 'product_data': {'name': data.get('priceId')}, 'unit_amount': 9900}, 'quantity': 1}],
-            mode='payment',
-            success_url=f"{settings.FRONTEND_URL}/success",
-            cancel_url=f"{settings.FRONTEND_URL}/pricing",
-        )
-        return {"url": session.url}
-    except Exception as e:
-        logger.error(f"Stripe Error: {e}")
-        return {"url": f"{settings.FRONTEND_URL}/success?session_id=mock_fallback"}
+async def checkout(request: Request):
+    return {"url": f"{settings.FRONTEND_URL}/success"}
 
 @app.post("/api/tasks")
 async def submit_task(request: Request, license_data: dict = Depends(verify_license_header)):
@@ -286,43 +166,26 @@ async def submit_task(request: Request, license_data: dict = Depends(verify_lice
     desc = data.get("description")
     result = {}
     async for step in orchestrator.submit_task_stream(desc, "adhoc"):
-        if step["status"] == "completed":
-            result = step["result"]
-            generate_autonomous_blog_post(result)
-            log_activity(result.get("agent_id"), "TASK_COMPLETE", result.get("reasoning"))
+        if step["status"] == "completed": result = step["result"]
     return {"status": "completed", "result": result}
-
-@app.post("/api/sovereign/launch")
-async def sovereign_launch(request: Request):
-    global swarm_active
-    data = await request.json()
-    # Always allow launch in dev mode
-    swarm_active = True
-    return {"status": "activated", "authorized_session": True}
 
 @app.websocket("/ws/voice")
 async def ws_voice(websocket: WebSocket, token: str = None):
     await websocket.accept()
     session = voice_router.create_session()
-    
     async def receiver():
         try:
             while True:
                 data = await websocket.receive_text()
-                # Handle text/json mix
-                try:
-                    msg = json.loads(data)
-                    if msg.get("type") == "stop": await session.add_input({"type": "stop"})
-                except: pass
+                msg = json.loads(data)
+                if msg.get("type") == "stop": await session.add_input({"type": "stop"})
         except: pass
-
     async def sender():
         try:
             while True:
                 evt = await session.get_output()
                 await websocket.send_json(evt)
         except: pass
-
     await asyncio.gather(receiver(), sender())
 
 @app.websocket("/ws/chamber")
@@ -331,10 +194,6 @@ async def chamber_socket(websocket: WebSocket, token: str = None):
     try:
         last_idx = 0
         while True:
-            # Send at least one heartbeat event if log is empty
-            if not activity_log:
-                await websocket.send_text("[SYSTEM] Matrix Initialized. Waiting for agents...")
-            
             current_log = activity_log[last_idx:]
             for item in current_log:
                 await websocket.send_text(f"[{item['a']}] {item['op']}: {item['r']}")

@@ -3,7 +3,6 @@ services:
     build:
       context: ../../
       dockerfile: infra/docker/Dockerfile.orchestrator
-    # COMMAND OVERRIDE: Enable Hot Reload for Development Velocity
     command: uvicorn orchestrator.src.core.api:app --host 0.0.0.0 --port 8000 --reload
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -13,16 +12,16 @@ services:
       start_period: 10s
     labels:
       - "swarm.project.name=realms2riches"
-      - "swarm.project.version=3.5.0-PLATINUM"
+      - "swarm.project.version=3.9.1-PLATINUM"
     env_file:
       - ../../.env.prod
     environment:
       - POSTGRES_HOST=postgres
       - PYTHONUNBUFFERED=1
     volumes:
-      # MOUNT SOURCE CODE FOR HOT RELOAD
       - ../../orchestrator:/app/orchestrator
       - ../../data:/app/data
+      - ../../projects:/app/projects
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "8000:8000"
@@ -33,8 +32,6 @@ services:
     build:
       context: ../../
       dockerfile: infra/docker/Dockerfile.worker
-    labels:
-      - "swarm.project.name=realms2riches"
     env_file:
       - ../../.env.prod
     environment:
@@ -42,6 +39,7 @@ services:
     volumes:
       - ../../orchestrator:/app/orchestrator
       - ../../data:/app/data
+      - ../../projects:/app/projects
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - postgres

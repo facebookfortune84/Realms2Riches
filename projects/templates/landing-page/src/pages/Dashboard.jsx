@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Shield, Zap, Users, Globe, Database, Cpu, Terminal, Layers, Radio, Video, Share2, BarChart3 } from 'lucide-react';
+import { Activity, Shield, Zap, Users, Globe, Database, Cpu, Terminal, Layers, Radio, BarChart3 } from 'lucide-react';
 import CompanyWizard from '../components/CompanyWizard';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev";
@@ -14,7 +14,10 @@ export default function Dashboard() {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   const fetchStats = async () => {
-    const headers = { 'X-License-Key': import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || 'mock_dev_key' };
+    const headers = { 
+        'X-License-Key': import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || 'mock_dev_key',
+        'ngrok-skip-browser-warning': 'true'
+    };
     try {
       const [mRes, aRes, iRes, tRes] = await Promise.all([
         fetch(`${BACKEND_URL}/health`, { headers }),
@@ -22,11 +25,21 @@ export default function Dashboard() {
         fetch(`${BACKEND_URL}/api/integrations/status`, { headers }),
         fetch(`${BACKEND_URL}/api/telemetry/stats`, { headers })
       ]);
-      setMetrics(await mRes.json());
-      setActivity(await aRes.json());
-      setIntegrations(await iRes.json());
-      setTelemetry(await tRes.json());
-    } catch (err) { console.error(err); } finally { setLoading(false); }
+      
+      const mData = await mRes.json();
+      const aData = await aRes.json();
+      const iData = await iRes.json();
+      const tData = await tRes.json();
+
+      setMetrics(mData);
+      setActivity(aData);
+      setIntegrations(iData);
+      setTelemetry(tData);
+    } catch (err) { 
+        console.error("Dashboard Sync Error:", err); 
+    } finally { 
+        setLoading(false); 
+    }
   };
 
   useEffect(() => {
@@ -53,7 +66,7 @@ export default function Dashboard() {
         <div>
             <div className="flex items-center gap-2 text-primary text-[10px] mb-2 tracking-[0.5em] uppercase">
                 <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                Sovereign OS v3.8.2-PLATINUM
+                Sovereign OS v3.9.1
             </div>
             <h2 className="text-6xl md:text-8xl font-black tracking-tighter italic leading-none">THE <span className="text-primary">CORE</span></h2>
         </div>
@@ -62,14 +75,11 @@ export default function Dashboard() {
                 <Radio size={16} className="text-primary animate-pulse" />
                 <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Neural Link: ACTIVE</span>
             </div>
-            <button onClick={fetchStats} className="p-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors">
-                <Activity size={18} className="text-primary" />
-            </button>
         </div>
       </div>
 
       {/* INTEGRATION GRID */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-12">
         {integrations && Object.entries(integrations).map(([k, v]) => (
             <div key={k} className="bg-black/40 p-4 rounded-2xl border border-white/5 flex flex-col gap-2 group hover:border-primary/20 transition-all">
                 <div className="flex justify-between items-center">
@@ -77,38 +87,7 @@ export default function Dashboard() {
                     <div className={`w-1.5 h-1.5 rounded-full ${v === 'active' ? 'bg-primary shadow-[0_0_8px_#00ff88]' : 'bg-red-500/30'}`} />
                 </div>
                 <div className={`text-[10px] font-black ${v === 'active' ? 'text-white' : 'text-gray-700'}`}>
-                    {v === 'active' ? 'UPLINK_STABLE' : 'OFFLINE'}
-                </div>
-            </div>
-        ))}
-      </div>
-
-      {/* MATRIX WORKSTREAMS */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-        {metrics?.cells && Object.entries(metrics.cells).map(([name, data]) => (
-            <div key={name} className="bg-gradient-to-br from-white/5 to-transparent border-2 border-white/5 p-8 rounded-3xl relative overflow-hidden group hover:border-primary/30 transition-all">
-                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-opacity">
-                    <Layers size={100} />
-                </div>
-                <div className="flex justify-between items-start mb-8">
-                    <div>
-                        <h3 className="text-primary font-black uppercase tracking-tighter text-2xl">CELL_{name}</h3>
-                        <p className="text-gray-500 text-[9px] uppercase tracking-[0.2em]">Matrix Shard 0x0{name.length}</p>
-                    </div>
-                    <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase ${data.active > 0 ? 'bg-primary text-black animate-pulse' : 'bg-white/5 text-gray-600'}`}>
-                        {data.active > 0 ? 'Executing' : 'Standby'}
-                    </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
-                        <div className="text-[10px] text-gray-600 uppercase mb-1">Queue</div>
-                        <div className="text-2xl font-black text-white">{data.queued}</div>
-                    </div>
-                    <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
-                        <div className="text-[10px] text-gray-600 uppercase mb-1">Units</div>
-                        <div className="text-2xl font-black text-primary">{data.units}</div>
-                    </div>
+                    {v === 'active' ? 'ACTIVE' : 'OFFLINE'}
                 </div>
             </div>
         ))}
@@ -116,23 +95,13 @@ export default function Dashboard() {
 
       {/* ANALYTICS & ACTIVITY */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* LIVE TELEMETRY */}
         <div className="lg:col-span-1 space-y-6">
             <div className="bg-black/40 p-6 rounded-3xl border border-white/5">
                 <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-6 flex items-center gap-2">
                     <BarChart3 size={14} className="text-primary" />
-                    Market Telemetry
+                    Live Telemetry
                 </h4>
                 <div className="space-y-6">
-                    <div>
-                        <div className="flex justify-between text-[10px] mb-2">
-                            <span className="text-gray-400">Total Outreach</span>
-                            <span className="text-primary">{telemetry?.messages_sent || 0}</span>
-                        </div>
-                        <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                            <motion.div animate={{width: '75%'}} className="h-full bg-primary" />
-                        </div>
-                    </div>
                     <div>
                         <div className="flex justify-between text-[10px] mb-2">
                             <span className="text-gray-400">Impressions</span>
@@ -142,9 +111,9 @@ export default function Dashboard() {
                             <motion.div animate={{width: '45%'}} className="h-full bg-blue-400" />
                         </div>
                     </div>
-                    <div className="pt-4 border-t border-white/5">
-                        <div className="text-[10px] text-gray-600 uppercase mb-1 text-center">Net Sovereign Revenue</div>
-                        <div className="text-3xl font-black text-center text-white">${telemetry?.revenue?.toFixed(2)}</div>
+                    <div className="pt-4 border-t border-white/5 text-center">
+                        <div className="text-[10px] text-gray-600 uppercase mb-1">System Revenue</div>
+                        <div className="text-3xl font-black text-white">${telemetry?.revenue?.toFixed(2)}</div>
                     </div>
                 </div>
             </div>
@@ -152,21 +121,16 @@ export default function Dashboard() {
             <div className="bg-primary p-8 rounded-3xl text-black cursor-pointer hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_30px_rgba(0,255,136,0.2)]" onClick={() => setIsWizardOpen(true)}>
                 <Zap size={32} className="mb-4" />
                 <h4 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2">Genesis<br/>Portal</h4>
-                <p className="text-[10px] font-bold opacity-70 uppercase tracking-widest">Architect New Realm</p>
+                <p className="text-[10px] font-bold opacity-70 uppercase tracking-widest">Spawn New Project</p>
             </div>
         </div>
 
-        {/* LOG FEED */}
         <div className="lg:col-span-3 bg-black/40 p-8 rounded-3xl border border-white/5 relative">
             <div className="flex justify-between items-center mb-8">
-                <h3 className="text-lg font-bold flex items-center gap-3">
+                <h3 className="text-lg font-bold flex items-center gap-3 italic">
                     <Terminal className="text-primary" size={20} />
-                    NEURAL ACTIVITY LOG
+                    SWARM ACTIVITY
                 </h3>
-                <div className="flex items-center gap-2 text-[9px] text-gray-500 uppercase">
-                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                    Live Transmission
-                </div>
             </div>
             
             <div className="space-y-2 h-[450px] overflow-y-auto custom-scrollbar pr-4 font-mono text-[11px]">
