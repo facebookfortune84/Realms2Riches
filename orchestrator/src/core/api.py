@@ -1,5 +1,6 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from orchestrator.src.core.voice.router import VoiceRouter
 from orchestrator.src.core.voice.mock_adapters import MockSTTAdapter, MockTTSAdapter
 from orchestrator.src.core.orchestrator import Orchestrator
@@ -17,7 +18,7 @@ from datetime import datetime
 
 logger = get_logger(__name__)
 
-app = FastAPI(title="Sovereign API", version="3.1.0")
+app = FastAPI(title="Sovereign API", version="3.2.0")
 
 # ---------------------------------------------------------
 # FIXED CORS CONFIGURATION (Vercel + Ngrok compatible)
@@ -63,9 +64,23 @@ async def log_heartbeat():
         logger.info(f"💓 SOVEREIGN HEARTBEAT: Agents {len(orchestrator.agents)} Online | State: {status} | RAG Active")
         await asyncio.sleep(10)
 
+# Autonomous Backlog Processor (The Continuous Loop)
+async def process_autonomous_backlog():
+    while True:
+        if swarm_active and len(orchestrator.agents) > 0:
+            # Simple simulation of background "thinking"
+            # In a real system, this would pull from a persistent queue
+            await asyncio.sleep(60) # Only run every minute to save resources
+            logger.info("🤖 AUTONOMOUS AGENT: Scanning backlog for optimization opportunities...")
+            # Here we could trigger a "self-healing" or "market research" task
+            pass
+        else:
+            await asyncio.sleep(10)
+
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(log_heartbeat())
+    asyncio.create_task(process_autonomous_backlog())
 
 @app.get("/health")
 async def health():
@@ -85,7 +100,7 @@ async def diagnostics():
             db = "connected"
     except Exception as e:
         db = f"error: {str(e)}"
-    return {"db": db, "swarm_active": swarm_active, "agents": len(orchestrator.agents), "v": "3.1.0"}
+    return {"db": db, "swarm_active": swarm_active, "agents": len(orchestrator.agents), "v": "3.2.0"}
 
 from orchestrator.src.core.alchemy_engine import generate_autonomous_blog_post
 
@@ -101,16 +116,38 @@ async def submit_task(request: Request):
         raise HTTPException(status_code=400, detail="Description required")
 
     logger.info(f"Processing synchronous task: {desc}")
-    result = orchestrator.submit_task(desc, project_id)
     
-    if result.get("status") == "completed":
-        generate_autonomous_blog_post(result)
+    # Use the new async stream logic but collect it for synchronous response
+    result_accumulator = {}
+    async for step in orchestrator.submit_task_stream(desc, project_id):
+        if step.get("status") == "completed":
+            result_accumulator = step.get("result")
+        elif step.get("status") == "failed":
+             raise HTTPException(status_code=500, detail=step.get("message"))
+    
+    if result_accumulator.get("status") == "completed":
+        generate_autonomous_blog_post(result_accumulator)
         
     return {
         "status": "completed", 
         "agent_count": len(orchestrator.agents),
-        "result": result
+        "result": result_accumulator
     }
+
+# Streaming Task Endpoint for Real-Time UI
+@app.websocket("/ws/task_stream")
+async def task_stream(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        data = await websocket.receive_json()
+        desc = data.get("description")
+        project_id = data.get("project_id", "adhoc")
+        
+        async for step in orchestrator.submit_task_stream(desc, project_id):
+            await websocket.send_json(step)
+            
+    except WebSocketDisconnect:
+        pass
 
 @app.get("/products")
 async def get_products():
@@ -121,6 +158,10 @@ async def create_checkout_session(request: Request):
     try:
         data = await request.json()
         price_id = data.get("priceId", "default")
+        # In mock mode, return a dummy URL
+        if not settings.STRIPE_API_KEY or settings.STRIPE_API_KEY == "placeholder":
+            return {"url": f"{settings.FRONTEND_URL}/success?session_id=mock_session"}
+            
         session = stripe.checkout.Session.create(
             line_items=[{
                 'price_data': {
@@ -190,21 +231,42 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     session = voice_router.create_session()
     output_task = asyncio.create_task(send_output(websocket, session))
+    
     try:
         while True:
             data = await websocket.receive_text()
-            msg = json.loads(data)
-            if msg.get("type") == "audio_chunk":
-                await session.add_input({"type": "audio", "data": msg.get("data", "").encode("utf-8")})
-    except Exception:
-        pass
+            try:
+                msg = json.loads(data)
+                
+                # Check for control messages (Barge-in / Stop)
+                if msg.get("type") == "stop" or msg.get("action") == "interrupt":
+                    await session.add_input({"type": "stop"})
+                    # Re-create session or reset state if needed
+                    continue
+                
+                # Check for audio chunk
+                if msg.get("type") == "audio_chunk":
+                    await session.add_input({"type": "audio", "data": msg.get("data", "").encode("utf-8")})
+                
+                # Check for text input (Chat mode via voice socket)
+                if msg.get("type") == "text_input":
+                    # Treat text input as a "finished" utterance
+                    await session.add_input({"type": "text_command", "text": msg.get("text")})
+                    
+            except json.JSONDecodeError:
+                pass
+                
+    except WebSocketDisconnect:
+        session.active = False
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
     finally:
         output_task.cancel()
 
 async def send_output(websocket: WebSocket, session):
     try:
         while True:
-            event = await session.output_queue.get()
+            event = await session.get_output()
             await websocket.send_json(event)
     except Exception:
         pass

@@ -105,22 +105,46 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-primary/5 p-8 rounded-3xl border border-primary/10">
-                    <Zap className="text-primary mb-4" />
+                <div className="bg-primary/5 p-8 rounded-3xl border border-primary/10 hover:border-primary/30 transition-all cursor-pointer group" onClick={() => setIsWizardOpen(true)}>
+                    <Zap className="text-primary mb-4 group-hover:scale-110 transition-transform" />
                     <h4 className="text-white font-bold mb-2">Build a Company</h4>
                     <p className="text-xs text-gray-500 mb-6">Deploy a full-stack corporate structure in 60 seconds.</p>
-                    <button 
-                        onClick={() => setIsWizardOpen(true)}
-                        className="w-full bg-primary text-black py-3 rounded-xl font-bold text-xs uppercase hover:scale-105 transition-transform"
-                    >
-                        Initialize Blueprint
-                    </button>
+                    <button className="w-full bg-primary text-black py-3 rounded-xl font-bold text-xs uppercase group-hover:bg-primary/90">Initialize Blueprint</button>
                 </div>
-                <div className="bg-blue-500/5 p-8 rounded-3xl border border-blue-500/10">
-                    <Globe className="text-blue-400 mb-4" />
+                <div className="bg-blue-500/5 p-8 rounded-3xl border border-blue-500/10 hover:border-blue-500/30 transition-all cursor-pointer group">
+                    <Globe className="text-blue-400 mb-4 group-hover:scale-110 transition-transform" />
                     <h4 className="text-white font-bold mb-2">Global Scale</h4>
                     <p className="text-xs text-gray-500 mb-6">Distribute agents across 12 edge clusters.</p>
-                    <button className="w-full border border-blue-500/20 text-blue-400 py-3 rounded-xl font-bold text-xs uppercase">Manage Nodes</button>
+                    <button className="w-full border border-blue-500/20 text-blue-400 py-3 rounded-xl font-bold text-xs uppercase group-hover:bg-blue-500/10">Manage Nodes</button>
+                </div>
+            </div>
+
+            {/* REVENUE PROJECTIONS (New Module) */}
+            <div className="bg-card-bg p-8 rounded-3xl border border-white/5 mt-8">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-bold text-gray-300">REVENUE FORECAST (SCENARIO A)</h3>
+                    <span className="text-[10px] text-green-400 bg-green-400/10 px-3 py-1 rounded-full uppercase tracking-wider">Growth Trajectory</span>
+                </div>
+                <div className="space-y-4">
+                    {[
+                        { label: 'Q1', value: 15, goal: '$15k' },
+                        { label: 'Q2', value: 45, goal: '$45k' },
+                        { label: 'Q3', value: 80, goal: '$80k' },
+                        { label: 'Q4', value: 100, goal: '$120k' }
+                    ].map((q, i) => (
+                        <div key={i} className="flex items-center gap-4 text-xs font-mono text-gray-500">
+                            <span className="w-8">{q.label}</span>
+                            <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                                <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${q.value}%` }}
+                                    transition={{ duration: 1, delay: i * 0.2 }}
+                                    className="h-full bg-gradient-to-r from-blue-500 to-primary"
+                                />
+                            </div>
+                            <span className="w-12 text-right text-white">{q.goal}</span>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>

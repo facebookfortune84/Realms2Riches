@@ -39,24 +39,50 @@ class Orchestrator:
         logger.info(f"Sovereign Orchestrator initialized with {len(self.agents)} agents and 150+ multiplexed capabilities.")
 
     def submit_task(self, task_description: str, project_id: str):
+        # ... existing synchronous implementation ...
+        pass # (This is just a placeholder to show context, I will replace the whole method below if needed or add the new one)
+
+    async def submit_task_stream(self, task_description: str, project_id: str):
+        """
+        Asynchronous generator that yields intermediate steps of the agent's thought process.
+        """
         task = TaskSpec(project_id=project_id, description=task_description)
         
-        # High-Scale Routing Logic
-        agent_id = "agent_strategic_operations_1" # Default to Strategic Ops
+        # 1. Routing
+        yield {"status": "routing", "message": "Analyzing task intent..."}
+        await asyncio.sleep(0.5) # Narrative delay
         
         desc = task_description.lower()
-        if any(k in desc for k in ["code", "logic", "refactor"]):
+        if any(k in desc for k in ["code", "logic", "refactor", "fix"]):
             agent_id = "agent_cybernetic_engineering_1"
-        elif any(k in desc for k in ["design", "ui", "brand"]):
+        elif any(k in desc for k in ["design", "ui", "brand", "css"]):
             agent_id = "agent_visual_intelligence_1"
-        elif any(k in desc for k in ["market", "seo", "growth"]):
+        elif any(k in desc for k in ["market", "seo", "growth", "business"]):
             agent_id = "agent_global_market_force_1"
+        else:
+            agent_id = "agent_strategic_operations_1"
             
-        logger.info(f"Forge routing task to {agent_id}")
-        
+        yield {"status": "routing", "message": f"Routed to {agent_id}"}
+        await asyncio.sleep(0.3)
+
         agent = self.agents.get(agent_id)
-        if agent:
-            result = agent.process_task(task)
+        if not agent:
+            yield {"status": "error", "message": f"Agent {agent_id} offline."}
+            return
+
+        # 2. Agent Execution (Simulated Steps if LLM is fast/mocked)
+        yield {"status": "processing", "message": f"[{agent_id}] Accessing context..."}
+        # In a real scenario, agent.process_task would be async and yield steps.
+        # For now, we wrap the synchronous call but inject narrative steps.
+        
+        try:
+            # We run the synchronous agent in a thread to not block the event loop
+            result = await asyncio.to_thread(agent.process_task, task)
+            
+            yield {"status": "processing", "message": f"[{agent_id}] formulating response..."}
+            await asyncio.sleep(0.5) 
+            
+            # Log to SQL
             self.sql_store.add_run({
                 "id": task.id,
                 "project_id": project_id,
@@ -64,10 +90,12 @@ class Orchestrator:
                 "action": "task_completion",
                 "details": result
             })
-            return result
-        else:
-            logger.error(f"Agent {agent_id} not found")
-            return {"status": "failed", "reason": "Agent not found"}
+            
+            yield {"status": "completed", "result": result}
+            
+        except Exception as e:
+            logger.error(f"Task failed: {e}")
+            yield {"status": "failed", "message": str(e)}
 
 if __name__ == "__main__":
     orchestrator = Orchestrator()

@@ -88,8 +88,11 @@ class VoiceSession:
             except Exception as e:
                 logger.error(f"Error in processing loop: {e}")
 
-    async def _handle_interruption(self):
-        """Cancels current processing and thinking/speaking."""
+    async def _handle_interruption(self, reason: str = "Audio Detected"):
+        """Cancels current processing and clears output queue to stop playback immediately."""
+        logger.warning(f"🛑 BARGE-IN TRIGGERED: {reason}")
+        
+        # 1. Cancel the current thinking/speaking task
         if self.processing_task and not self.processing_task.done():
             self.processing_task.cancel()
             try:
@@ -98,12 +101,21 @@ class VoiceSession:
                 pass
             self.processing_task = None
         
-        # Drain output queue of pending audio?
-        # Implementing a priority queue or separate audio queue would be better, 
-        # but clearing standard queue might lose system events.
-        # For now, just send a "stop_audio" event to client
-        await self.output_queue.put({"type": "control", "action": "stop_audio"})
+        # 2. Drain the output queue (Stop the TTS stream from sending more chunks)
+        while not self.output_queue.empty():
+            try:
+                self.output_queue.get_nowait()
+            except asyncio.QueueEmpty:
+                break
+        
+        # 3. Send explicit STOP command to frontend
+        await self.output_queue.put({"type": "control", "action": "stop_audio", "reason": reason})
+        
+        # 4. Reset State
         self.state = VoiceSessionState.IDLE
+        
+        # 5. (Future) Update LLM Context with "User interrupted me"
+        # self.context.append({"role": "system", "content": "User interrupted previous response."})
 
     async def _process_turn(self, audio_data: bytes):
         try:
