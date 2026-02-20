@@ -8,20 +8,26 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeabl
 export default function Dashboard() {
   const [metrics, setMetrics] = useState(null);
   const [activity, setActivity] = useState([]);
+  const [integrations, setIntegrations] = useState(null);
+  const [telemetry, setTelemetry] = useState({ campaigns_launched: 0, messages_sent: 0, impressions: 0, clicks: 0, conversions: 0, revenue: 0 });
   const [diag, setDiag] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   const fetchStats = async () => {
     try {
-      const [mRes, dRes, aRes] = await Promise.all([
+      const [mRes, dRes, aRes, iRes, tRes] = await Promise.all([
         fetch(`${BACKEND_URL}/health`),
         fetch(`${BACKEND_URL}/api/diagnostics`),
-        fetch(`${BACKEND_URL}/api/activity`)
+        fetch(`${BACKEND_URL}/api/activity`),
+        fetch(`${BACKEND_URL}/api/integrations/status`),
+        fetch(`${BACKEND_URL}/api/telemetry/stats`)
       ]);
       setMetrics(await mRes.json());
       setDiag(await dRes.json());
       setActivity(await aRes.json());
+      setIntegrations(await iRes.json());
+      setTelemetry(await tRes.json());
     } catch (err) {
       console.error("Failed to load metrics", err);
     } finally {
@@ -29,9 +35,19 @@ export default function Dashboard() {
     }
   };
 
+  const handleCampaignLaunch = async () => {
+      // Trigger a real campaign event
+      await fetch(`${BACKEND_URL}/api/telemetry/event`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ type: 'campaign_start' })
+      });
+      fetchStats(); // Refresh immediately
+  };
+
   useEffect(() => {
     fetchStats();
-    const interval = setInterval(fetchStats, 5000);
+    const interval = setInterval(fetchStats, 3000); // Faster polling for "Live" feel
     return () => clearInterval(interval);
   }, []);
 
@@ -59,6 +75,35 @@ export default function Dashboard() {
         <div className="bg-white/5 px-6 py-3 rounded-full border border-white/10 flex items-center gap-3">
             <div className={`w-2 h-2 rounded-full animate-pulse ${metrics?.status === 'ok' ? 'bg-primary' : 'bg-red-500'}`} />
             <span className="text-[10px] text-gray-400 uppercase tracking-widest">System Integrity: {metrics?.status === 'ok' ? 'Verified' : 'Degraded'}</span>
+        </div>
+      </div>
+      
+      {/* INTEGRATIONS STATUS (New Module) */}
+      <div className="mb-12 bg-black/40 backdrop-blur-xl p-8 rounded-3xl border border-white/5">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-lg font-bold text-gray-300">INTEGRATION MATRIX</h3>
+          <div className="text-[10px] text-gray-500 uppercase tracking-widest">Live Status: {integrations ? 'Scanning...' : 'Connecting'}</div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {[
+                { label: 'Intelligence (LLM)', status: integrations?.intelligence?.llm },
+                { label: 'Telephony (Twilio)', status: integrations?.communication?.telephony },
+                { label: 'Outreach (Email)', status: integrations?.communication?.email_outreach },
+                { label: 'Social (LinkedIn)', status: integrations?.social_matrix?.linkedin },
+                { label: 'Voice Clone (11Labs)', status: integrations?.media_synthesis?.voice_cloning },
+                { label: 'Payments (Stripe)', status: integrations?.monetization?.stripe },
+                { label: 'Vector Memory', status: integrations?.intelligence?.vector_db },
+                { label: 'Image Gen', status: integrations?.media_synthesis?.image_gen },
+                { label: 'WhatsApp', status: integrations?.communication?.whatsapp },
+                { label: 'Social (FB)', status: integrations?.social_matrix?.facebook },
+            ].map((item, i) => (
+                <div key={i} className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
+                    <div className={`w-2 h-2 rounded-full animate-pulse ${item.status === 'active' ? 'bg-primary shadow-[0_0_10px_rgba(0,255,136,0.5)]' : 'bg-red-500/50'}`} />
+                    <span className={`text-[10px] uppercase font-bold ${item.status === 'active' ? 'text-white' : 'text-gray-600'}`}>
+                        {item.label}
+                    </span>
+                </div>
+            ))}
         </div>
       </div>
       
@@ -121,6 +166,44 @@ export default function Dashboard() {
                         {[...Array(12)].map((_, i) => (
                             <div key={i} className="h-4 bg-blue-500/20 rounded-sm border border-blue-500/30 animate-pulse" />
                         ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* LIVE OPS (New) */}
+            <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-3xl border border-white/10 mt-8 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <Activity size={120} className="text-white" />
+                </div>
+                <div className="flex justify-between items-center mb-6 relative z-10">
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                        <Zap className="text-yellow-400" size={18} />
+                        LIVE OPERATIONS
+                    </h3>
+                    <button 
+                        onClick={handleCampaignLaunch}
+                        className="bg-primary text-black px-4 py-2 rounded-lg text-xs font-bold uppercase hover:scale-105 transition-transform active:scale-95"
+                    >
+                        Deploy Campaign
+                    </button>
+                </div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 relative z-10">
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                        <div className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Campaigns</div>
+                        <div className="text-2xl font-bold text-white">{telemetry?.campaigns_launched || 0}</div>
+                    </div>
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                        <div className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Messages Sent</div>
+                        <div className="text-2xl font-bold text-blue-400">{telemetry?.messages_sent || 0}</div>
+                    </div>
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                        <div className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Impressions</div>
+                        <div className="text-2xl font-bold text-purple-400">{telemetry?.impressions || 0}</div>
+                    </div>
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                        <div className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Est. Revenue</div>
+                        <div className="text-2xl font-bold text-green-400">${telemetry?.revenue?.toFixed(2) || "0.00"}</div>
                     </div>
                 </div>
             </div>

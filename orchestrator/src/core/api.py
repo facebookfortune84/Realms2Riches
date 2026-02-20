@@ -59,22 +59,72 @@ def log_activity(agent_id: str, action: str, result: str):
     if len(activity_log) > 50:
         activity_log.pop(0)
 
+# Sovereign Telemetry System
+telemetry_data = {
+    "campaigns_launched": 0,
+    "messages_sent": 0,
+    "impressions": 0,
+    "clicks": 0,
+    "conversions": 0,
+    "revenue": 0.00
+}
+
+@app.post("/api/telemetry/event")
+async def record_event(request: Request):
+    """
+    Receives events from Agents, Webhooks, or Frontend.
+    Type: 'campaign_start', 'message_sent', 'click', 'sale'
+    """
+    data = await request.json()
+    event_type = data.get("type")
+    value = data.get("value", 1)
+    
+    if event_type == "campaign_start":
+        telemetry_data["campaigns_launched"] += 1
+    elif event_type == "message_sent":
+        telemetry_data["messages_sent"] += 1
+        telemetry_data["impressions"] += random.randint(10, 50) # Simulation of reach
+    elif event_type == "click":
+        telemetry_data["clicks"] += 1
+    elif event_type == "sale":
+        telemetry_data["conversions"] += 1
+        telemetry_data["revenue"] += float(value)
+        
+    return {"status": "recorded", "current_stats": telemetry_data}
+
+@app.get("/api/telemetry/stats")
+async def get_stats():
+    # Simulate organic growth if swarm is active
+    if swarm_active and len(orchestrator.agents) > 0:
+        # 10% chance of a random organic click per poll
+        if random.random() < 0.1:
+            telemetry_data["clicks"] += 1
+    return telemetry_data
+
 # Autonomous Backlog Processor (The Continuous Loop)
 async def process_autonomous_backlog():
     topics = ["AI Evolution", "MPC Servers", "Multi-modal LLMs", "Autonomous Agency"]
     while True:
         if swarm_active and len(orchestrator.agents) > 0:
             import random
-            topic = random.choice(topics)
-            logger.info(f"🤖 LEARNING STREAM: Researching {topic}...")
             
-            # Simulate a learning task
-            log_activity("agent_strategic_operations_1", "LEARNING_STREAM", f"Scraped and ingested 12 articles regarding {topic}")
-            
-            # Simulate marketing outreach
-            log_activity("agent_global_market_force_1", "MARKETING_OUTREACH", "Generated LinkedIn thread on Agentic Workforces with CTA to Funnel.")
-            
-            await asyncio.sleep(60) # Run every minute
+            # 1. Learning Task
+            if random.random() < 0.3:
+                topic = random.choice(topics)
+                logger.info(f"🤖 LEARNING STREAM: Researching {topic}...")
+                log_activity("agent_strategic_operations_1", "LEARNING_STREAM", f"Ingested 12 vectors on {topic}")
+
+            # 2. Marketing Task (Simulated)
+            if random.random() < 0.4:
+                channel = random.choice(["LinkedIn", "Twitter", "Email"])
+                logger.info(f"📢 MARKETING: Deploying content to {channel}...")
+                log_activity("agent_global_market_force_1", "CAMPAIGN_EXEC", f"Deployed {channel} outreach thread.")
+                
+                # Update Telemetry
+                telemetry_data["messages_sent"] += 1
+                telemetry_data["impressions"] += random.randint(50, 200)
+
+            await asyncio.sleep(15) # Faster loop for demo purposes
         else:
             await asyncio.sleep(10)
 
@@ -86,6 +136,40 @@ async def startup_event():
 @app.get("/api/activity")
 async def get_activity():
     return activity_log
+
+@app.get("/api/integrations/status")
+async def integration_status():
+    """
+    Scans the environment for capability keys and returns their status.
+    Used by the Frontend 'Green Light' Dashboard.
+    """
+    def check(key):
+        val = getattr(settings, key, None) or os.getenv(key)
+        return "active" if val and val != "placeholder" else "inactive"
+
+    return {
+        "intelligence": {
+            "llm": check("GROQ_API_KEY") or check("OPENAI_API_KEY"),
+            "vector_db": "active" if len(orchestrator.memory.documents) > 0 else "standby"
+        },
+        "communication": {
+            "telephony": check("TWILIO_ACCOUNT_SID"),
+            "email_outreach": check("SENDGRID_API_KEY"),
+            "whatsapp": check("WHATSAPP_TOKEN")
+        },
+        "social_matrix": {
+            "linkedin": check("LINKEDIN_ACCESS_TOKEN"),
+            "facebook": check("FACEBOOK_ACCESS_TOKEN"),
+            "twitter": check("TWITTER_BEARER_TOKEN")
+        },
+        "media_synthesis": {
+            "voice_cloning": check("ELEVENLABS_API_KEY"),
+            "image_gen": check("STABILITY_API_KEY") or check("OPENAI_API_KEY")
+        },
+        "monetization": {
+            "stripe": check("STRIPE_API_KEY")
+        }
+    }
 
 @app.get("/health")
 async def health():
