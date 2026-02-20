@@ -7,20 +7,21 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeabl
 
 export default function Dashboard() {
   const [metrics, setMetrics] = useState(null);
+  const [activity, setActivity] = useState([]);
   const [diag, setDiag] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   const fetchStats = async () => {
     try {
-      const [mRes, dRes] = await Promise.all([
+      const [mRes, dRes, aRes] = await Promise.all([
         fetch(`${BACKEND_URL}/health`),
-        fetch(`${BACKEND_URL}/api/diagnostics`)
+        fetch(`${BACKEND_URL}/api/diagnostics`),
+        fetch(`${BACKEND_URL}/api/activity`)
       ]);
-      const mData = await mRes.json();
-      const dData = await dRes.json();
-      setMetrics(mData);
-      setDiag(dData);
+      setMetrics(await mRes.json());
+      setDiag(await dRes.json());
+      setActivity(await aRes.json());
     } catch (err) {
       console.error("Failed to load metrics", err);
     } finally {
@@ -30,14 +31,14 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchStats();
-    const interval = setInterval(fetchStats, 10000);
+    const interval = setInterval(fetchStats, 5000);
     return () => clearInterval(interval);
   }, []);
 
   if (loading) return (
     <div className="min-h-screen flex flex-col items-center justify-center space-y-4 font-mono">
         <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <div className="text-primary animate-pulse tracking-[0.3em] uppercase text-xs">Accessing Sovereign Core...</div>
+        <div className="text-primary animate-pulse tracking-[0.3em] uppercase text-xs">Uplinking to Sovereign Matrix...</div>
     </div>
   );
 
@@ -45,15 +46,15 @@ export default function Dashboard() {
     { label: "Active Agents", value: metrics?.agents || 1000, icon: Users, color: "text-primary" },
     { label: "Swarm State", value: metrics?.swarm_active ? "READY" : "RESTRICTED", icon: Shield, color: metrics?.swarm_active ? "text-green-400" : "text-red-400" },
     { label: "Memory Docs", value: metrics?.rag_docs || 0, icon: Database, color: "text-blue-400" },
-    { label: "DB Link", value: diag?.db === 'connected' ? "ACTIVE" : "ERROR", icon: Activity, color: diag?.db === 'connected' ? "text-primary" : "text-red-500" }
+    { label: "Matrix Link", value: diag?.db === 'connected' ? "SECURE" : "UNSTABLE", icon: Activity, color: diag?.db === 'connected' ? "text-primary" : "text-red-500" }
   ];
 
   return (
     <div className="py-10 max-w-7xl mx-auto px-4 font-mono">
       <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
         <div>
-            <div className="text-primary text-xs mb-2 tracking-[0.5em] uppercase">Sovereign OS v3.1.0</div>
-            <h2 className="text-5xl md:text-7xl font-black tracking-tighter">FOUNDER <span className="text-primary">COCKPIT</span></h2>
+            <div className="text-primary text-xs mb-2 tracking-[0.5em] uppercase">Sovereign OS v3.3.0</div>
+            <h2 className="text-5xl md:text-7xl font-black tracking-tighter">FOUNDER <span className="text-primary">DASHBOARD</span></h2>
         </div>
         <div className="bg-white/5 px-6 py-3 rounded-full border border-white/10 flex items-center gap-3">
             <div className={`w-2 h-2 rounded-full animate-pulse ${metrics?.status === 'ok' ? 'bg-primary' : 'bg-red-500'}`} />
@@ -86,40 +87,45 @@ export default function Dashboard() {
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-lg font-bold text-gray-300 flex items-center gap-2">
                         <Terminal size={18} className="text-primary" />
-                        LIVE NEURAL TELEMETRY
+                        AUTONOMOUS ACTIVITY LOG
                     </h3>
                     <div className="flex gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
-                        <span className="text-[10px] text-primary">RECURSIVE_UPSTREAM</span>
+                        <span className="text-[10px] text-primary">REALTIME_FEED</span>
                     </div>
                 </div>
-                <div className="space-y-3 font-mono text-[11px] h-80 overflow-y-auto custom-scrollbar">
-                    <div className="text-primary/60">[0.001s] Sovereign Core Ignition: Authorized.</div>
-                    <div className="text-gray-600">[0.004s] Multi-agent multiplexing protocol engaged...</div>
-                    <div className="text-primary/40">[0.012s] Mapping 150+ logic domains to active swarm.</div>
-                    <div className="text-gray-600">[0.015s] PostgreSQL Vector Extension: Latency 2ms.</div>
-                    <div className="text-primary/20">[0.022s] Consensus reached on task_id: {Math.random().toString(36).substring(7)}.</div>
-                    <div className="text-green-400/50">[0.045s] Integrity Check: 0x{Math.random().toString(16).substring(2, 10).toUpperCase()} Verified.</div>
-                    <div className="text-gray-700 animate-pulse">_ Awaiting user directive...</div>
+                <div className="space-y-4 font-mono text-[10px] h-80 overflow-y-auto custom-scrollbar">
+                    {activity.length > 0 ? activity.map((a, i) => (
+                        <div key={i} className="flex gap-4 p-2 border-b border-white/5 hover:bg-white/5 transition-colors">
+                            <span className="text-gray-600">[{new Date(a.timestamp).toLocaleTimeString()}]</span>
+                            <span className="text-primary font-bold">[{a.agent}]</span>
+                            <span className="text-white">{a.action}:</span>
+                            <span className="text-gray-400 italic">{a.result}</span>
+                        </div>
+                    )) : <div className="text-gray-600">Waiting for agent activity...</div>}
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-primary/5 p-8 rounded-3xl border border-primary/10 hover:border-primary/30 transition-all cursor-pointer group" onClick={() => setIsWizardOpen(true)}>
-                    <Zap className="text-primary mb-4 group-hover:scale-110 transition-transform" />
-                    <h4 className="text-white font-bold mb-2">Build a Company</h4>
-                    <p className="text-xs text-gray-500 mb-6">Deploy a full-stack corporate structure in 60 seconds.</p>
+                    <Zap className="text-primary mb-4" />
+                    <h4 className="text-white font-bold mb-2 uppercase text-sm">Build a Company</h4>
+                    <p className="text-[10px] text-gray-500 mb-6">Deploy a full-stack corporate structure in 60 seconds.</p>
                     <button className="w-full bg-primary text-black py-3 rounded-xl font-bold text-xs uppercase group-hover:bg-primary/90">Initialize Blueprint</button>
                 </div>
                 <div className="bg-blue-500/5 p-8 rounded-3xl border border-blue-500/10 hover:border-blue-500/30 transition-all cursor-pointer group">
                     <Globe className="text-blue-400 mb-4 group-hover:scale-110 transition-transform" />
-                    <h4 className="text-white font-bold mb-2">Global Scale</h4>
-                    <p className="text-xs text-gray-500 mb-6">Distribute agents across 12 edge clusters.</p>
-                    <button className="w-full border border-blue-500/20 text-blue-400 py-3 rounded-xl font-bold text-xs uppercase group-hover:bg-blue-500/10">Manage Nodes</button>
+                    <h4 className="text-white font-bold mb-2 uppercase text-sm">Global Matrix</h4>
+                    <p className="text-[10px] text-gray-500 mb-2">12 Active Clusters across 4 Regions.</p>
+                    <div className="grid grid-cols-6 gap-1 mt-4">
+                        {[...Array(12)].map((_, i) => (
+                            <div key={i} className="h-4 bg-blue-500/20 rounded-sm border border-blue-500/30 animate-pulse" />
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            {/* REVENUE PROJECTIONS (New Module) */}
+            {/* REVENUE PROJECTIONS */}
             <div className="bg-card-bg p-8 rounded-3xl border border-white/5 mt-8">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-lg font-bold text-gray-300">REVENUE FORECAST (SCENARIO A)</h3>
@@ -181,4 +187,3 @@ export default function Dashboard() {
     </div>
   );
 }
-

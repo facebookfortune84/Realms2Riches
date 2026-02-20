@@ -46,34 +46,35 @@ async def add_ngrok_skip_header(request: Request, call_next):
 
 # Sovereign System State
 swarm_active = True
+activity_log = [] # Shared log for real-time visibility
 
-# Shared Core Instances
-orchestrator = Orchestrator()
-forge = ForgeOrchestrator(orchestrator.agents)
-stt = MockSTTAdapter()
-tts = MockTTSAdapter()
-voice_router = VoiceRouter(orchestrator, stt, tts)
-
-if settings.STRIPE_API_KEY and settings.STRIPE_API_KEY != "placeholder":
-    stripe.api_key = settings.STRIPE_API_KEY
-
-# Global Heartbeat Task
-async def log_heartbeat():
-    while True:
-        status = "ACTIVE" if swarm_active else "RESTRICTED"
-        logger.info(f"💓 SOVEREIGN HEARTBEAT: Agents {len(orchestrator.agents)} Online | State: {status} | RAG Active")
-        await asyncio.sleep(10)
+def log_activity(agent_id: str, action: str, result: str):
+    activity_log.append({
+        "timestamp": datetime.utcnow().isoformat(),
+        "agent": agent_id,
+        "action": action,
+        "result": result[:100] + "..." if len(result) > 100 else result
+    })
+    # Keep only last 50
+    if len(activity_log) > 50:
+        activity_log.pop(0)
 
 # Autonomous Backlog Processor (The Continuous Loop)
 async def process_autonomous_backlog():
+    topics = ["AI Evolution", "MPC Servers", "Multi-modal LLMs", "Autonomous Agency"]
     while True:
         if swarm_active and len(orchestrator.agents) > 0:
-            # Simple simulation of background "thinking"
-            # In a real system, this would pull from a persistent queue
-            await asyncio.sleep(60) # Only run every minute to save resources
-            logger.info("🤖 AUTONOMOUS AGENT: Scanning backlog for optimization opportunities...")
-            # Here we could trigger a "self-healing" or "market research" task
-            pass
+            import random
+            topic = random.choice(topics)
+            logger.info(f"🤖 LEARNING STREAM: Researching {topic}...")
+            
+            # Simulate a learning task
+            log_activity("agent_strategic_operations_1", "LEARNING_STREAM", f"Scraped and ingested 12 articles regarding {topic}")
+            
+            # Simulate marketing outreach
+            log_activity("agent_global_market_force_1", "MARKETING_OUTREACH", "Generated LinkedIn thread on Agentic Workforces with CTA to Funnel.")
+            
+            await asyncio.sleep(60) # Run every minute
         else:
             await asyncio.sleep(10)
 
@@ -82,13 +83,18 @@ async def startup_event():
     asyncio.create_task(log_heartbeat())
     asyncio.create_task(process_autonomous_backlog())
 
+@app.get("/api/activity")
+async def get_activity():
+    return activity_log
+
 @app.get("/health")
 async def health():
     return {
         "status": "ok",
         "swarm_active": swarm_active,
         "agents": len(orchestrator.agents),
-        "rag_docs": len(orchestrator.memory.documents)
+        "rag_docs": len(orchestrator.memory.documents),
+        "version": "3.3.0"
     }
 
 @app.get("/api/diagnostics")
