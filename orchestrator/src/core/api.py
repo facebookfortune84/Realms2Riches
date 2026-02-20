@@ -14,9 +14,13 @@ import asyncio
 import json
 import random
 import time
+import os
 from datetime import datetime
 
 logger = get_logger(__name__)
+
+# Sovereign System State
+swarm_active = True
 
 # --- SECURITY & LICENSING ---
 api_key_header = APIKeyHeader(name="X-License-Key", auto_error=False)
@@ -24,10 +28,8 @@ api_key_header = APIKeyHeader(name="X-License-Key", auto_error=False)
 async def verify_license_header(key: str = Security(api_key_header)):
     # 1. Dev Mode Bypass
     if not key and settings.GROQ_API_KEY == "placeholder":
-        # Check if we are truly in a restricted prod environment or local dev
-        # For now, we allow local dev without key but warn
         logger.warning("No License Key. Assuming Trial/Dev Mode.")
-        return {"tier": "TRIAL", "features": ["basic"]}
+        return {"tier": "TRIAL", "features": ["basic", "swarm"]}
         
     if not key:
         raise HTTPException(status_code=403, detail="License Key Required")
@@ -39,7 +41,7 @@ async def verify_license_header(key: str = Security(api_key_header)):
         
     return result["data"]
 
-# --- RATE LIMITING (Memory-Based Token Bucket) ---
+# --- RATE LIMITING ---
 class RateLimiter:
     def __init__(self, requests: int, window: int):
         self.requests = requests
@@ -49,10 +51,7 @@ class RateLimiter:
     async def __call__(self, request: Request):
         client_ip = request.client.host
         now = time.time()
-        
-        # Clean old
         self.clients = {ip: (count, start) for ip, (count, start) in self.clients.items() if now - start < self.window}
-        
         if client_ip not in self.clients:
             self.clients[client_ip] = (1, now)
         else:
@@ -61,13 +60,13 @@ class RateLimiter:
                 raise HTTPException(status_code=429, detail="Rate Limit Exceeded")
             self.clients[client_ip] = (count + 1, start)
 
-limiter = RateLimiter(requests=100, window=60) # 100 req/min
+limiter = RateLimiter(requests=100, window=60)
 
-app = FastAPI(title="Sovereign API", version="3.7.0-SECURE", dependencies=[Depends(limiter)])
+app = FastAPI(title="Sovereign API", version="3.7.2-LOCKED", dependencies=[Depends(limiter)])
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Tighten this in production env vars!
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -85,6 +84,11 @@ def log_activity(agent: str, action: str, result: str):
     if len(activity_log) > 50: activity_log.pop(0)
 
 # --- BACKGROUND PROCESSORS ---
+async def log_heartbeat():
+    while True:
+        logger.info(f"💓 HEARTBEAT: {len(orchestrator.agents)} Online | Matrix: ACTIVE")
+        await asyncio.sleep(15)
+
 async def autonomous_loop():
     while True:
         if swarm_active:
@@ -96,19 +100,20 @@ async def autonomous_loop():
 
 @app.on_event("startup")
 async def startup():
+    asyncio.create_task(log_heartbeat())
     asyncio.create_task(autonomous_loop())
 
 # --- ENDPOINTS ---
 
 @app.get("/health")
-async def health(license_data: dict = Depends(verify_license_header)):
+async def health():
     return {
         "status": "ok",
         "swarm": "ACTIVE",
-        "license": license_data.get("tier", "UNKNOWN"),
         "agents": len(orchestrator.agents),
         "cells": orchestrator.get_matrix_status(),
-        "rag": len(orchestrator.memory.documents)
+        "rag": len(orchestrator.memory.documents),
+        "version": "3.7.2"
     }
 
 @app.get("/api/integrations/status")
@@ -116,7 +121,6 @@ async def integrations():
     def status(k):
         v = getattr(settings, k, None)
         return "active" if v and len(str(v)) > 10 else "inactive"
-    
     return {
         "intel": status("GROQ_API_KEY"),
         "voice": status("ELEVENLABS_API_KEY"),
@@ -135,10 +139,8 @@ async def get_single_post(slug: str):
     path = os.path.join(blog_dir, f"{slug}.md")
     if not os.path.exists(path):
         raise HTTPException(status_code=404, detail="Post not found")
-    
     with open(path, "r", encoding="utf-8") as f:
         content = f.read()
-    
     parts = content.split("---", 2)
     meta = {}
     body = content
@@ -148,7 +150,6 @@ async def get_single_post(slug: str):
                 k, v = line.split(":", 1)
                 meta[k.strip()] = v.strip().strip('"')
         body = parts[2].strip()
-        
     return {"meta": meta, "content": body}
 
 @app.get("/api/activity")
@@ -157,20 +158,14 @@ async def get_activity():
 
 @app.post("/api/tasks")
 async def submit_task(request: Request, license_data: dict = Depends(verify_license_header)):
-    # License Check for Tasks
-    if "swarm" not in license_data.get("features", []):
-        raise HTTPException(status_code=402, detail="Upgrade License to access Swarm Intelligence.")
-
     data = await request.json()
     desc = data.get("description")
-    
     result = {}
     async for step in orchestrator.submit_task_stream(desc, "adhoc"):
         if step["status"] == "completed":
             result = step["result"]
             generate_autonomous_blog_post(result)
             log_activity(result.get("agent_id"), "TASK_COMPLETE", result.get("reasoning"))
-            
     return {"status": "completed", "result": result}
 
 @app.get("/products")
@@ -182,10 +177,20 @@ async def get_products():
     }]
 
 @app.websocket("/ws/voice")
-async def ws_voice(websocket: WebSocket):
+async def ws_voice(websocket: WebSocket, token: str = None):
+    # Verify License via Query Param for WebSockets
+    if not token and settings.GROQ_API_KEY != "placeholder":
+        await websocket.close(code=4003)
+        return
+    
+    if token:
+        res = license_manager.verify_license_key(token)
+        if not res["valid"] and settings.GROQ_API_KEY != "placeholder":
+            await websocket.close(code=4003)
+            return
+
     await websocket.accept()
     session = voice_router.create_session()
-    
     async def receiver():
         try:
             while True:
@@ -194,12 +199,10 @@ async def ws_voice(websocket: WebSocket):
                 if msg.get("type") == "stop": await session.add_input({"type": "stop"})
                 elif msg.get("type") == "audio": await session.add_input({"type": "audio", "data": msg["data"].encode()})
         except: pass
-
     async def sender():
         try:
             while True:
                 evt = await session.get_output()
                 await websocket.send_json(evt)
         except: pass
-
     await asyncio.gather(receiver(), sender())

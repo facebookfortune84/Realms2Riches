@@ -32,7 +32,10 @@ export default function Cockpit() {
     try {
         const res = await fetch(`${BACKEND_URL}/api/tasks`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                'X-License-Key': import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || ''
+            },
             body: JSON.stringify({ description: currentInput })
         });
         const data = await res.json();
@@ -65,9 +68,10 @@ export default function Cockpit() {
         socketRef.current = null;
         setVoiceStatus('Inactive');
     } else {
+        const token = import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || '';
         const wsUrl = BACKEND_URL.replace('https', 'wss').replace('http', 'ws');
         try {
-            const socket = new WebSocket(`${wsUrl}/ws/voice`);
+            const socket = new WebSocket(`${wsUrl}/ws/voice?token=${token}`);
             socket.onopen = () => {
                 setVoiceStatus('Connected');
                 addMsg("VOICE UPLINK ACTIVE.", 'system');

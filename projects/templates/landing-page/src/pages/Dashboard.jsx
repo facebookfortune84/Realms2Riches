@@ -13,11 +13,12 @@ export default function Dashboard() {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   const fetchStats = async () => {
+    const headers = { 'X-License-Key': import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || '' };
     try {
       const [mRes, aRes, iRes] = await Promise.all([
-        fetch(`${BACKEND_URL}/health`),
-        fetch(`${BACKEND_URL}/api/activity`),
-        fetch(`${BACKEND_URL}/api/integrations/status`)
+        fetch(`${BACKEND_URL}/health`, { headers }),
+        fetch(`${BACKEND_URL}/api/activity`, { headers }),
+        fetch(`${BACKEND_URL}/api/integrations/status`, { headers })
       ]);
       setMetrics(await mRes.json());
       setActivity(await aRes.json());
