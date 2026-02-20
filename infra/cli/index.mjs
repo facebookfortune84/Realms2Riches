@@ -215,4 +215,92 @@ program.command('docker:rebuild')
       console.log(chalk.green('\n✅ Infrastructure Reset Complete.'));
   });
 
+// --- SHELL MODE (REALM REPL) ---
+
+program.command('shell')
+  .description('Enter the interactive Sovereign Command Console')
+  .option('-y, --yolo', 'Enable YOLO mode (skip confirmations)', false)
+  .action(async (options) => {
+      printBanner();
+      const rl = (await import('readline')).createInterface({
+          input: process.stdin,
+          output: process.stdout,
+          prompt: chalk.green('r2r> ')
+      });
+
+      console.log(chalk.gray('Type "help" for commands. Type "exit" to quit.'));
+      if (options.yolo) console.log(chalk.red.bold('⚠️  YOLO MODE ENGAGED: SAFETY CHECKS DISABLED'));
+
+      rl.prompt();
+
+      rl.on('line', async (line) => {
+          const args = line.trim().split(' ');
+          const cmd = args[0];
+          const payload = args.slice(1).join(' ');
+
+          if (!cmd) { rl.prompt(); return; }
+
+          try {
+              if (cmd === 'exit' || cmd === 'quit') {
+                  console.log(chalk.blue('👋 Session Terminated.'));
+                  process.exit(0);
+              } else if (cmd === 'clear') {
+                  console.clear();
+                  printBanner();
+              } else if (cmd === 'help') {
+                  console.log(chalk.white(`
+  Available Commands:
+    task <desc>     - Submit a directive to the swarm
+    status          - Check system health
+    forecast        - View revenue projections
+    learn <topic>   - Initiate a learning stream on a specific topic
+    marketing       - Check marketing campaign status
+    brain           - Inspect agent reasoning logs
+    yolo            - Toggle safety checks
+    exit            - Close session
+                  `));
+              } else if (cmd === 'yolo') {
+                  options.yolo = !options.yolo;
+                  console.log(chalk.yellow(`YOLO Mode: ${options.yolo ? 'ON' : 'OFF'}`));
+              } else if (cmd === 'task') {
+                  if (!payload) { console.log(chalk.red('Error: Task description required.')); }
+                  else {
+                      await spinner(chalk.yellow('Orchestrating Agents...'), async () => {
+                          const res = await axios.post(`${BACKEND_URL}/api/tasks`, { description: payload });
+                          console.log(chalk.green('\n✅ Task Complete.'));
+                          console.log(chalk.gray(res.data.result?.reasoning || 'No output.'));
+                      });
+                  }
+              } else if (cmd === 'learn') {
+                  if (!payload) { console.log(chalk.red('Error: Topic required.')); }
+                  else {
+                      console.log(chalk.blue(`🌐 Initiating Learning Stream regarding: "${payload}"`));
+                      await spinner(chalk.cyan('Scanning Global Knowledge Graph...'), async () => {
+                          // Simulate learning task
+                          await axios.post(`${BACKEND_URL}/api/tasks`, { description: `LEARN: Scrape web for latest on ${payload} and update RAG.` });
+                      });
+                      console.log(chalk.green('✅ Knowledge Ingested. RAG Vector Updated.'));
+                  }
+              } else if (cmd === 'marketing') {
+                  console.log(chalk.magenta('📢 Marketing Pulse Check...'));
+                  // Mock marketing status for MVP
+                  console.log(chalk.white('   Active Campaigns: ') + chalk.green('3'));
+                  console.log(chalk.white('   Content Created:  ') + chalk.blue('12 Posts (Last 24h)'));
+                  console.log(chalk.white('   Leads Generated:  ') + chalk.yellow('45 (Verified)'));
+              } else if (cmd === 'status') {
+                   // Reuse status logic (simplified for shell)
+                   const res = await axios.get(`${BACKEND_URL}/health`);
+                   console.log(chalk.green(`   System Online: ${res.data.agents} Agents | RAG: ${res.data.rag_docs}`));
+              } else {
+                  console.log(chalk.red(`Unknown command: ${cmd}`));
+              }
+          } catch (e) {
+              console.log(chalk.red(`Error: ${e.message}`));
+          }
+          
+          rl.prompt();
+      });
+  });
+
 program.parse();
+

@@ -17,6 +17,7 @@ import Cancel from './pages/Cancel';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import CookieBanner from './components/CookieBanner';
+import LeadGenPopup from './components/LeadGenPopup';
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
         </main>
         <Footer />
         <CookieBanner />
+        <LeadGenPopup />
       </div>
     </Router>
   );
