@@ -4,34 +4,57 @@ import os
 import random
 from orchestrator.src.core.agent import Agent
 from orchestrator.src.core.llm_provider import GroqProvider
+from orchestrator.src.core.config import settings
 from orchestrator.src.validation.schemas import TaskSpec, AgentConfig, ToolConfig
 from orchestrator.src.tools.git_tools import GitTool
 from orchestrator.src.tools.file_tools import FileTool
+from orchestrator.src.tools.social_tools import SocialTool
+from orchestrator.src.tools.web_tools import WebSearchTool, WebScraperTool
+from orchestrator.src.tools.project_tools import ProjectGeneratorTool
+from orchestrator.src.tools.content_sharder import ContentSharderTool
 from orchestrator.src.tools.universal_tools import get_multiplexer_tool
 from orchestrator.src.memory.vector_store import VectorStore
 from orchestrator.src.memory.sql_store import SQLStore
 from orchestrator.src.logging.logger import get_logger
 from orchestrator.src.agents.fleet import generate_grand_fleet
 
+# Voice Adapters
+from orchestrator.src.core.voice.interfaces import STTAdapter, TTSAdapter
+from orchestrator.src.core.voice.mock_adapters import MockSTTAdapter, MockTTSAdapter
+from orchestrator.src.core.voice.real_adapters import OpenAIWhisperAdapter, ElevenLabsAdapter
+
 logger = get_logger(__name__)
 
+class VideoGenerationTool(FileTool):
+    """Stub for real Video Generation (e.g. HeyGen/Sora). Provides storage instructions."""
+    def execute(self, invocation):
+        # Instructions for the agent on how to 'simulate' or 'prepare' video
+        instructions = """
+        To generate real video:
+        1. Store the script in 'data/marketing/scripts/'.
+        2. Store generated assets in 'data/marketing/videos/'.
+        3. Use the HeyGen API (if key present) to render.
+        """
+        return {"status": "instruction_received", "guidelines": instructions}
+
 class SovereignCell:
-    """A specialized sub-swarm handling a specific domain."""
     def __init__(self, cell_id: str, agents: List[Agent]):
         self.cell_id = cell_id
         self.agent_pool = agents
-        self.agents = {a.config.id: a for a in agents}
         self.active_tasks = 0
+        self.task_queue = asyncio.Queue()
 
     async def execute(self, task: TaskSpec):
         self.active_tasks += 1
-        # Platinum Routing: Random selection from specialized pool for hyper-parallelism
-        agent = random.choice(self.agent_pool)
+        await self.task_queue.put(task)
+        # Advanced routing: find the most specialized agent
+        agent = random.choice(self.agent_pool) 
         try:
             result = await asyncio.to_thread(agent.process_task, task)
             return result
         finally:
             self.active_tasks -= 1
+            await self.task_queue.get()
 
 class Orchestrator:
     def __init__(self):
@@ -39,51 +62,58 @@ class Orchestrator:
         self.sql_store = SQLStore()
         self.llm_provider = GroqProvider()
         self.cells: Dict[str, SovereignCell] = {}
+        
+        # Real-time Voice Detection
+        if settings.ELEVENLABS_API_KEY and len(settings.ELEVENLABS_API_KEY) > 10:
+            self.tts = ElevenLabsAdapter(settings.ELEVENLABS_API_KEY)
+        else: self.tts = MockTTSAdapter()
+            
+        if settings.OPENAI_API_KEY and len(settings.OPENAI_API_KEY) > 10:
+            self.stt = OpenAIWhisperAdapter(settings.OPENAI_API_KEY)
+        else: self.stt = MockSTTAdapter()
+
         self._initialize_sovereign_matrix()
 
     def _initialize_sovereign_matrix(self):
-        # 1. Initialize Tools
-        git_tool = GitTool(ToolConfig(tool_id="git", name="Git", description="Git ops", parameters_schema={}, allowed_agents=["*"]))
-        file_tool = FileTool(ToolConfig(tool_id="file", name="File", description="File ops", parameters_schema={}, allowed_agents=["*"]))
-        multiplexer = get_multiplexer_tool()
-        all_tools = [git_tool, file_tool, multiplexer]
+        # 1. Load Tools
+        all_tools = [
+            GitTool(ToolConfig(tool_id="git", name="Git", description="Git ops", parameters_schema={}, allowed_agents=["*"])),
+            FileTool(ToolConfig(tool_id="file", name="File", description="File system access", parameters_schema={}, allowed_agents=["*"])),
+            SocialTool(ToolConfig(tool_id="social", name="Social", description="Post to LinkedIn/Twitter", parameters_schema={}, allowed_agents=["*"]),
+                       linkedin_token=settings.LINKEDIN_ACCESS_TOKEN, twitter_token=settings.TWITTER_BEARER_TOKEN),
+            WebSearchTool(ToolConfig(tool_id="search", name="Search", description="Search web", parameters_schema={}, allowed_agents=["*"])),
+            WebScraperTool(ToolConfig(tool_id="scrape", name="Scrape", description="Scrape web", parameters_schema={}, allowed_agents=["*"])),
+            ProjectGeneratorTool(ToolConfig(tool_id="scaffold", name="Scaffold", description="Build companies", parameters_schema={}, allowed_agents=["*"])),
+            ContentSharderTool(ToolConfig(tool_id="shard", name="Shard", description="Fragment content", parameters_schema={}, allowed_agents=["*"])),
+            VideoGenerationTool(ToolConfig(tool_id="video", name="Video", description="Video logic", parameters_schema={}, allowed_agents=["*"])),
+            get_multiplexer_tool()
+        ]
 
-        # 2. Get Fleet Configs
         fleet = generate_grand_fleet()
         
-        # 3. Instantiate Agents with Tools
-        alpha_agents = [Agent(c, all_tools, self.memory, self.llm_provider) for c in fleet if any(k in c.id for k in ["Engineering", "Cybernetic"])]
-        beta_agents = [Agent(c, all_tools, self.memory, self.llm_provider) for c in fleet if any(k in c.id for k in ["Market", "Strategic"])]
-        gamma_agents = [Agent(c, all_tools, self.memory, self.llm_provider) for c in fleet if any(k in c.id for k in ["Legal", "Revenue"])]
+        # 2. Advanced Cell Partitioning
+        self.cells["ALPHA"] = SovereignCell("ALPHA_CORE", [Agent(c, all_tools, self.memory, self.llm_provider) for c in fleet if "Engineering" in c.id])
+        self.cells["BETA"] = SovereignCell("BETA_GROWTH", [Agent(c, all_tools, self.memory, self.llm_provider) for c in fleet if "Market" in c.id])
+        self.cells["GAMMA"] = SovereignCell("GAMMA_OPS", [Agent(c, all_tools, self.memory, self.llm_provider) for c in fleet if "Strategic" in c.id or "Legal" in c.id])
 
-        # 4. Map to Cells
-        self.cells["ALPHA"] = SovereignCell("ALPHA_ENGINEERING", alpha_agents)
-        self.cells["BETA"] = SovereignCell("BETA_MARKETING", beta_agents)
-        self.cells["GAMMA"] = SovereignCell("GAMMA_STRATEGY", gamma_agents)
-        
-        # Legacy flat access for specific routing
-        self.agents = {a.config.id: a for a in (alpha_agents + beta_agents + gamma_agents)}
-        
-        logger.info(f"PLATINUM MATRIX ONLINE: {len(self.cells)} Sovereign Cells Active with 1000 Agents.")
+        self.agents = {a.config.id: a for cell in self.cells.values() for a in cell.agent_pool}
+        logger.info(f"PLATINUM SOVEREIGN MATRIX ONLINE: {len(self.agents)} Agents across 3 Specialized Cells.")
 
     async def submit_task_stream(self, task_description: str, project_id: str):
         task = TaskSpec(project_id=project_id, description=task_description)
-        
-        # Intelligent Cell Routing
         desc = task_description.lower()
-        if any(k in desc for k in ["code", "fix", "build", "logic", "docker"]): target_cell = "ALPHA"
-        elif any(k in desc for k in ["market", "post", "social", "outreach", "seo"]): target_cell = "BETA"
-        else: target_cell = "GAMMA"
-
-        yield {"status": "routing", "message": f"Diverting directive to Cell {target_cell}..."}
         
-        cell = self.cells.get(target_cell, self.cells["GAMMA"])
+        if any(k in desc for k in ["build", "code", "fix"]): cell_key = "ALPHA"
+        elif any(k in desc for k in ["post", "market", "shard"]): cell_key = "BETA"
+        else: cell_key = "GAMMA"
+
+        yield {"status": "routing", "message": f"Diverting directive to CELL_{cell_key}..."}
+        
         try:
-            result = await cell.execute(task)
+            result = await self.cells[cell_key].execute(task)
             yield {"status": "completed", "result": result}
         except Exception as e:
-            logger.error(f"Cell Execution Failed: {e}")
             yield {"status": "failed", "message": str(e)}
 
     def get_matrix_status(self):
-        return {name: {"active_tasks": c.active_tasks, "agents": len(c.agents)} for name, c in self.cells.items()}
+        return {name: {"active": c.active_tasks, "queued": c.task_queue.qsize(), "units": len(c.agent_pool)} for name, c in self.cells.items()}

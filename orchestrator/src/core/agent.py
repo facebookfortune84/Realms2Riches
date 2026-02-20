@@ -66,7 +66,22 @@ class Agent:
             return {"status": "failed", "error": str(e), "agent_id": self.config.id}
 
     def _call_llm(self, prompt: str, context: str) -> Dict[str, Any]:
-        system_msg = f"{self.config.system_prompt}\n\nContext:\n{context}\n\nOutput ONLY a JSON object with a 'reasoning' string and a 'steps' list."
+        # Build Tool Definition Block
+        tools_desc = "\n".join([f"- {t.config.name} ({t.config.tool_id}): {t.config.description}" for t in self.tools.values()])
+        
+        system_msg = f"""{self.config.system_prompt}
+
+You have access to the following tools:
+{tools_desc}
+
+RULES:
+1. If the user asks to create a file or project, YOU MUST use the 'file' tool.
+2. If the user asks to post social media, YOU MUST use the 'social' tool.
+3. Output ONLY valid JSON with a 'reasoning' string and a 'steps' list of tool invocations.
+
+Context:
+{context}"""
+        
         user_msg = f"Task: {prompt}"
         
         messages = [

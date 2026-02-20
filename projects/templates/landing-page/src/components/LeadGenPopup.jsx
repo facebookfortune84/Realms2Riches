@@ -12,12 +12,20 @@ export default function LeadGenPopup() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (email) {
-      setSubmitted(true);
-      // In real app, POST to backend/CRM
-      setTimeout(() => setIsOpen(false), 3000);
+      try {
+        await fetch(`${import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev"}/api/leads`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        setSubmitted(true);
+        setTimeout(() => setIsOpen(false), 3000);
+      } catch (err) {
+        console.error("Lead submission failed", err);
+      }
     }
   };
 
