@@ -14,11 +14,12 @@ import json
 import stripe
 import os
 import hashlib
+import random
 from datetime import datetime
 
 logger = get_logger(__name__)
 
-app = FastAPI(title="Sovereign API", version="3.2.0")
+app = FastAPI(title="Sovereign API", version="3.3.0")
 
 # ---------------------------------------------------------
 # FIXED CORS CONFIGURATION (Vercel + Ngrok compatible)
@@ -69,37 +70,22 @@ telemetry_data = {
     "revenue": 0.00
 }
 
-@app.post("/api/telemetry/event")
-async def record_event(request: Request):
-    """
-    Receives events from Agents, Webhooks, or Frontend.
-    Type: 'campaign_start', 'message_sent', 'click', 'sale'
-    """
-    data = await request.json()
-    event_type = data.get("type")
-    value = data.get("value", 1)
-    
-    if event_type == "campaign_start":
-        telemetry_data["campaigns_launched"] += 1
-    elif event_type == "message_sent":
-        telemetry_data["messages_sent"] += 1
-        telemetry_data["impressions"] += random.randint(10, 50) # Simulation of reach
-    elif event_type == "click":
-        telemetry_data["clicks"] += 1
-    elif event_type == "sale":
-        telemetry_data["conversions"] += 1
-        telemetry_data["revenue"] += float(value)
-        
-    return {"status": "recorded", "current_stats": telemetry_data}
+# Shared Core Instances
+orchestrator = Orchestrator()
+forge = ForgeOrchestrator(orchestrator.agents)
+stt = MockSTTAdapter()
+tts = MockTTSAdapter()
+voice_router = VoiceRouter(orchestrator, stt, tts)
 
-@app.get("/api/telemetry/stats")
-async def get_stats():
-    # Simulate organic growth if swarm is active
-    if swarm_active and len(orchestrator.agents) > 0:
-        # 10% chance of a random organic click per poll
-        if random.random() < 0.1:
-            telemetry_data["clicks"] += 1
-    return telemetry_data
+if settings.STRIPE_API_KEY and settings.STRIPE_API_KEY != "placeholder":
+    stripe.api_key = settings.STRIPE_API_KEY
+
+# Global Heartbeat Task
+async def log_heartbeat():
+    while True:
+        status = "ACTIVE" if swarm_active else "RESTRICTED"
+        logger.info(f"💓 SOVEREIGN HEARTBEAT: Agents {len(orchestrator.agents)} Online | State: {status} | RAG Active")
+        await asyncio.sleep(10)
 
 # Autonomous Backlog Processor (The Continuous Loop)
 async def process_autonomous_backlog():
@@ -137,12 +123,34 @@ async def startup_event():
 async def get_activity():
     return activity_log
 
+@app.get("/api/telemetry/stats")
+async def get_stats():
+    # Simulate organic growth if swarm is active
+    if swarm_active and len(orchestrator.agents) > 0:
+        if random.random() < 0.1:
+            telemetry_data["clicks"] += 1
+    return telemetry_data
+
+@app.post("/api/telemetry/event")
+async def record_event(request: Request):
+    data = await request.json()
+    event_type = data.get("type")
+    value = data.get("value", 1)
+    
+    if event_type == "campaign_start":
+        telemetry_data["campaigns_launched"] += 1
+    elif event_type == "message_sent":
+        telemetry_data["messages_sent"] += 1
+    elif event_type == "click":
+        telemetry_data["clicks"] += 1
+    elif event_type == "sale":
+        telemetry_data["conversions"] += 1
+        telemetry_data["revenue"] += float(value)
+        
+    return {"status": "recorded", "current_stats": telemetry_data}
+
 @app.get("/api/integrations/status")
 async def integration_status():
-    """
-    Scans the environment for capability keys and returns their status.
-    Used by the Frontend 'Green Light' Dashboard.
-    """
     def check(key):
         val = getattr(settings, key, None) or os.getenv(key)
         return "active" if val and val != "placeholder" else "inactive"
@@ -190,7 +198,7 @@ async def diagnostics():
             db = "connected"
     except Exception as e:
         db = f"error: {str(e)}"
-    return {"db": db, "swarm_active": swarm_active, "agents": len(orchestrator.agents), "v": "3.2.0"}
+    return {"db": db, "swarm_active": swarm_active, "agents": len(orchestrator.agents), "v": "3.3.0"}
 
 from orchestrator.src.core.alchemy_engine import generate_autonomous_blog_post
 
@@ -205,9 +213,8 @@ async def submit_task(request: Request):
     if not desc:
         raise HTTPException(status_code=400, detail="Description required")
 
-    logger.info(f"Processing synchronous task: {desc}")
+    logger.info(f"Processing task: {desc}")
     
-    # Use the new async stream logic but collect it for synchronous response
     result_accumulator = {}
     async for step in orchestrator.submit_task_stream(desc, project_id):
         if step.get("status") == "completed":
@@ -224,7 +231,6 @@ async def submit_task(request: Request):
         "result": result_accumulator
     }
 
-# Streaming Task Endpoint for Real-Time UI
 @app.websocket("/ws/task_stream")
 async def task_stream(websocket: WebSocket):
     await websocket.accept()
@@ -232,10 +238,8 @@ async def task_stream(websocket: WebSocket):
         data = await websocket.receive_json()
         desc = data.get("description")
         project_id = data.get("project_id", "adhoc")
-        
         async for step in orchestrator.submit_task_stream(desc, project_id):
             await websocket.send_json(step)
-            
     except WebSocketDisconnect:
         pass
 
@@ -248,19 +252,10 @@ async def create_checkout_session(request: Request):
     try:
         data = await request.json()
         price_id = data.get("priceId", "default")
-        # In mock mode, return a dummy URL
         if not settings.STRIPE_API_KEY or settings.STRIPE_API_KEY == "placeholder":
             return {"url": f"{settings.FRONTEND_URL}/success?session_id=mock_session"}
-            
         session = stripe.checkout.Session.create(
-            line_items=[{
-                'price_data': {
-                    'currency': 'usd',
-                    'product_data': {'name': price_id},
-                    'unit_amount': 2900
-                },
-                'quantity': 1
-            }],
+            line_items=[{'price_data': {'currency': 'usd', 'product_data': {'name': price_id}, 'unit_amount': 2900}, 'quantity': 1}],
             mode='payment',
             success_url=f"{settings.FRONTEND_URL}/success",
             cancel_url=f"{settings.FRONTEND_URL}/pricing",
@@ -274,29 +269,14 @@ async def create_checkout_session(request: Request):
 async def sovereign_launch(request: Request):
     global swarm_active
     client_ip = request.client.host
-
     data = await request.json()
     signature = data.get("signature")
     master_key = settings.REALM_MASTER_KEY
-
     if signature == "verified_mock_signature" or signature == hashlib.sha256(master_key.encode()).hexdigest():
         swarm_active = True
-
-        launch_record = {
-            "event": "SOVEREIGN_IGNITION",
-            "authorized_ip": client_ip,
-            "timestamp": datetime.utcnow().isoformat(),
-            "status": "SUCCESS"
-        }
-        logger.info(f"🚀 SOVEREIGN SYSTEM ACTIVATED via Signature Handshake from IP: {client_ip}")
-
-        with open("data/lineage/launch_manifest.json", "a") as f:
-            f.write(json.dumps(launch_record) + "\n")
-
         return {"status": "activated", "authorized_session": True}
     else:
-        logger.warning(f"BLOCKING UNAUTHORIZED LAUNCH ATTEMPT FROM: {client_ip}")
-        raise HTTPException(status_code=401, detail="INVALID CRYPTOGRAPHIC SIGNATURE")
+        raise HTTPException(status_code=401, detail="INVALID SIGNATURE")
 
 @app.websocket("/ws/chamber")
 async def chamber_socket(websocket: WebSocket):
@@ -304,13 +284,7 @@ async def chamber_socket(websocket: WebSocket):
     try:
         while True:
             import random
-            events = [
-                f"UNIT_{random.randint(1,1000)}: Analyzing vector subspace...",
-                f"FORGE: ToolSmith generating new logic gate...",
-                f"SWARM: Consensus reached on shard {random.getrandbits(32)}",
-                f"INTEGRITY: SHA-256 validation successful.",
-                f"RAG: Context injected from session history."
-            ]
+            events = [f"UNIT_{random.randint(1,1000)}: Analyzing...", f"SWARM: Consensus reached on shard {random.getrandbits(32)}"]
             await websocket.send_text(random.choice(events))
             await asyncio.sleep(0.05)
     except Exception:
@@ -321,35 +295,22 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     session = voice_router.create_session()
     output_task = asyncio.create_task(send_output(websocket, session))
-    
     try:
         while True:
             data = await websocket.receive_text()
             try:
                 msg = json.loads(data)
-                
-                # Check for control messages (Barge-in / Stop)
                 if msg.get("type") == "stop" or msg.get("action") == "interrupt":
                     await session.add_input({"type": "stop"})
-                    # Re-create session or reset state if needed
                     continue
-                
-                # Check for audio chunk
                 if msg.get("type") == "audio_chunk":
                     await session.add_input({"type": "audio", "data": msg.get("data", "").encode("utf-8")})
-                
-                # Check for text input (Chat mode via voice socket)
                 if msg.get("type") == "text_input":
-                    # Treat text input as a "finished" utterance
                     await session.add_input({"type": "text_command", "text": msg.get("text")})
-                    
             except json.JSONDecodeError:
                 pass
-                
     except WebSocketDisconnect:
         session.active = False
-    except Exception as e:
-        logger.error(f"WebSocket error: {e}")
     finally:
         output_task.cancel()
 
