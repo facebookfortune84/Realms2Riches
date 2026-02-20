@@ -10,7 +10,7 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "`n  REALMS  2  RICHES" -ForegroundColor Green
 Write-Host "  SOVEREIGN INTELLIGENCE NETWORK" -ForegroundColor Green
-Write-Host "  v3.0.0-PLATINUM | SYSTEM: INITIALIZING`n" -ForegroundColor Gray
+Write-Host "  v3.7.2-PLATINUM | SYSTEM: INITIALIZING`n" -ForegroundColor Gray
 
 # --- 1. DOCKER VALIDATION ---
 Write-Host "[1/6] Verifying Docker Desktop..." -ForegroundColor Cyan
@@ -38,7 +38,7 @@ docker-compose -f infra/docker/docker-compose.prod.yml up -d --build
 
 # --- 3. PULSE CHECK ---
 Write-Host "[3/6] Detecting Neural Heartbeat..." -ForegroundColor Cyan
-$maxRetries = 20
+$maxRetries = 25
 $retry = 0
 $healthy = $false
 
@@ -48,10 +48,12 @@ while ($retry -lt $maxRetries) {
         if ($res.status -eq "ok") {
             $healthy = $true
             Write-Host "SUCCESS: Neural Link Established." -ForegroundColor Green
-            Write-Host "   Agents: $($res.agents) | RAG: $($res.rag_docs) Vectors" -ForegroundColor Gray
+            Write-Host "   Agents: $($res.agents) | RAG: $($res.rag) Vectors" -ForegroundColor Gray
+            Write-Host "   Version: $($res.version)" -ForegroundColor DarkGray
             break
         }
     } catch {
+        $msg = $_.Exception.Message
         Write-Host "   ...waiting for API ($($retry+1)/$maxRetries)..." -ForegroundColor DarkGray
         Start-Sleep -Seconds 3
         $retry++
@@ -59,7 +61,8 @@ while ($retry -lt $maxRetries) {
 }
 
 if (-not $healthy) {
-    Write-Host "ERROR: Neural Link Timeout. Check container logs." -ForegroundColor Red
+    Write-Host "ERROR: Neural Link Timeout. Dumping Logs:" -ForegroundColor Red
+    docker logs docker-orchestrator-api-1 --tail 20
     exit 1
 }
 
@@ -69,7 +72,6 @@ docker exec docker-orchestrator-api-1 python -m orchestrator.src.core.catalog.in
 
 # --- 5. LEARNING STREAM ---
 Write-Host "[5/6] Activating Autonomous Learning Stream..." -ForegroundColor Cyan
-# The Learning Loop is built into the startup of api.py
 Write-Host "SUCCESS: Learning Stream Online." -ForegroundColor Green
 
 # --- 6. FINAL READY ---

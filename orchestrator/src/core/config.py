@@ -11,38 +11,49 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-    # Core
+    # --- CORE ---
     DATABASE_URL: str = "sqlite:///./orchestrator.db"
     FRONTEND_URL: str = "http://localhost:5173"
     REALM_MASTER_KEY: str = "placeholder_key"
+    ENV_MODE: str = "dev"
 
-    # Database Fields (for property construction)
+    # --- DATABASE ---
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"
     POSTGRES_DB: str = "app_db"
     POSTGRES_HOST: str = "postgres"
     POSTGRES_PORT: int = 5432
 
-    # Intelligence
-    GROQ_API_KEY: Optional[str] = None
+    # --- INTELLIGENCE (Groq / OpenAI) ---
+    GROQ_API_KEY: Optional[str] = "placeholder"
+    GROQ_MODEL: str = "llama-3.1-8b-instant"
+    GROQ_BASE_URL: str = "https://api.groq.com/openai/v1"
+    
     OPENAI_API_KEY: Optional[str] = None
     
-    # Communication
+    # --- COMMUNICATION ---
     TWILIO_ACCOUNT_SID: Optional[str] = None
     TWILIO_AUTH_TOKEN: Optional[str] = None
     SENDGRID_API_KEY: Optional[str] = None
+    WHATSAPP_TOKEN: Optional[str] = None
     
-    # Social
+    # --- SOCIAL ---
     LINKEDIN_ACCESS_TOKEN: Optional[str] = None
     FACEBOOK_ACCESS_TOKEN: Optional[str] = None
+    TWITTER_BEARER_TOKEN: Optional[str] = None
     
-    # Synthesis
+    # --- SYNTHESIS & VOICE ---
+    VOICE_ENABLED: bool = True
+    STT_PROVIDER: str = "mock"
+    TTS_PROVIDER: str = "mock"
     ELEVENLABS_API_KEY: Optional[str] = None
     STABILITY_API_KEY: Optional[str] = None
     
-    # Monetization
+    # --- MONETIZATION ---
     STRIPE_API_KEY: Optional[str] = None
+    STRIPE_WEBHOOK_SECRET: Optional[str] = None
 
+    # --- PROPERTIES ---
     @property
     def db_config(self) -> DatabaseConfig:
         return DatabaseConfig(
@@ -56,16 +67,15 @@ class Settings(BaseSettings):
 
     @property
     def marketing_config(self) -> MarketingConfig:
-        # Provide defaults for missing marketing fields
         return MarketingConfig(
-            BRAND_NAME="Realms 2 Riches",
-            PRODUCT_NAME="Sovereign Swarm",
-            MARKETING_SITE_URL=self.FRONTEND_URL,
-            CONTACT_EMAIL="hello@realms2riches.ai",
-            SOCIAL_TWITTER_HANDLE="realms2riches",
-            SOCIAL_LINKEDIN_URL="https://linkedin.com/company/realms2riches",
-            SOCIAL_YOUTUBE_URL="https://youtube.com/@realms2riches",
-            SOCIAL_GITHUB_URL="https://github.com/realms2riches"
+            brand_name="Realms 2 Riches",
+            product_name="Sovereign Swarm",
+            website_url=self.FRONTEND_URL,
+            contact_email="hello@realms2riches.ai",
+            twitter_handle="realms2riches",
+            linkedin_url="https://linkedin.com/company/realms2riches",
+            youtube_url="https://youtube.com/@realms2riches",
+            github_url="https://github.com/realms2riches"
         )
 
 settings = Settings()

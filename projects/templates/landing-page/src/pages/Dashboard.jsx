@@ -16,7 +16,7 @@ export default function Dashboard() {
     const headers = { 'X-License-Key': import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || '' };
     try {
       const [mRes, aRes, iRes] = await Promise.all([
-        fetch(`${BACKEND_URL}/health`, { headers }),
+        fetch(`${BACKEND_URL}/health`),
         fetch(`${BACKEND_URL}/api/activity`, { headers }),
         fetch(`${BACKEND_URL}/api/integrations/status`, { headers })
       ]);
@@ -39,12 +39,19 @@ export default function Dashboard() {
     </div>
   );
 
+  const stats = [
+    { label: "Active Agents", value: metrics?.agents || 1000, icon: Users, color: "text-primary" },
+    { label: "Swarm State", value: metrics?.swarm || "ACTIVE", icon: Shield, color: "text-green-400" },
+    { label: "Memory Docs", value: metrics?.rag || 0, icon: Database, color: "text-blue-400" },
+    { label: "Matrix Link", value: "SECURE", icon: Activity, color: "text-primary" }
+  ];
+
   return (
     <div className="py-10 max-w-7xl mx-auto px-4 font-mono text-white">
       {/* HEADER */}
       <div className="flex justify-between items-end mb-12">
         <div>
-            <div className="text-primary text-[10px] mb-2 tracking-[0.5em] uppercase">Sovereign OS v3.5.0-PLATINUM</div>
+            <div className="text-primary text-[10px] mb-2 tracking-[0.5em] uppercase">Sovereign OS v3.7.2-PLATINUM</div>
             <h2 className="text-6xl font-black tracking-tighter italic">FOUNDER <span className="text-primary">COCKPIT</span></h2>
         </div>
         <div className="bg-white/5 px-6 py-3 rounded-2xl border border-white/10 flex items-center gap-3">
@@ -59,6 +66,20 @@ export default function Dashboard() {
             <div key={k} className="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center gap-3">
                 <div className={`w-2 h-2 rounded-full ${v === 'active' ? 'bg-primary shadow-[0_0_10px_#00ff88]' : 'bg-red-500/50'}`} />
                 <span className="text-[10px] font-bold uppercase text-gray-400">{k}</span>
+            </div>
+        ))}
+      </div>
+
+      {/* OVERALL STATS */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        {stats.map((s, i) => (
+            <div key={i} className="bg-black/40 p-6 rounded-2xl border border-white/5 flex flex-col">
+                <div className="flex justify-between items-center mb-2 text-gray-600">
+                    <s.icon size={16} />
+                    <span className="text-[10px]">00{i+1}</span>
+                </div>
+                <div className="text-gray-500 text-[10px] uppercase font-bold">{s.label}</div>
+                <div className={`text-2xl font-black ${s.color}`}>{s.value}</div>
             </div>
         ))}
       </div>
@@ -96,14 +117,14 @@ export default function Dashboard() {
                 SOVEREIGN ACTIVITY STREAM
             </h3>
             <div className="space-y-4 h-96 overflow-y-auto custom-scrollbar pr-4">
-                {activity.map((a, i) => (
+                {activity.length > 0 ? activity.map((a, i) => (
                     <div key={i} className="flex gap-4 text-[10px] border-b border-white/5 pb-4">
                         <span className="text-gray-600 shrink-0">[{new Date(a.t).toLocaleTimeString()}]</span>
                         <span className="text-primary font-bold w-32 truncate">[{a.a}]</span>
                         <span className="text-white uppercase">{a.op}:</span>
                         <span className="text-gray-400">{a.r}</span>
                     </div>
-                ))}
+                )) : <div className="text-gray-600 text-[10px]">Awaiting telemetry...</div>}
             </div>
         </div>
 
