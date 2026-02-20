@@ -8,8 +8,9 @@ export default function Chamber() {
   const scrollRef = useRef(null);
 
   useEffect(() => {
+    const token = import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || '';
     const wsUrl = BACKEND_URL.replace('https', 'wss').replace('http', 'ws');
-    const socket = new WebSocket(`${wsUrl}/ws/chamber`);
+    const socket = new WebSocket(`${wsUrl}/ws/chamber?token=${token}`);
 
     socket.onmessage = (event) => {
       setLogs(prev => [...prev.slice(-100), {

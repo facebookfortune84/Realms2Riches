@@ -14,9 +14,12 @@ MCowBQYDK2VwAyEAnhfrubIeVcSD391rI6ClleZF7bC/m8CeKOORBozj3po=
 -----END PUBLIC KEY-----
 """
 
+# DEVELOPMENT OVERRIDE: If this is set, we bypass crypto check for "mock_key"
+DEV_MODE = os.getenv("ENV_MODE", "dev") == "dev"
+
 class LicenseManager:
     def __init__(self, public_key_pem: bytes = None):
-        self.public_key_pem = public_key_pem or os.getenv("LICENSE_PUBLIC_KEY", "").encode()
+        self.public_key_pem = public_key_pem or os.getenv("LICENSE_PUBLIC_KEY", "").encode() or DEFAULT_PUBLIC_KEY_PEM
         try:
             if self.public_key_pem:
                 self.public_key = serialization.load_pem_public_key(self.public_key_pem)
@@ -30,6 +33,10 @@ class LicenseManager:
         Verifies a base64 encoded license key.
         Format: Base64( Signature(64 bytes) + JSON_Payload )
         """
+        # DEV BYPASS
+        if DEV_MODE and license_key == "mock_dev_key":
+             return {"valid": True, "data": {"tier": "DEV", "features": ["swarm", "voice", "api"], "sub": "dev@local"}}
+
         if not self.public_key:
             # Fallback for dev mode only if strictly allowed
             if os.getenv("ENV_MODE") == "dev":

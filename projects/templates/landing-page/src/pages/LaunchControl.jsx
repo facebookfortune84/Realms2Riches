@@ -31,7 +31,10 @@ export default function LaunchControl() {
     try {
         const res = await fetch(`${BACKEND_URL}/api/sovereign/launch`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                'X-License-Key': import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || ''
+            },
             body: JSON.stringify({ signature: "verified_mock_signature" })
         });
         

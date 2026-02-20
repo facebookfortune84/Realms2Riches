@@ -10,7 +10,8 @@ export default function Pricing() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/products`)
+    const headers = { 'X-License-Key': import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || '' };
+    fetch(`${BACKEND_URL}/products`, { headers })
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch pricing');
         return res.json();

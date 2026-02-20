@@ -7,7 +7,8 @@ export default function Blog() {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/api/blog/posts`)
+    const headers = { 'X-License-Key': import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || '' };
+    fetch(`${BACKEND_URL}/api/blog/posts`, { headers })
       .then(res => res.json())
       .then(data => setPosts(data))
       .catch(err => console.error("Failed to load blog posts", err));
