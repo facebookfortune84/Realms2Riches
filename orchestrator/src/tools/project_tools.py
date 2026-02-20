@@ -7,6 +7,7 @@ class ProjectGeneratorTool(BaseTool):
     def __init__(self, config: ToolConfig, base_dir: str = "projects/generated"):
         super().__init__(config)
         self.base_dir = base_dir
+        os.makedirs(self.base_dir, exist_ok=True)
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         name = input_data.get("name", "new_company").replace(" ", "_").lower()

@@ -12,8 +12,7 @@ class ContentSharderTool(BaseTool):
         if len(source_text) < 100:
             return {"error": "Source text too short for sharding."}
 
-        # In a real scenario, this would use an LLM to intelligently shard.
-        # Here we implement the logic to return a structured sharding plan.
+        # Structured sharding plan
         shards = {
             "linkedin": [
                 f"🚀 Analysis on {source_text[:50]}... #AI #Sovereignty",
@@ -24,11 +23,7 @@ class ContentSharderTool(BaseTool):
                 f"2/5: Deep dive into the Sovereign Matrix. #R2R"
             ],
             "blog_summary": f"Executive Summary: {source_text[:200]}...",
-            "email_copy": f"Subject: The Intelligence Briefing
-
-Hello Founder,
-
-We've analyzed {source_text[:100]} and found..."
+            "email_copy": f"Subject: The Intelligence Briefing\n\nHello Founder,\n\nWe've analyzed {source_text[:100]} and found interesting results."
         }
 
         return {
