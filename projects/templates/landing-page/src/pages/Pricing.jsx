@@ -65,11 +65,11 @@ export default function Pricing() {
               <h3 className="text-2xl font-bold mb-2 uppercase text-white">{p.name}</h3>
               <div className="flex items-baseline gap-2 mb-8">
                   <span className="text-5xl font-black text-primary">${price?.price}</span>
-                  <span className="text-gray-600 text-xs uppercase">/mo</span>
+                  <span className="text-gray-600 text-xs uppercase">/{price?.interval === 'one_time' ? 'once' : price?.interval}</span>
               </div>
               <p className="text-gray-400 text-sm mb-10">{p.description}</p>
               <button 
-                onClick={() => handleCheckout(price?.product_id)}
+                onClick={() => handleCheckout(price?.stripe_price_id || price?.product_id)}
                 className="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-primary transition-colors"
               >
                 Acquire

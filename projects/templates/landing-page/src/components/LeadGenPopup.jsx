@@ -19,7 +19,7 @@ export default function LeadGenPopup() {
         await fetch(`${import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev"}/api/leads`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
+          body: JSON.stringify({ email, source: 'popup' })
         });
         setSubmitted(true);
         setTimeout(() => setIsOpen(false), 3000);
@@ -48,33 +48,34 @@ export default function LeadGenPopup() {
           {!submitted ? (
             <>
               <div className="flex items-center gap-3 mb-4">
-                <div className="bg-primary/20 p-2 rounded-lg text-primary">
+                <div className="bg-primary/20 p-2 rounded-lg text-primary shadow-[0_0_15px_rgba(0,255,136,0.4)]">
                   <Sparkles size={20} />
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-sm uppercase tracking-wide">Early Access</h3>
-                  <p className="text-[10px] text-gray-400">Join the sovereign elite.</p>
+                  <h3 className="text-white font-black text-sm uppercase tracking-tighter italic">Platinum Access</h3>
+                  <p className="text-[10px] text-primary font-bold tracking-widest uppercase">Limited Transmission</p>
                 </div>
               </div>
+              <p className="text-[11px] text-gray-400 mb-4 leading-relaxed">Secure the <span className="text-white font-bold underline">Sovereign Strategy Guide</span> and join the autonomous elite.</p>
               <form onSubmit={handleSubmit} className="space-y-3">
                 <input 
                   type="email" 
                   placeholder="Enter your email..."
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-xs focus:outline-none focus:border-primary transition-colors placeholder:text-gray-600"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:outline-none focus:border-primary transition-all placeholder:text-gray-600 focus:ring-1 focus:ring-primary/20"
                   required
                 />
-                <button type="submit" className="w-full bg-primary text-black font-bold text-xs py-3 rounded-lg hover:bg-primary/90 transition-colors uppercase tracking-widest">
-                  Secure Spot
+                <button type="submit" className="w-full bg-primary text-black font-black text-[10px] py-4 rounded-xl hover:bg-white transition-all uppercase tracking-[0.2em] shadow-[0_5px_20px_rgba(0,255,136,0.2)]">
+                  Initialize Transmission
                 </button>
               </form>
             </>
           ) : (
             <div className="text-center py-6">
-              <div className="text-primary text-4xl mb-2">✓</div>
-              <h3 className="text-white font-bold text-sm uppercase">Access Granted</h3>
-              <p className="text-[10px] text-gray-500">Check your inbox for directives.</p>
+              <motion.div initial={{ scale: 0.5 }} animate={{ scale: 1 }} className="text-primary text-5xl mb-4">⚡</motion.div>
+              <h3 className="text-white font-black text-sm uppercase tracking-tighter italic">Transmission Sent</h3>
+              <p className="text-[10px] text-gray-500 mt-2 uppercase tracking-widest">Guide arriving in sub-60s.</p>
             </div>
           )}
         </div>

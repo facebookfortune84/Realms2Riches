@@ -16,8 +16,8 @@ CAPABILITIES = {
 
 class ActionMultiplexer(BaseTool):
     """Unified access point for 150+ agent capabilities."""
-    def execute(self, invocation: ToolInvocation) -> Dict[str, Any]:
-        action = invocation.input_data.get("action")
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        action = input_data.get("action")
         category = "unknown"
         
         # Determine category for 150+ actions

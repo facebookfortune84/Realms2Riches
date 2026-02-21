@@ -25,7 +25,8 @@ class CatalogAPI:
                             product_id=pr.product_id,
                             price=pr.price,
                             currency=pr.currency,
-                            interval=pr.interval
+                            interval=pr.interval,
+                            stripe_price_id=pr.stripe_price_id
                         ) for pr in p.prices
                     ]
                 ) for p in products
@@ -49,7 +50,8 @@ class CatalogAPI:
                         product_id=pr.product_id,
                         price=pr.price,
                         currency=pr.currency,
-                        interval=pr.interval
+                        interval=pr.interval,
+                        stripe_price_id=pr.stripe_price_id
                     ) for pr in p.prices
                 ]
             )

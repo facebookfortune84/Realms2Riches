@@ -18,8 +18,10 @@ def seed_catalog(products_csv_path="data/catalog/products.csv", prices_csv_path=
         prices_df = pd.read_csv(prices_csv_path)
 
         # 1. Seed Products (Upsert Logic)
+        seeded_product_ids = set()
         for _, row in products_df.iterrows():
             product_id = row['id']
+            seeded_product_ids.add(product_id)
             existing_product = session.query(ProductModel).filter_by(id=product_id).first()
             
             if existing_product:
@@ -34,23 +36,24 @@ def seed_catalog(products_csv_path="data/catalog/products.csv", prices_csv_path=
                     category=row['category']
                 )
                 session.add(new_product)
+        
+        session.flush()
 
-        # 2. Seed Prices (Delete existing & Re-insert for simplicity/idempotency)
-        # Note: In production, consider upserting to preserve IDs if needed.
-        # But prices often change or get replaced.
+        # 2. Seed Prices
         session.query(PriceModel).delete()
         
         for _, row in prices_df.iterrows():
-            # Check if product exists (FK constraint)
-            if not session.query(ProductModel).filter_by(id=row['product_id']).first():
-                logger.warning(f"Skipping price for unknown product: {row['product_id']}")
+            pid = row['product_id']
+            if pid not in seeded_product_ids:
+                logger.warning(f"Skipping price for unknown product: {pid}")
                 continue
 
             new_price = PriceModel(
                 product_id=row['product_id'],
                 price=float(row['price']),
                 currency=row['currency'],
-                interval=row['interval']
+                interval=row['interval'],
+                stripe_price_id=row.get('stripe_price_id')
             )
             session.add(new_price)
             

@@ -24,6 +24,7 @@ class PriceModel(Base):
     price = Column(Float, nullable=False)
     currency = Column(String, nullable=False)
     interval = Column(String) # 'month', 'year', 'one_time'
+    stripe_price_id = Column(String)
     
     product = relationship("ProductModel", back_populates="prices")
 
@@ -34,6 +35,7 @@ class PriceSchema(BaseModel):
     price: float
     currency: str
     interval: str
+    stripe_price_id: Optional[str] = None
 
 class ProductSchema(BaseModel):
     id: str

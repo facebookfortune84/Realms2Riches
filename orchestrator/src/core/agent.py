@@ -67,17 +67,28 @@ class Agent:
 
     def _call_llm(self, prompt: str, context: str) -> Dict[str, Any]:
         # Build Tool Definition Block
-        tools_desc = "\n".join([f"- {t.config.name} ({t.config.tool_id}): {t.config.description}" for t in self.tools.values()])
+        tools_desc = "\n".join([f"- {t.config.tool_id}: {t.config.description}" for t in self.tools.values()])
         
         system_msg = f"""{self.config.system_prompt}
 
-You have access to the following tools:
+You have access to the following tool IDs:
 {tools_desc}
 
 RULES:
 1. If the user asks to create a file or project, YOU MUST use the 'file' tool.
 2. If the user asks to post social media, YOU MUST use the 'social' tool.
-3. Output ONLY valid JSON with a 'reasoning' string and a 'steps' list of tool invocations.
+3. If the user asks to generate images, YOU MUST use the 'image_gen' tool.
+4. If the user asks to generate videos, YOU MUST use the 'video' tool.
+5. Output ONLY valid JSON with the following schema:
+{{
+  "reasoning": "explanation of plan",
+  "steps": [
+    {{
+      "tool_id": "tool_id_from_list_above",
+      "inputs": {{ "param_name": "value" }}
+    }}
+  ]
+}}
 
 Context:
 {context}"""
@@ -92,13 +103,22 @@ Context:
         response_text = self.llm_provider.generate_response(messages)
         
         try:
-            # Basic cleanup in case of markdown blocks
-            if "```json" in response_text:
-                response_text = response_text.split("```json")[1].split("```")[0].strip()
-            elif "```" in response_text:
-                response_text = response_text.split("```")[1].split("```")[0].strip()
-                
-            return json.loads(response_text)
+            # Robust JSON extraction
+            # Find the first { and last }
+            start_idx = response_text.find('{')
+            end_idx = response_text.rfind('}')
+            
+            if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+                json_str = response_text[start_idx : end_idx + 1]
+                return json.loads(json_str)
+            else:
+                # Basic cleanup in case of markdown blocks if not caught above
+                if "```json" in response_text:
+                    response_text = response_text.split("```json")[1].split("```")[0].strip()
+                elif "```" in response_text:
+                    response_text = response_text.split("```")[1].split("```")[0].strip()
+                    
+                return json.loads(response_text)
         except Exception as e:
             logger.error(f"Failed to parse LLM response as JSON: {e}. Raw: {response_text}")
-            return {"steps": []}
+            return {"steps": [], "reasoning": "Failed to parse plan."}

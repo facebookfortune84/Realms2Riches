@@ -4,10 +4,10 @@ from orchestrator.src.tools.base import BaseTool
 from orchestrator.src.validation.schemas import ToolConfig, ToolInvocation
 
 class FileTool(BaseTool):
-    def execute(self, invocation: ToolInvocation) -> Dict[str, Any]:
-        operation = invocation.input_data.get("operation")
-        path = invocation.input_data.get("path")
-        content = invocation.input_data.get("content")
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        operation = input_data.get("operation")
+        path = input_data.get("path")
+        content = input_data.get("content")
         
         # Security: ensure path is within allowed directories
         # real implementation would enforce root jail

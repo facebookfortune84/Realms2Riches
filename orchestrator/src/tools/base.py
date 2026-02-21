@@ -26,7 +26,8 @@ class BaseTool(ABC):
             return invocation
 
         try:
-            result = self.execute(invocation)
+            # Pass input_data (dict) to execute instead of invocation object
+            result = self.execute(invocation.input_data)
             invocation.output_data = result
             invocation.status = "success"
         except Exception as e:

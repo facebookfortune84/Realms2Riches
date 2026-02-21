@@ -12,6 +12,8 @@ from orchestrator.src.tools.social_tools import SocialTool
 from orchestrator.src.tools.web_tools import WebSearchTool, WebScraperTool
 from orchestrator.src.tools.project_tools import ProjectGeneratorTool
 from orchestrator.src.tools.content_sharder import ContentSharderTool
+from orchestrator.src.tools.media_tools import ImageGenerationTool, VideoGenerationTool
+from orchestrator.src.tools.revenue_tools import PaymentTool
 from orchestrator.src.tools.universal_tools import get_multiplexer_tool
 from orchestrator.src.memory.vector_store import VectorStore
 from orchestrator.src.memory.sql_store import SQLStore
@@ -24,17 +26,6 @@ from orchestrator.src.core.voice.mock_adapters import MockSTTAdapter, MockTTSAda
 from orchestrator.src.core.voice.real_adapters import OpenAIWhisperAdapter, ElevenLabsAdapter
 
 logger = get_logger(__name__)
-
-class VideoGenerationTool(FileTool):
-    """Stub for real Video Generation (e.g. HeyGen/Sora). Provides storage instructions."""
-    def execute(self, invocation):
-        instructions = """
-        To generate real video:
-        1. Store the script in 'data/marketing/scripts/'.
-        2. Store generated assets in 'data/marketing/videos/'.
-        3. Use the HeyGen API (if key present) to render.
-        """
-        return {"status": "instruction_received", "guidelines": instructions}
 
 class SovereignCell:
     def __init__(self, cell_id: str, agents: List[Agent]):
@@ -77,12 +68,14 @@ class Orchestrator:
             GitTool(ToolConfig(tool_id="git", name="Git", description="Git ops", parameters_schema={}, allowed_agents=["*"])),
             FileTool(ToolConfig(tool_id="file", name="File", description="File system access", parameters_schema={}, allowed_agents=["*"])),
             SocialTool(ToolConfig(tool_id="social", name="Social", description="Post to LinkedIn/Twitter", parameters_schema={}, allowed_agents=["*"]),
-                       linkedin_token=settings.LINKEDIN_ACCESS_TOKEN, twitter_token=settings.TWITTER_BEARER_TOKEN),
+                       linkedin_token=settings.LINKEDIN_ACCESS_TOKEN, twitter_token=settings.TWITTER_BEARER_TOKEN, facebook_token=settings.FACEBOOK_ACCESS_TOKEN),
             WebSearchTool(ToolConfig(tool_id="search", name="Search", description="Search web", parameters_schema={}, allowed_agents=["*"])),
             WebScraperTool(ToolConfig(tool_id="scrape", name="Scrape", description="Scrape web", parameters_schema={"url": "string"}, allowed_agents=["*"])),
             ProjectGeneratorTool(ToolConfig(tool_id="scaffold", name="Scaffold", description="Build companies", parameters_schema={"name": "string", "industry": "string"}, allowed_agents=["*"])),
             ContentSharderTool(ToolConfig(tool_id="shard", name="Shard", description="Fragment content", parameters_schema={"text": "string"}, allowed_agents=["*"])),
+            ImageGenerationTool(ToolConfig(tool_id="image_gen", name="ImageGen", description="Generate images", parameters_schema={"prompt": "string"}, allowed_agents=["*"]), stability_key=settings.STABILITY_API_KEY),
             VideoGenerationTool(ToolConfig(tool_id="video", name="Video", description="Video logic", parameters_schema={}, allowed_agents=["*"])),
+            PaymentTool(ToolConfig(tool_id="payments", name="Payments", description="Manage fiscal transmissions", parameters_schema={}, allowed_agents=["*"]), stripe_key=settings.STRIPE_API_KEY),
             get_multiplexer_tool()
         ]
 
