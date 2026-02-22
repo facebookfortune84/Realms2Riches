@@ -1,22 +1,22 @@
-# Marketing Plan for {{ BRAND_NAME }}
+# Marketing Plan for Realms 2 Riches
 
 ## Objectives
-- Launch {{ PRODUCT_NAME }} to target audience.
-- Drive traffic to {{ WEBSITE_URL }}.
-- Build community on {{ SOCIAL_TWITTER }} and {{ SOCIAL_LINKEDIN }}.
+- Launch Sovereign Swarm to target audience.
+- Drive traffic to https://realms2riches.ai.
+- Build community on Twitter and LinkedIn.
 
 ## Strategy
-1. **Awareness**: Share progress updates on {{ SOCIAL_TWITTER }}.
-2. **Consideration**: Publish deep-dives on {{ SOCIAL_YOUTUBE }}.
-3. **Conversion**: Lead magnets on {{ WEBSITE_URL }}.
+1. **Awareness**: Share progress updates on Twitter.
+2. **Consideration**: Publish deep-dives on YouTube.
+3. **Conversion**: Lead magnets on https://realms2riches.ai.
 
 ## Channels
-- **Twitter/X**: @{{ SOCIAL_TWITTER_HANDLE }}
-- **LinkedIn**: {{ SOCIAL_LINKEDIN_URL }}
-- **YouTube**: {{ SOCIAL_YOUTUBE_URL }}
-- **GitHub**: {{ SOCIAL_GITHUB_URL }}
-- **Email**: {{ CONTACT_EMAIL }}
+- **Twitter/X**: @realms2riches
+- **LinkedIn**: https://linkedin.com/company/realms2riches
+- **YouTube**: https://youtube.com/@realms2riches
+- **GitHub**: https://github.com/realms2riches
+- **Email**: hello@realms2riches.ai
 
 ## Action Items
-- Setup landing page at {{ WEBSITE_URL }}.
-- Configure tracking for {{ BRAND_NAME }}.
+- Setup landing page at https://realms2riches.ai.
+- Configure tracking for Realms 2 Riches.

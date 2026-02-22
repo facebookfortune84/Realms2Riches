@@ -4,13 +4,26 @@
     "name": "SaaS Starter Kit",
     "price": 49,
     "description": "Next.js + Tailwind + Stripe boilerplate.",
-    "category": "Template"
+    "category": "Template",
+    "stripe_price_id": "price_1Pxyz...", 
+    "checkout_url": "https://buy.stripe.com/test_1"
   },
   {
     "id": "prompt_pack_marketing",
     "name": "Marketing Agent Prompts",
     "price": 19,
     "description": "50+ optimized prompts for growth agents.",
-    "category": "Prompts"
+    "category": "Prompts",
+    "stripe_price_id": "price_1Pabc...",
+    "checkout_url": "https://buy.stripe.com/test_2"
+  },
+  {
+    "id": "sovereign_platinum",
+    "name": "Platinum License",
+    "price": 2999,
+    "description": "Full Sovereign Network Access + 1000 Agent Fleet",
+    "category": "Membership",
+    "stripe_price_id": "price_1Pqrs...",
+    "checkout_url": "https://buy.stripe.com/test_platinum_2999"
   }
 ]

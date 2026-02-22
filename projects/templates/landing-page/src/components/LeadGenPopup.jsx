@@ -52,8 +52,8 @@ export default function LeadGenPopup() {
                   <Sparkles size={20} />
                 </div>
                 <div>
-                  <h3 className="text-white font-black text-sm uppercase tracking-tighter italic">Platinum Access</h3>
-                  <p className="text-[10px] text-primary font-bold tracking-widest uppercase">Limited Transmission</p>
+                  <h3 className="text-white font-black text-sm uppercase tracking-tighter italic">Sovereign Strategy</h3>
+                  <p className="text-[10px] text-primary font-bold tracking-widest uppercase">Guide Access</p>
                 </div>
               </div>
               <p className="text-[11px] text-gray-400 mb-4 leading-relaxed">Secure the <span className="text-white font-bold underline">Sovereign Strategy Guide</span> and join the autonomous elite.</p>
@@ -67,15 +67,15 @@ export default function LeadGenPopup() {
                   required
                 />
                 <button type="submit" className="w-full bg-primary text-black font-black text-[10px] py-4 rounded-xl hover:bg-white transition-all uppercase tracking-[0.2em] shadow-[0_5px_20px_rgba(0,255,136,0.2)]">
-                  Initialize Transmission
+                  Acquire Guide
                 </button>
               </form>
             </>
           ) : (
             <div className="text-center py-6">
               <motion.div initial={{ scale: 0.5 }} animate={{ scale: 1 }} className="text-primary text-5xl mb-4">⚡</motion.div>
-              <h3 className="text-white font-black text-sm uppercase tracking-tighter italic">Transmission Sent</h3>
-              <p className="text-[10px] text-gray-500 mt-2 uppercase tracking-widest">Guide arriving in sub-60s.</p>
+              <h3 className="text-white font-black text-sm uppercase tracking-tighter italic">Guide Dispatched</h3>
+              <p className="text-[10px] text-gray-500 mt-2 uppercase tracking-widest">Check your inbox.</p>
             </div>
           )}
         </div>

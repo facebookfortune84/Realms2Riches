@@ -20,7 +20,7 @@ def seed_catalog(products_csv_path="data/catalog/products.csv", prices_csv_path=
         # 1. Seed Products (Upsert Logic)
         seeded_product_ids = set()
         for _, row in products_df.iterrows():
-            product_id = row['id']
+            product_id = str(row['id']).strip()
             seeded_product_ids.add(product_id)
             existing_product = session.query(ProductModel).filter_by(id=product_id).first()
             
@@ -43,9 +43,9 @@ def seed_catalog(products_csv_path="data/catalog/products.csv", prices_csv_path=
         session.query(PriceModel).delete()
         
         for _, row in prices_df.iterrows():
-            pid = row['product_id']
+            pid = str(row['product_id']).strip()
             if pid not in seeded_product_ids:
-                logger.warning(f"Skipping price for unknown product: {pid}")
+                logger.warning(f"Skipping price for unknown product: '{pid}' (Seeded: {seeded_product_ids})")
                 continue
 
             new_price = PriceModel(

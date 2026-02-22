@@ -126,6 +126,14 @@ async def autonomous_loop():
                         if img_url:
                             log_activity("VISUAL_INTELLIGENCE_1", "ASSET_GEN", f"Created Image: {img_url}")
 
+                        # 2.5 SEO Optimization
+                        seo_task = f"Generate optimized meta tags for a blog post about {topic}."
+                        async for step in orchestrator.submit_task_stream(seo_task, "market_domination"):
+                             if step.get("status") == "completed":
+                                 seo_data = step.get("result", {}).get("output_data", {})
+                                 if seo_data:
+                                     log_activity("GLOBAL_MARKET_FORCE_1", "SEO_BOOST", f"Meta Tags Optimized: {seo_data.get('title_tag', 'Standard')}")
+
                         # 3. Publish Blog Post (with image if available)
                         slug = generate_autonomous_blog_post(final_result, image_url=img_url) 
                         log_activity("TITAN_ORCHESTRATOR", "CONTENT_GEN", f"Published Blog: {slug}")
@@ -168,9 +176,11 @@ async def autonomous_loop():
 
             except Exception as e:
                 logger.error(f"Autonomous Loop Error: {e}")
-            await asyncio.sleep(20)
+            
+            # OVERCLOCK: Reduced sleep time for maximum velocity
+            await asyncio.sleep(5) 
         else:
-            await asyncio.sleep(10)
+            await asyncio.sleep(5)
 
 def seed_content():
     """Initializes the data directories with content if empty."""
@@ -190,8 +200,12 @@ The Matrix is now online. Deploy specialized agents to build your empire.
     # Ensure generated projects dir exists
     os.makedirs("projects/generated", exist_ok=True)
 
+from orchestrator.src.core.scheduler import social_scheduler
+
 @app.on_event("startup")
-async def startup():
+async def startup_event():
+    logger.info("Orchestrator starting up...")
+    social_scheduler.start()
     seed_content()
     asyncio.create_task(log_heartbeat())
     asyncio.create_task(autonomous_loop())

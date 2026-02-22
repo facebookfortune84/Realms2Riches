@@ -120,6 +120,14 @@ class GroqProvider(BaseLLMProvider):
                 ]
             })
 
+        if "seo" in prompt_lower or "meta" in prompt_lower or "optimize" in prompt_lower:
+             return json.dumps({
+                "reasoning": "Analyzing search intent and keyword density. Generating high-CTR meta tags.",
+                "steps": [
+                    {"tool_id": "seo", "inputs": {"action": "optimize_meta", "content": user_prompt, "keywords": ["Sovereign", "AI", "Wealth"]}}
+                ]
+            })
+
         return json.dumps({
             "reasoning": "Standard swarm operation initiated. Optimized pathways identified.",
             "steps": []

@@ -1,7 +1,7 @@
 product_id,price,currency,interval,stripe_price_id
-prod_TzQuYVuoiYCnnG,4999.00,USD,month,price_1T1S2UDo5o1YgZszsCWHWJPk
-prod_TzQuYVuoiYCnnG,44999.00,USD,year,price_1T1S2UDo5o1YgZszm6U5PlOA
-prod_TzQudorQFSUHnK,2999.00,USD,month,price_1T1S2TDo5o1YgZszPv8irMSu
-prod_TzQudorQFSUHnK,29999.00,USD,year,price_1T1S2TDo5o1YgZszgnZEL7lB
-prod_TyjBDBlBkIpCuu,299.00,USD,one_time,price_1T0lifDo5o1YgZszzV6oxFaw
-prod_Tyj9HDjs5IaebR,499.00,USD,one_time,price_1T0lhGDo5o1YgZszUwFofKhK
+"prod_TzQuYVuoiYCnnG",4999.00,"USD","month","price_1T1S2UDo5o1YgZszsCWHWJPk"
+"prod_TzQuYVuoiYCnnG",44999.00,"USD","year","price_1T1S2UDo5o1YgZszm6U5PlOA"
+"prod_TzQudorQFSUHnK",2999.00,"USD","month","price_1T1S2TDo5o1YgZszPv8irMSu"
+"prod_TzQudorQFSUHnK",29999.00,"USD","year","price_1T1S2TDo5o1YgZszgnZEL7lB"
+"prod_TyjBDBlBkIpCuu",299.00,"USD","one_time","price_1T0lifDo5o1YgZszzV6oxFaw"
+"prod_Tyj9HDjs5IaebR",499.00,"USD","one_time","price_1T0lhGDo5o1YgZszUwFofKhK"

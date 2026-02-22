@@ -33,6 +33,7 @@ aiohttp = "^3.9.3"
 beautifulsoup4 = "^4.12.3"
 httpx = "^0.28.1"
 starlette = "^0.52.1"
+apscheduler = "^3.10.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"

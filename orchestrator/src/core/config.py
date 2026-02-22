@@ -39,8 +39,13 @@ class Settings(BaseSettings):
     
     # --- SOCIAL ---
     LINKEDIN_ACCESS_TOKEN: Optional[str] = None
-    FACEBOOK_ACCESS_TOKEN: Optional[str] = None
+    LINKEDIN_REFRESH_TOKEN: Optional[str] = None
+    LINKEDIN_CLIENT_ID: Optional[str] = None
+    LINKEDIN_CLIENT_SECRET: Optional[str] = None
+    FACEBOOK_PAGE_TOKEN: Optional[str] = None
+    FACEBOOK_PAGE_ID: Optional[str] = None
     TWITTER_BEARER_TOKEN: Optional[str] = None
+    LINKEDIN_PROFILE_URN: Optional[str] = None
     
     # --- SYNTHESIS & VOICE ---
     VOICE_ENABLED: bool = True

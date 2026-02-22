@@ -14,6 +14,7 @@ from orchestrator.src.tools.project_tools import ProjectGeneratorTool
 from orchestrator.src.tools.content_sharder import ContentSharderTool
 from orchestrator.src.tools.media_tools import ImageGenerationTool, VideoGenerationTool
 from orchestrator.src.tools.revenue_tools import PaymentTool
+from orchestrator.src.tools.seo_tools import SEOTool
 from orchestrator.src.tools.universal_tools import get_multiplexer_tool
 from orchestrator.src.memory.vector_store import VectorStore
 from orchestrator.src.memory.sql_store import SQLStore
@@ -76,6 +77,7 @@ class Orchestrator:
             ImageGenerationTool(ToolConfig(tool_id="image_gen", name="ImageGen", description="Generate images", parameters_schema={"prompt": "string"}, allowed_agents=["*"]), stability_key=settings.STABILITY_API_KEY),
             VideoGenerationTool(ToolConfig(tool_id="video", name="Video", description="Video logic", parameters_schema={}, allowed_agents=["*"])),
             PaymentTool(ToolConfig(tool_id="payments", name="Payments", description="Manage fiscal transmissions", parameters_schema={}, allowed_agents=["*"]), stripe_key=settings.STRIPE_API_KEY),
+            SEOTool(ToolConfig(tool_id="seo", name="SEO_Master", description="Optimize content for organic reach", parameters_schema={}, allowed_agents=["*"])),
             get_multiplexer_tool()
         ]
 
