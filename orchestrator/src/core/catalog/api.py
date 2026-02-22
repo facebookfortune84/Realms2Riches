@@ -10,7 +10,29 @@ class CatalogAPI:
         self.store = SQLStore()
     
     def get_products(self) -> List[ProductSchema]:
-        """Fetch all products with their pricing."""
+        """Fetch all products dynamically from the modular slots directory."""
+        import json
+        import glob
+        import os
+        
+        all_products = []
+        slot_path = "data/store/slots/*.json"
+        
+        try:
+            for slot_file in glob.glob(slot_path):
+                with open(slot_file, 'r') as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        all_products.extend([ProductSchema(**p) if not isinstance(p, ProductSchema) else p for p in data])
+                    else:
+                        all_products.append(ProductSchema(**data) if not isinstance(data, ProductSchema) else data)
+            
+            if all_products:
+                return all_products
+        except Exception as e:
+            logger.error(f"Catalog Expansion Error: {e}")
+
+        # Fallback to DB if directory scan fails
         session = self.store.Session()
         try:
             products = session.query(ProductModel).all()

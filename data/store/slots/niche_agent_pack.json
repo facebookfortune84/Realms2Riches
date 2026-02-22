@@ -1,0 +1,9 @@
+{
+  "id": "pack_niche_agents",
+  "name": "Niche Department Expansion",
+  "price": 499,
+  "description": "50 Specialized agents for specialized verticals (Real Estate, Fintech, e-com).",
+  "category": "Expansion",
+  "stripe_price_id": "price_1Pabc_niche",
+  "checkout_url": "https://buy.stripe.com/test_niche_499"
+}

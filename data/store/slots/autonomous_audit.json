@@ -1,0 +1,9 @@
+{
+  "id": "autonomous_audit",
+  "name": "Sovereign AI Workforce Audit",
+  "price": 999,
+  "description": "Deep scan of company workflows for agentic substitution.",
+  "category": "General",
+  "stripe_price_id": "pending",
+  "checkout_url": "#"
+}

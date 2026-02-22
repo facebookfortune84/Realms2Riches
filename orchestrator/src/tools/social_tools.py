@@ -176,19 +176,61 @@ class LinkedInTokenRefreshTool(BaseTool):
         success = self.poster._refresh_token()
         return {"status": "success" if success else "error", "new_token_active": success}
 
+class TwitterPostTool(BaseTool):
+    def __init__(self, config: ToolConfig):
+        super().__init__(config)
+        self.bearer_token = settings.TWITTER_BEARER_TOKEN
+
+    def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        text = params.get("message")
+        if not self.bearer_token or self.bearer_token == "placeholder":
+            return {"status": "skipped", "reason": "No valid TWITTER_BEARER_TOKEN"}
+
+        url = "https://api.twitter.com/2/tweets"
+        headers = {"Authorization": f"Bearer {self.bearer_token}", "Content-Type": "application/json"}
+        payload = {"text": text[:280]} # Twitter limit
+
+        try:
+            response = requests.post(url, json=payload, headers=headers, timeout=10)
+            response.raise_for_status()
+            return {"status": "success", "platform": "twitter", "id": response.json().get("data", {}).get("id")}
+        except Exception as e:
+            logger.error(f"Twitter Post Error: {e}")
+            return {"status": "error", "reason": str(e)}
+
+class DiscordPostTool(BaseTool):
+    def __init__(self, config: ToolConfig):
+        super().__init__(config)
+        self.webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
+
+    def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        content = params.get("message")
+        link = params.get("link")
+        
+        if not self.webhook_url or self.webhook_url == "placeholder":
+            return {"status": "skipped", "reason": "No valid DISCORD_WEBHOOK_URL"}
+
+        if link: content += f"\n\n👉 {link}"
+        
+        try:
+            response = requests.post(self.webhook_url, json={"content": content}, timeout=10)
+            response.raise_for_status()
+            return {"status": "success", "platform": "discord"}
+        except Exception as e:
+            logger.error(f"Discord Post Error: {e}")
+            return {"status": "error", "reason": str(e)}
+
 class SocialMediaMultiplexer(BaseTool):
     def __init__(self, config: ToolConfig):
         super().__init__(config)
         self.fb_tool = FacebookPostTool(ToolConfig(tool_id="fb_post", name="FB Poster", description="Posts to FB", parameters_schema={}, allowed_agents=["*"]))
         self.li_tool = LinkedInPostTool(ToolConfig(tool_id="li_post", name="LI Poster", description="Posts to LI", parameters_schema={}, allowed_agents=["*"]))
+        self.tw_tool = TwitterPostTool(ToolConfig(tool_id="tw_post", name="X Poster", description="Posts to X", parameters_schema={}, allowed_agents=["*"]))
+        self.dc_tool = DiscordPostTool(ToolConfig(tool_id="dc_post", name="Discord Poster", description="Posts to Discord", parameters_schema={}, allowed_agents=["*"]))
 
     def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """
         Distributes content to all configured social channels.
-        Params:
-            message: The text content
-            link: The URL to the product/checkout page (CTA)
-            image_path: Optional path to an image asset (not fully implemented for upload in this MVP)
         """
         message = params.get("message")
         link = params.get("link")
@@ -196,19 +238,26 @@ class SocialMediaMultiplexer(BaseTool):
         results = {}
         
         # Post to Facebook
-        fb_res = self.fb_tool.execute({"message": message, "link": link})
-        results["facebook"] = fb_res
+        results["facebook"] = self.fb_tool.execute({"message": message, "link": link})
         
         # Post to LinkedIn
-        li_res = self.li_tool.execute({"message": message, "link": link})
-        results["linkedin"] = li_res
+        results["linkedin"] = self.li_tool.execute({"message": message, "link": link})
+        
+        # Post to Twitter
+        results["twitter"] = self.tw_tool.execute({"message": message})
+        
+        # Post to Discord
+        results["discord"] = self.dc_tool.execute({"message": message, "link": link})
         
         return results
 
 # Helper to register these tools
 def get_social_tools() -> List[BaseTool]:
+    base_config = {"type": "object", "properties": {"message": {"type": "string"}, "link": {"type": "string"}}}
     return [
-        FacebookPostTool(ToolConfig(tool_id="facebook_post", name="Facebook Poster", description="Post content to Facebook Page", parameters_schema={"type": "object", "properties": {"message": {"type": "string"}, "link": {"type": "string"}}}, allowed_agents=["Global_Market_Force_1"])),
-        LinkedInPostTool(ToolConfig(tool_id="linkedin_post", name="LinkedIn Poster", description="Post content to LinkedIn Profile/Page", parameters_schema={"type": "object", "properties": {"message": {"type": "string"}, "link": {"type": "string"}}}, allowed_agents=["Global_Market_Force_1"])),
-        SocialMediaMultiplexer(ToolConfig(tool_id="social_multiplexer", name="Social Media Multiplexer", description="Post to all channels simultaneously", parameters_schema={"type": "object", "properties": {"message": {"type": "string"}, "link": {"type": "string"}}}, allowed_agents=["Global_Market_Force_1"]))
+        FacebookPostTool(ToolConfig(tool_id="facebook_post", name="Facebook Poster", description="Post to Facebook", parameters_schema=base_config, allowed_agents=["Global_Market_Force_1"])),
+        LinkedInPostTool(ToolConfig(tool_id="linkedin_post", name="LinkedIn Poster", description="Post to LinkedIn", parameters_schema=base_config, allowed_agents=["Global_Market_Force_1"])),
+        TwitterPostTool(ToolConfig(tool_id="twitter_post", name="Twitter Poster", description="Post to X", parameters_schema=base_config, allowed_agents=["Global_Market_Force_1"])),
+        DiscordPostTool(ToolConfig(tool_id="discord_post", name="Discord Poster", description="Post to Discord", parameters_schema=base_config, allowed_agents=["Global_Market_Force_1"])),
+        SocialMediaMultiplexer(ToolConfig(tool_id="social_multiplexer", name="Social Multiplexer", description="Post to all channels", parameters_schema=base_config, allowed_agents=["Global_Market_Force_1"]))
     ]

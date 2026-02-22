@@ -163,6 +163,18 @@ lead_service = LeadDeliveryService()
 
 # --- ENDPOINTS ---
 
+@app.post("/api/telemetry/conversion")
+async def record_conversion(request: Request):
+    data = await request.json()
+    product_id = data.get("product_id")
+    event_type = data.get("event") # e.g. 'click_checkout'
+    
+    # Update Telemetry
+    telemetry_data["clicks"] += 1
+    log_activity("REVENUE_SYSTEMS_1", "INTENT_CAPTURE", f"Product {product_id} - Event: {event_type}")
+    
+    return {"status": "recorded", "total_clicks": telemetry_data["clicks"]}
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "swarm": "ACTIVE", "agents": len(orchestrator.agents), "version": "3.9.5-FINAL"}

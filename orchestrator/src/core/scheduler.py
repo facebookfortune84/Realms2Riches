@@ -30,50 +30,54 @@ class SocialScheduler:
 
     async def post_latest_content(self):
         """
-        Fetches the latest blog post and shares it if it hasn't been shared recently.
-        In a real prod system, we'd track 'last_shared_id' in a DB.
-        For now, we pick a random recent post to keep the feed alive.
+        Rotates between sharing fresh reports and highlighting specific products from the modular registry.
         """
         logger.info("Social Scheduler: Waking up to post content...")
         
-        posts = get_all_posts()
-        if not posts:
-            logger.warning("Social Scheduler: No content found to post.")
-            return
-
-        # Strategy: Pick from the top 3 most recent to ensure freshness but variety
-        # This simple logic ensures we don't just spam the same one if no new ones are made.
-        # But since the swarm generates continuously, 'posts[0]' is likely new.
-        target_post = posts[0] 
+        from orchestrator.src.core.catalog.api import catalog_api
         
-        # Construct the message
-        # We use a variety of templates to avoid duplicate content detection
-        templates = [
-            f"""🚀 New Intelligence Report: {target_post['title']}
+        # 1. Decision Logic: 70% chance report, 30% chance product spotlight
+        if random.random() < 0.7:
+            posts = get_all_posts()
+            if not posts: return
+            target_post = posts[0] 
+            link = f"{settings.FRONTEND_URL}/blog/{target_post['slug']}"
+            templates = [
+                f"""🚀 New Intelligence Report: {target_post['title']}
 
 {target_post['summary']}
 
 Read more & verify: """,
-            f"""⚡ Sovereign Update: {target_post['title']}
+                f"""⚡ Sovereign Update: {target_post['title']}
 
 Access the full analysis here: """,
-            f"""🦅 The Swarm has spoken. New insight on {target_post['title']}.
+                f"""🦅 The Swarm has spoken. New insight on {target_post['title']}.
 
 Secure your access: """
-        ]
-        message = random.choice(templates)
-        
-        # The link to the post (assuming it's hosted at /blog/slug)
-        # We append a CTA link to the product page or checkout for higher conversion
-        # The user requested direct Stripe checkout links. 
-        # But social platforms prefer content links. 
-        # Strategy: Link to the *blog post* which NOW contains the direct Stripe links (implemented in previous step).
-        # OR link directly to the checkout if the post is promotional.
-        
-        # Let's link to the blog post, which is the "content" value.
-        link = f"{settings.FRONTEND_URL}/blog/{target_post['slug']}"
-        
-        logger.info(f"Social Scheduler: Attempting to post '{target_post['title']}' to all channels.")
+            ]
+            message = random.choice(templates)
+        else:
+            # PRODUCT SPOTLIGHT
+            products = catalog_api.get_products()
+            if not products: return
+            # Weighted choice: 50% chance for Platinum, 50% chance for others
+            platinum = [p for p in products if "platinum" in p.id.lower()]
+            others = [p for p in products if "platinum" not in p.id.lower()]
+            
+            if platinum and (random.random() < 0.5 or not others):
+                target_p = platinum[0]
+            else:
+                target_p = random.choice(others if others else products)
+            
+            target_p = target_p.model_dump() if hasattr(target_p, "model_dump") else target_p
+            link = target_p.get("checkout_url", f"{settings.FRONTEND_URL}/pricing")
+            message = f"""💰 SOVEREIGN ASSET SPOTLIGHT: {target_p['name']}
+
+{target_p['description']}
+
+Acquire instantly: """
+
+        logger.info(f"Social Scheduler: Broadcasting message to all channels.")
         
         try:
             # Execute the multiplexer

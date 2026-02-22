@@ -40,6 +40,14 @@ export default function Pricing() {
   const handleCheckout = async (priceId) => {
     try {
       setLoading(true);
+      
+      // Track Conversion Intent
+      fetch(`${BACKEND_URL}/api/telemetry/conversion`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: priceId, event: 'click_checkout' })
+      }).catch(() => {}); // Fire and forget tracking
+
       const res = await fetch(`${BACKEND_URL}/api/checkout/session`, {
         method: 'POST',
         headers: { 

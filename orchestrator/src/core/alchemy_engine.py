@@ -81,13 +81,13 @@ Bypass the waitlist. Secure your Sovereign assets immediately:
 """
     # Inject Direct Checkout Links
     try:
-        import json
-        with open("data/store/products.json", "r") as f:
-            products = json.load(f)
-            for p in products:
-                # Use checkout_url if available, else fallback to a constructed link
-                link = p.get("checkout_url", f"/api/checkout/session?priceId={p.get('id')}")
-                content += f"- **[{p['name']} (${p['price']})]({link})**: {p['description']}\n"
+        from orchestrator.src.core.catalog.api import catalog_api
+        products = catalog_api.get_products()
+        for p in products:
+            # Handle both ProductSchema and dict types
+            p_data = p.model_dump() if hasattr(p, "model_dump") else p
+            link = p_data.get("checkout_url", f"/api/checkout/session?priceId={p_data.get('id')}")
+            content += f"- **[{p_data['name']} (${p_data['price']})]({link})**: {p_data['description']}\n"
     except Exception as e:
         content += "\n*Market uplink temporarily unavailable.*\n"
 

@@ -13,7 +13,7 @@ from orchestrator.src.tools.web_tools import WebSearchTool, WebScraperTool
 from orchestrator.src.tools.project_tools import ProjectGeneratorTool
 from orchestrator.src.tools.content_sharder import ContentSharderTool
 from orchestrator.src.tools.media_tools import ImageGenerationTool, VideoGenerationTool
-from orchestrator.src.tools.revenue_tools import PaymentTool
+from orchestrator.src.tools.revenue_tools import PaymentTool, ProductForgeTool, YieldAuditorTool
 from orchestrator.src.tools.seo_tools import SEOTool
 from orchestrator.src.tools.universal_tools import get_multiplexer_tool
 from orchestrator.src.memory.vector_store import VectorStore
@@ -84,6 +84,8 @@ class Orchestrator:
             ImageGenerationTool(ToolConfig(tool_id="image_gen", name="ImageGen", description="Generate images", parameters_schema={"prompt": "string"}, allowed_agents=["*"]), stability_key=settings.STABILITY_API_KEY),
             VideoGenerationTool(ToolConfig(tool_id="video", name="Video", description="Video logic", parameters_schema={}, allowed_agents=["*"])),
             PaymentTool(ToolConfig(tool_id="payments", name="Payments", description="Manage fiscal transmissions", parameters_schema={}, allowed_agents=["*"]), stripe_key=settings.STRIPE_API_KEY),
+            ProductForgeTool(ToolConfig(tool_id="product_forge", name="Product_Forge", description="Create new modular product slots", parameters_schema={"id": "string", "name": "string", "price": "number", "description": "string"}, allowed_agents=["GAMMA_OPS_1"])),
+            YieldAuditorTool(ToolConfig(tool_id="yield_auditor", name="Yield_Auditor", description="Audit monetization potential", parameters_schema={}, allowed_agents=["GAMMA_OPS_1"])),
             SEOTool(ToolConfig(tool_id="seo", name="SEO_Master", description="Optimize content for organic reach", parameters_schema={}, allowed_agents=["*"])),
             get_multiplexer_tool()
         ]
