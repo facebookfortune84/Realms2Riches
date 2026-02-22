@@ -106,6 +106,7 @@ class LinkedInPostTool(BaseTool):
     def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
         text = params.get("message")
         article_url = params.get("link")
+        media_url = params.get("media_url")
         
         if not self.access_token or self.access_token == "placeholder":
             return {"status": "skipped", "reason": "No valid LINKEDIN_ACCESS_TOKEN"}
@@ -122,7 +123,7 @@ class LinkedInPostTool(BaseTool):
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
             "X-Restli-Protocol-Version": "2.0.0",
-            "LinkedIn-Version": "202601"
+            "LinkedIn-Version": "202501" 
         }
         
         payload = {
@@ -138,7 +139,19 @@ class LinkedInPostTool(BaseTool):
             "isReshareDisabledByAuthor": False
         }
         
-        if article_url:
+        if media_url:
+            # Note: For REST v2, posting a direct image URL requires a multi-step upload.
+            # We'll use the 'article' format with the image URL as an illustration 
+            # to ensure the post succeeds while still being visual.
+            payload["content"] = {
+                "article": {
+                    "source": article_url or "https://realms2riches.ai",
+                    "thumbnail": media_url,
+                    "title": "Sovereign Intelligence Pulse",
+                    "description": "Visualizing the future of agentic swarms."
+                }
+            }
+        elif article_url:
             payload["content"] = {
                 "article": {
                     "source": article_url,
@@ -234,14 +247,15 @@ class SocialMediaMultiplexer(BaseTool):
         """
         message = params.get("message")
         link = params.get("link")
+        media_url = params.get("media_url")
         
         results = {}
         
         # Post to Facebook
-        results["facebook"] = self.fb_tool.execute({"message": message, "link": link})
+        results["facebook"] = self.fb_tool.execute({"message": message, "link": link, "media_url": media_url})
         
         # Post to LinkedIn
-        results["linkedin"] = self.li_tool.execute({"message": message, "link": link})
+        results["linkedin"] = self.li_tool.execute({"message": message, "link": link, "media_url": media_url})
         
         # Post to Twitter
         results["twitter"] = self.tw_tool.execute({"message": message})

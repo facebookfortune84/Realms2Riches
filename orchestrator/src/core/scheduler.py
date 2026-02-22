@@ -30,54 +30,86 @@ class SocialScheduler:
 
     async def post_latest_content(self):
         """
-        Rotates between sharing fresh reports and highlighting specific products from the modular registry.
+        Uses the Global Market Force agents to generate high-impact, authority-driven 
+        social copy that weaves technical value with high-ticket CTAs.
         """
-        logger.info("Social Scheduler: Waking up to post content...")
+        logger.info("Social Scheduler: Waking up for Agentic Content Generation...")
         
         from orchestrator.src.core.catalog.api import catalog_api
+        from orchestrator.src.core.orchestrator import Orchestrator
         
-        # 1. Decision Logic: 70% chance report, 30% chance product spotlight
-        if random.random() < 0.7:
-            posts = get_all_posts()
-            if not posts: return
-            target_post = posts[0] 
-            link = f"{settings.FRONTEND_URL}/blog/{target_post['slug']}"
-            templates = [
-                f"""🚀 New Intelligence Report: {target_post['title']}
+        orchestrator = Orchestrator()
+        products = catalog_api.get_products()
+        posts = get_all_posts()
+        
+        if not products or not posts:
+            logger.warning("Social Scheduler: Insufficient data for broadcast.")
+            return
 
-{target_post['summary']}
-
-Read more & verify: """,
-                f"""⚡ Sovereign Update: {target_post['title']}
-
-Access the full analysis here: """,
-                f"""🦅 The Swarm has spoken. New insight on {target_post['title']}.
-
-Secure your access: """
-            ]
-            message = random.choice(templates)
-        else:
-            # PRODUCT SPOTLIGHT
-            products = catalog_api.get_products()
-            if not products: return
-            # Weighted choice: 50% chance for Platinum, 50% chance for others
-            platinum = [p for p in products if "platinum" in p.id.lower()]
-            others = [p for p in products if "platinum" not in p.id.lower()]
+        target_post = posts[0]
+        # Always prioritize Platinum for high-impact posts
+        platinum = [p for p in products if "platinum" in p.id.lower()][0]
+        platinum_data = platinum.model_dump() if hasattr(platinum, "model_dump") else platinum
+        
+        # --- AGENTIC COPYWRITING PROMPT ---
+        prompt = f"""
+        You are the Chief Growth Architect of the Sovereign Intelligence Network.
+        Your task is to write a VIRAL, high-authority social media post based on our latest Intelligence Report.
+        
+        REPORT TITLE: {target_post['title']}
+        REPORT SUMMARY: {target_post['summary']}
+        
+        TARGET PRODUCT: {platinum_data['name']} (${platinum_data['price']})
+        PRODUCT DESC: {platinum_data['description']}
+        
+        STYLE GUIDELINES:
+        1. NO generic marketing fluff. Use high-intensity, technical, 'Sovereign' vocabulary.
+        2. STRUCTURE: Hook (The Problem), Value (The Insight from the report), CTA (The Sovereign Solution).
+        3. FORMAT: Short, punchy paragraphs with clear technical authority.
+        4. LINK: You must end with this link: {platinum_data.get('checkout_url')}
+        
+        Write the copy for a LinkedIn/Facebook broadcast that will impress high-net-worth developers and founders.
+        """
+        
+        try:
+            # Generate the high-tier copy
+            messages = [{"role": "system", "content": "You are a world-class Direct Response Copywriter for AI Deep Tech."}, 
+                        {"role": "user", "content": prompt}]
             
-            if platinum and (random.random() < 0.5 or not others):
-                target_p = platinum[0]
-            else:
-                target_p = random.choice(others if others else products)
+            message = orchestrator.llm_provider.generate_response(messages)
             
-            target_p = target_p.model_dump() if hasattr(target_p, "model_dump") else target_p
-            link = target_p.get("checkout_url", f"{settings.FRONTEND_URL}/pricing")
-            message = f"""💰 SOVEREIGN ASSET SPOTLIGHT: {target_p['name']}
+            # Final Sanity Check: Ensure the link is present
+            if platinum_data.get('checkout_url') not in message:
+                message += f"\n\nSecure your position: {platinum_data.get('checkout_url')}"
 
-{target_p['description']}
+            # --- VISUAL ASSET SELECTION ---
+            media_url = None
+            try:
+                import glob
+                import os
+                # Using ngrok URL for external access
+                base_url = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+                
+                # Prioritize images for this cycle
+                image_files = glob.glob("data/marketing/images/*.*")
+                if image_files:
+                    choice = random.choice(image_files)
+                    media_url = f"{base_url}/marketing/images/{os.path.basename(choice)}"
+            except Exception as me:
+                logger.warning(f"Social Scheduler: Asset selection failed: {me}")
 
-Acquire instantly: """
-
-        logger.info(f"Social Scheduler: Broadcasting message to all channels.")
+            logger.info(f"Social Scheduler: Agentic copy generated. Media: {media_url}. Broadcasting...")
+            
+            result = self.multiplexer.execute({
+                "message": message,
+                "link": f"{settings.FRONTEND_URL}/blog/{target_post['slug']}",
+                "media_url": media_url
+            })
+            
+            logger.info(f"Social Scheduler: Broadcast Result - {result}")
+            
+        except Exception as e:
+            logger.error(f"Social Scheduler: Failed to generate agentic copy. Error: {e}")
         
         try:
             # Execute the multiplexer

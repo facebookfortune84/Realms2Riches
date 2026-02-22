@@ -48,7 +48,10 @@ app = FastAPI(title="Sovereign API", version="3.9.5-FINAL")
 
 # Mount Assets Directory for Strategy Guide
 os.makedirs("data/assets", exist_ok=True)
+os.makedirs("data/marketing/images", exist_ok=True)
+os.makedirs("data/marketing/videos", exist_ok=True)
 app.mount("/assets", StaticFiles(directory="data/assets"), name="assets")
+app.mount("/marketing", StaticFiles(directory="data/marketing"), name="marketing")
 
 app.add_middleware(
     CORSMiddleware,
@@ -137,11 +140,18 @@ def seed_content():
             f.write("---\ntitle: \"The Sovereign Era Begins\"\ndate: \"2026-02-20\"\nsummary: \"Welcome to the world's first 1000-agent autonomous workforce.\"\n---\n# Welcome\nThe Matrix is now online.")
     os.makedirs("projects/generated", exist_ok=True)
 
-from orchestrator.src.core.scheduler import social_scheduler
+from orchestrator.src.core.self_healing import sovereign_healer
 
 @app.on_event("startup")
 async def startup_event():
     logger.info("Orchestrator starting up...")
+    
+    # 1. Self-Healing Cycle
+    repairs = sovereign_healer.execute_healing_cycle()
+    for repair in repairs:
+        log_activity("SYSTEM_INTEGRITY", "SELF_HEAL", repair)
+
+    # 2. Start Services
     social_scheduler.start()
     seed_content()
     asyncio.create_task(log_heartbeat())

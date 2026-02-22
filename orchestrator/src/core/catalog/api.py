@@ -20,12 +20,15 @@ class CatalogAPI:
         
         try:
             for slot_file in glob.glob(slot_path):
-                with open(slot_file, 'r') as f:
-                    data = json.load(f)
-                    if isinstance(data, list):
-                        all_products.extend([ProductSchema(**p) if not isinstance(p, ProductSchema) else p for p in data])
-                    else:
-                        all_products.append(ProductSchema(**data) if not isinstance(data, ProductSchema) else data)
+                try:
+                    with open(slot_file, 'r') as f:
+                        data = json.load(f)
+                        if isinstance(data, list):
+                            all_products.extend([ProductSchema(**p) if not isinstance(p, ProductSchema) else p for p in data])
+                        else:
+                            all_products.append(ProductSchema(**data) if not isinstance(data, ProductSchema) else data)
+                except Exception as e:
+                    logger.error(f"Skipping corrupt slot file {slot_file}: {e}")
             
             if all_products:
                 return all_products
