@@ -82,7 +82,13 @@ class SelfHealingService:
         for f in glob.glob("data/store/slots/*.json"):
             try:
                 with open(f, "r") as pf:
-                    json.load(pf)
+                    data = json.load(pf)
+                    # Purge 'None' or null slots
+                    if isinstance(data, dict):
+                        if data.get("id") is None or data.get("price") is None:
+                            os.remove(f)
+                            self.repair_log.append(f"Deleted null slot: {os.path.basename(f)}")
+                            continue
             except Exception as e:
                 logger.error(f"Corrupt Slot Detected: {f}. Archiving.")
                 target = f + ".corrupt"

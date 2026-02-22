@@ -23,10 +23,26 @@ class CatalogAPI:
                 try:
                     with open(slot_file, 'r') as f:
                         data = json.load(f)
-                        if isinstance(data, list):
-                            all_products.extend([ProductSchema(**p) if not isinstance(p, ProductSchema) else p for p in data])
-                        else:
-                            all_products.append(ProductSchema(**data) if not isinstance(data, ProductSchema) else data)
+                        products_in_file = data if isinstance(data, list) else [data]
+                        
+                        for p in products_in_file:
+                            # NORMALIZATION: Map flat 'price' to 'prices' list if needed
+                            if "prices" not in p and "price" in p:
+                                p["prices"] = [{
+                                    "product_id": p.get("id"),
+                                    "price": p.get("price"),
+                                    "currency": p.get("currency", "usd"),
+                                    "interval": p.get("interval", "mo"),
+                                    "stripe_price_id": p.get("stripe_price_id")
+                                }]
+                            
+                            # Ensure required 'category' exists
+                            if "category" not in p:
+                                p["category"] = "General"
+                            
+                            # Filter out null/corrupt entries
+                            if p.get("id") and p.get("price") is not None:
+                                all_products.append(ProductSchema(**p))
                 except Exception as e:
                     logger.error(f"Skipping corrupt slot file {slot_file}: {e}")
             

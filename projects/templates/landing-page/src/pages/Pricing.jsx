@@ -77,13 +77,16 @@ export default function Pricing() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {!loading && products.map((p, i) => {
-           const price = p.prices?.[0];
+           // Schema fallback for resilience
+           const priceValue = p.prices?.[0]?.price ?? p.price;
+           const intervalValue = p.prices?.[0]?.interval ?? p.interval ?? 'mo';
+           
            return (
             <div key={i} className="bg-black border-2 border-white/5 p-10 rounded-3xl hover:border-primary/30 transition-all flex flex-col group">
               <h3 className="text-2xl font-bold mb-2 uppercase text-white">{p.name}</h3>
               <div className="flex items-baseline gap-2 mb-8">
-                  <span className="text-5xl font-black text-primary">${price?.price}</span>
-                  <span className="text-gray-600 text-xs uppercase">/{price?.interval === 'one_time' ? 'once' : price?.interval}</span>
+                  <span className="text-5xl font-black text-primary">${priceValue}</span>
+                  <span className="text-gray-600 text-xs uppercase">/{intervalValue === 'one_time' ? 'once' : intervalValue}</span>
               </div>
               <p className="text-gray-400 text-sm mb-10">{p.description}</p>
               <button 

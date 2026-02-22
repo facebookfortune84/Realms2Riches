@@ -140,10 +140,11 @@ def seed_content():
             f.write("---\ntitle: \"The Sovereign Era Begins\"\ndate: \"2026-02-20\"\nsummary: \"Welcome to the world's first 1000-agent autonomous workforce.\"\n---\n# Welcome\nThe Matrix is now online.")
     os.makedirs("projects/generated", exist_ok=True)
 
-from orchestrator.src.core.self_healing import sovereign_healer
-
 @app.on_event("startup")
 async def startup_event():
+    from orchestrator.src.core.self_healing import sovereign_healer
+    from orchestrator.src.core.scheduler import social_scheduler
+    
     logger.info("Orchestrator starting up...")
     
     # 1. Self-Healing Cycle
@@ -255,6 +256,24 @@ async def checkout(request: Request):
     except Exception as e:
         logger.error(f"Stripe Error: {str(e)}")
         return {"url": f"{settings.FRONTEND_URL}/success"}
+
+@app.post("/api/admin/test-dispatch")
+async def test_dispatch(license_data: dict = Depends(verify_license_header)):
+    """Manually triggers the agentic social dispatch loop for immediate verification."""
+    from orchestrator.src.core.scheduler import social_scheduler
+    logger.info("MANUAL DISPATCH TRIGGERED: Verifying visual authority...")
+    
+    try:
+        # We call the internal method directly for the test
+        result = await social_scheduler.post_latest_content()
+        return {
+            "status": "dispatched",
+            "details": result,
+            "notice": "Check Facebook/LinkedIn for the new Link Card CTA."
+        }
+    except Exception as e:
+        logger.error(f"Manual Dispatch Failed: {e}")
+        return {"status": "failed", "error": str(e)}
 
 @app.post("/api/tasks")
 async def submit_task(request: Request):
