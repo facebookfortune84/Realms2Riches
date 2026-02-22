@@ -8,7 +8,7 @@ from orchestrator.src.core.config import settings
 from orchestrator.src.validation.schemas import TaskSpec, AgentConfig, ToolConfig
 from orchestrator.src.tools.git_tools import GitTool
 from orchestrator.src.tools.file_tools import FileTool
-from orchestrator.src.tools.social_tools import SocialTool
+from orchestrator.src.tools.social_tools import FacebookPostTool, LinkedInPostTool, SocialMediaMultiplexer
 from orchestrator.src.tools.web_tools import WebSearchTool, WebScraperTool
 from orchestrator.src.tools.project_tools import ProjectGeneratorTool
 from orchestrator.src.tools.content_sharder import ContentSharderTool
@@ -68,8 +68,9 @@ class Orchestrator:
         all_tools = [
             GitTool(ToolConfig(tool_id="git", name="Git", description="Git ops", parameters_schema={}, allowed_agents=["*"])),
             FileTool(ToolConfig(tool_id="file", name="File", description="File system access", parameters_schema={}, allowed_agents=["*"])),
-            SocialTool(ToolConfig(tool_id="social", name="Social", description="Post to LinkedIn/Twitter", parameters_schema={}, allowed_agents=["*"]),
-                       linkedin_token=settings.LINKEDIN_ACCESS_TOKEN, twitter_token=settings.TWITTER_BEARER_TOKEN, facebook_token=settings.FACEBOOK_ACCESS_TOKEN),
+            FacebookPostTool(ToolConfig(tool_id="facebook_post", name="Facebook Poster", description="Post content to Facebook Page", parameters_schema={"message": "string", "link": "string"}, allowed_agents=["*"])),
+            LinkedInPostTool(ToolConfig(tool_id="linkedin_post", name="LinkedIn Poster", description="Post content to LinkedIn Profile/Page", parameters_schema={"message": "string", "link": "string"}, allowed_agents=["*"])),
+            SocialMediaMultiplexer(ToolConfig(tool_id="social_multiplexer", name="Social Media Multiplexer", description="Post to all channels simultaneously", parameters_schema={"message": "string", "link": "string"}, allowed_agents=["*"])),
             WebSearchTool(ToolConfig(tool_id="search", name="Search", description="Search web", parameters_schema={}, allowed_agents=["*"])),
             WebScraperTool(ToolConfig(tool_id="scrape", name="Scrape", description="Scrape web", parameters_schema={"url": "string"}, allowed_agents=["*"])),
             ProjectGeneratorTool(ToolConfig(tool_id="scaffold", name="Scaffold", description="Build companies", parameters_schema={"name": "string", "industry": "string"}, allowed_agents=["*"])),
