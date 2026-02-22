@@ -175,6 +175,36 @@ async def record_conversion(request: Request):
     
     return {"status": "recorded", "total_clicks": telemetry_data["clicks"]}
 
+@app.get("/api/integrations/status")
+async def integrations():
+    def status(key):
+        val = getattr(settings, key, None) or os.getenv(key)
+        return "active" if val and val != "placeholder" and len(str(val)) > 5 else "inactive"
+    
+    return {
+        "LLM_GATEWAY": status("GROQ_API_KEY"),
+        "VOICE_SYNTH": status("ELEVENLABS_API_KEY"),
+        "STRIPE_PAY": status("STRIPE_API_KEY"),
+        "LINKEDIN": status("LINKEDIN_ACCESS_TOKEN"),
+        "FACEBOOK": status("FACEBOOK_PAGE_TOKEN"),
+        "X_TWITTER": status("TWITTER_BEARER_TOKEN"),
+        "VECTOR_RAG": "active"
+    }
+
+@app.get("/api/telemetry/stats")
+async def get_stats():
+    return telemetry_data
+
+@app.get("/api/activity")
+async def get_activity():
+    return activity_log
+
+@app.post("/api/sovereign/launch")
+async def sovereign_launch(request: Request):
+    global swarm_active
+    swarm_active = True
+    return {"status": "activated", "authorized_session": True}
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "swarm": "ACTIVE", "agents": len(orchestrator.agents), "version": "3.9.5-FINAL"}
@@ -191,7 +221,8 @@ async def capture_lead(request: Request):
 
 @app.get("/products")
 async def get_products():
-    return catalog_api.get_products()
+    products = catalog_api.get_products()
+    return [p.model_dump() if hasattr(p, "model_dump") else p for p in products]
 
 @app.post("/api/checkout/session")
 async def checkout(request: Request):
