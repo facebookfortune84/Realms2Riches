@@ -38,8 +38,14 @@ class SovereignCell:
     async def execute(self, task: TaskSpec):
         self.active_tasks += 1
         await self.task_queue.put(task)
+        
+        # Select an available agent (simple random load balancing for now)
         agent = random.choice(self.agent_pool) 
+        
         try:
+            # Run CPU-bound agent logic in a separate thread to avoid blocking the asyncio loop
+            # This allows the 'Social Scheduler' and 'Autonomous Loop' to keep ticking 
+            # while this agent 'thinks'.
             result = await asyncio.to_thread(agent.process_task, task)
             return result
         finally:

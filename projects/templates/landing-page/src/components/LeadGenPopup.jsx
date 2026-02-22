@@ -12,17 +12,20 @@ export default function LeadGenPopup() {
     return () => clearTimeout(timer);
   }, []);
 
+  const [guideUrl, setGuideUrl] = useState('');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (email) {
       try {
-        await fetch(`${import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev"}/api/leads`, {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev"}/api/leads`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, source: 'popup' })
         });
+        const data = await response.json();
+        if (data.guide_url) setGuideUrl(data.guide_url);
         setSubmitted(true);
-        setTimeout(() => setIsOpen(false), 3000);
       } catch (err) {
         console.error("Lead submission failed", err);
       }
@@ -75,7 +78,17 @@ export default function LeadGenPopup() {
             <div className="text-center py-6">
               <motion.div initial={{ scale: 0.5 }} animate={{ scale: 1 }} className="text-primary text-5xl mb-4">⚡</motion.div>
               <h3 className="text-white font-black text-sm uppercase tracking-tighter italic">Guide Dispatched</h3>
-              <p className="text-[10px] text-gray-500 mt-2 uppercase tracking-widest">Check your inbox.</p>
+              <p className="text-[10px] text-gray-500 mt-2 mb-6 uppercase tracking-widest">Access established.</p>
+              {guideUrl && (
+                <a 
+                  href={guideUrl} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="bg-white text-black font-black text-[10px] px-6 py-3 rounded-lg hover:bg-primary transition-all uppercase tracking-widest"
+                >
+                  Download Guide
+                </a>
+              )}
             </div>
           )}
         </div>

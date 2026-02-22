@@ -75,8 +75,8 @@ class Settings(BaseSettings):
         return MarketingConfig(
             brand_name="Realms 2 Riches",
             product_name="Sovereign Swarm",
-            website_url=self.FRONTEND_URL,
-            contact_email="hello@realms2riches.ai",
+            website_url="https://frontend-two-xi-gal9lkptfi.vercel.app/",
+            contact_email="hello@glowfly-sizeable-lazaro.ngrok-free.dev",
             twitter_handle="realms2riches",
             linkedin_url="https://linkedin.com/company/realms2riches",
             youtube_url="https://youtube.com/@realms2riches",

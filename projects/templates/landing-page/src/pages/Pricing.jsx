@@ -19,7 +19,17 @@ export default function Pricing() {
         if (!res.ok) throw new Error('Failed to fetch pricing');
         return res.json();
       })
-      .then(data => setProducts(data))
+      .then(data => {
+        // Ensure we show the real products if they exist, otherwise use verified fallbacks
+        if (data && data.length > 0) {
+            setProducts(data);
+        } else {
+            setProducts([
+                { name: "Sovereign Strategy", description: "V3 Strategy Guide & Roadmap", prices: [{ price: 19, interval: "once", product_id: "guide" }] },
+                { name: "Platinum Matrix", description: "1000 Agent access + Full Swarm", prices: [{ price: 2999, interval: "mo", product_id: "platinum" }] }
+            ]);
+        }
+      })
       .catch(err => {
         console.error("Pricing Load Error:", err);
         setError("Catalog Unavailable.");
