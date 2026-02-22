@@ -16,6 +16,7 @@ class SocialScheduler:
             tool_id="social_scheduler_multiplexer",
             name="Automated Social Poster",
             description="Scheduled poster",
+            parameters_schema={},
             allowed_agents=["system"]
         ))
         
@@ -48,17 +49,17 @@ class SocialScheduler:
         # Construct the message
         # We use a variety of templates to avoid duplicate content detection
         templates = [
-            f"🚀 New Intelligence Report: {target_post['title']}
+            f"""🚀 New Intelligence Report: {target_post['title']}
 
 {target_post['summary']}
 
-Read more & verify: ",
-            f"⚡ Sovereign Update: {target_post['title']}
+Read more & verify: """,
+            f"""⚡ Sovereign Update: {target_post['title']}
 
-Access the full analysis here: ",
-            f"🦅 The Swarm has spoken. New insight on {target_post['title']}.
+Access the full analysis here: """,
+            f"""🦅 The Swarm has spoken. New insight on {target_post['title']}.
 
-Secure your access: "
+Secure your access: """
         ]
         message = random.choice(templates)
         
