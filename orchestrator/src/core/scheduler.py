@@ -30,6 +30,7 @@ class SocialScheduler:
         logger.info("Social Scheduler: Initiating Agentic Dispatch Cycle...")
         from orchestrator.src.core.catalog.api import catalog_api
         from orchestrator.src.core.orchestrator import Orchestrator
+        from orchestrator.src.validation.conversion_auditor import LinkBeautifier, ConversionAuditor
         
         o = Orchestrator()
         products = catalog_api.get_products()
@@ -40,14 +41,19 @@ class SocialScheduler:
         # Weighted choice for product (favor Platinum)
         platinum = [p for p in products if "platinum" in p.id.lower()]
         target_p = platinum[0] if platinum else products[0]
-        target_p_data = target_p.model_dump() if hasattr(target_p, "model_dump") else target_p
-        checkout_url = target_p_data.get('checkout_url', 'https://glowfly-sizeable-lazaro.ngrok-free.dev')
+        
+        # Extract Price safely for the prompt
+        target_price = target_p.prices[0].price if target_p.prices else 0
+        checkout_url = target_p.checkout_url if hasattr(target_p, 'checkout_url') else 'https://glowfly-sizeable-lazaro.ngrok-free.dev'
+        if not checkout_url or checkout_url == "#":
+             checkout_url = 'https://glowfly-sizeable-lazaro.ngrok-free.dev'
 
         max_attempts = 3
         attempt = 1
         last_feedback = ""
         
-            from orchestrator.src.validation.conversion_auditor import LinkBeautifier, ConversionAuditor
+        while attempt <= max_attempts:
+            logger.info(f"Dispatch Attempt {attempt}/{max_attempts}...")
             
             # Beautify for the prompt
             display_link = LinkBeautifier.beautify(checkout_url)
@@ -56,7 +62,7 @@ class SocialScheduler:
             You are the Sovereign Growth Architect. Write a high-ticket sales broadcast.
             
             REPORT: {target_post['title']}
-            PRODUCT: {target_p_data['name']} (${target_p_data['price']})
+            PRODUCT: {target_p.name} (${target_price})
             LINK: {checkout_url}
             
             MANDATORY UI REQUIREMENTS:
@@ -84,17 +90,24 @@ class SocialScheduler:
                     except: pass
 
                     # Attempt Broadcast
-                    res = self.multiplexer.execute({"message": msg, "link": checkout_url, "media_url": media_url})
+                    res = self.multiplexer.execute({
+                        "message": msg, 
+                        "link": checkout_url, 
+                        "media_url": media_url
+                    })
                     
                     if res.get("status") != "error":
                         logger.info("✅ SUCCESS: Post dispatched with verified conversion path.")
                         return res
                     else:
-                        last_feedback = res.get("reason")
+                        last_feedback = res.get("reason", "Unknown posting error")
                         attempt += 1
                 else:
                     last_feedback = reason
                     logger.warning(f"⚠️ AUDIT FAIL: {reason}. Kicking back to agent...")
                     attempt += 1
+            except Exception as e:
+                logger.error(f"Loop Error: {e}")
+                break
 
 social_scheduler = SocialScheduler()

@@ -37,7 +37,9 @@ class FacebookPostTool(BaseTool):
             payload["picture"] = media_url
             
         try:
-            response = requests.post(url, json=payload, timeout=15)
+            # We add the ngrok skip header in case we are pinging our own backend
+            headers = {"ngrok-skip-browser-warning": "true"}
+            response = requests.post(url, json=payload, headers=headers, timeout=15)
             response.raise_for_status()
             return {"status": "success", "platform": "facebook", "id": response.json().get("id")}
         except Exception as e:

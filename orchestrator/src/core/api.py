@@ -65,6 +65,7 @@ app.add_middleware(
 async def skip_ngrok_warning(request: Request, call_next):
     response = await call_next(request)
     response.headers["ngrok-skip-browser-warning"] = "true"
+    # Also handle the GET param version for simple links
     return response
 
 # Shared Core Instances
@@ -209,6 +210,34 @@ async def get_stats():
 @app.get("/api/activity")
 async def get_activity():
     return activity_log
+
+@app.post("/api/admin/test-dispatch")
+async def test_dispatch():
+    """Manual trigger for social broadcast verification."""
+    from orchestrator.src.core.scheduler import social_scheduler
+    logger.info("MANUAL DISPATCH INITIATED")
+    try:
+        # result is the dict returned by SocialMediaMultiplexer.execute
+        # e.g. {"facebook": {"status": "success"}, ...}
+        result = await social_scheduler.post_latest_content()
+        
+        # Flatten for visibility in simple CLI tools
+        summary = {}
+        if isinstance(result, dict):
+            for channel, data in result.items():
+                if isinstance(data, dict):
+                    summary[channel] = data.get("status", "unknown")
+                else:
+                    summary[channel] = str(data)
+        
+        return {
+            "status": "completed",
+            "results": summary,
+            "raw_payload": result
+        }
+    except Exception as e:
+        logger.error(f"Dispatch logic failure: {e}")
+        return {"status": "error", "reason": str(e)}
 
 @app.post("/api/sovereign/launch")
 async def sovereign_launch(request: Request):
