@@ -21,33 +21,26 @@ class FacebookPostTool(BaseTool):
         if not self.access_token or self.access_token == "placeholder":
             return {"status": "skipped", "reason": "No valid FACEBOOK_PAGE_TOKEN"}
 
-        # THE BUTTON FIX: We use /feed + link to generate a Clickable Preview Card.
-        # This is the most reliable way to get a 'Buy Button' experience organically.
-        url = f"https://graph.facebook.com/v19.0/{self.page_id}/feed"
+        # ABSOLUTE FIX: Use /photos to bypass 'Link Ownership' restrictions.
+        # This allows us to post the visual asset without needing a verified domain.
+        url = f"https://graph.facebook.com/v19.0/{self.page_id}/photos"
+        
+        # High-Conversion Caption: Link is prominent at the top.
+        caption = f"🚀 ACQUIRE ACCESS: {link}\n\n{message}"
         
         payload = {
-            "message": message,
-            "link": link,
+            "url": media_url if media_url else "https://glowfly-sizeable-lazaro.ngrok-free.dev/marketing/images/default.png",
+            "caption": caption,
             "access_token": self.access_token
         }
-        
-        # We include picture as a hint for the card, but don't force it to avoid ownership errors.
-        if media_url:
-            payload["picture"] = media_url
             
         try:
-            # We add the ngrok skip header in case we are pinging our own backend
             headers = {"ngrok-skip-browser-warning": "true"}
             response = requests.post(url, json=payload, headers=headers, timeout=15)
             
             if response.status_code != 200:
-                logger.error(f"Facebook API Error Details: {response.status_code} - {response.text}")
+                logger.error(f"Facebook API Error: {response.status_code} - {response.text}")
                 return {"status": "error", "reason": f"{response.status_code}: {response.text[:150]}"}
-                
-            return {"status": "success", "platform": "facebook", "id": response.json().get("id")}
-        except Exception as e:
-            logger.error(f"Facebook Connection Error: {e}")
-            return {"status": "error", "reason": str(e)}
                 
             return {"status": "success", "platform": "facebook", "id": response.json().get("id")}
         except Exception as e:
@@ -85,14 +78,17 @@ class LinkedInPostTool(BaseTool):
         text = params.get("message")
         link = params.get("link")
         media_url = params.get("media_url")
-        if not self.access_token or self.access_token == "placeholder": return {"status": "skipped"}
+        
+        token = self.access_token
+        if not token or token == "placeholder": return {"status": "skipped"}
+        if token.startswith("Bearer "): token = token.replace("Bearer ", "")
 
         url = "https://api.linkedin.com/rest/posts"
         headers = {
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-            "X-Restli-Protocol-Version": "2.0.0",
-            "LinkedIn-Version": "202401" 
+            "Authorization": f"Bearer {token}", 
+            "Content-Type": "application/json", 
+            "X-Restli-Protocol-Version": "2.0.0", 
+            "LinkedIn-Version": "202401"
         }
         
         payload = {
@@ -105,9 +101,9 @@ class LinkedInPostTool(BaseTool):
         }
         
         if media_url:
-            payload["content"] = {"article": {"source": link or "https://frontend-two-xi-gal9lkptfi.vercel.app/", "thumbnail": media_url, "title": "🚀 SECURE YOUR SOVEREIGN LICENSE", "description": "Initialize your 1000-agent swarm today. Direct access to the Platinum Matrix."}}
+            payload["content"] = {"article": {"source": link or "https://frontend-two-xi-gal9lkptfi.vercel.app/", "thumbnail": media_url, "title": "🚀 SECURE YOUR SOVEREIGN LICENSE", "description": "Initialize your 1000-agent swarm today."}}
         elif link:
-            payload["content"] = {"article": {"source": link, "title": "⚡ INITIALIZE DEPLOYMENT", "description": "Click to acquire your Sovereign Assets and activate the swarm."}}
+            payload["content"] = {"article": {"source": link, "title": "⚡ INITIALIZE DEPLOYMENT", "description": "Click to acquire your Sovereign Assets."}}
 
         try:
             response = requests.post(url, json=payload, headers=headers, timeout=10)
@@ -116,7 +112,7 @@ class LinkedInPostTool(BaseTool):
                 response = requests.post(url, json=payload, headers=headers, timeout=10)
             
             if response.status_code != 201:
-                logger.error(f"LinkedIn API Error Details: {response.status_code} - {response.text}")
+                logger.error(f"LinkedIn API Error: {response.status_code} - {response.text}")
                 return {"status": "error", "reason": f"{response.status_code}: {response.text[:150]}"}
                 
             return {"status": "success", "platform": "linkedin"}
@@ -155,10 +151,8 @@ class SocialMediaMultiplexer(BaseTool):
     def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
         from orchestrator.src.validation.social_validator import SocialPostValidator
         message, link, media_url = params.get("message"), params.get("link"), params.get("media_url")
-        
         is_valid, reason = SocialPostValidator.validate(message, link)
-        if not is_valid:
-            return {"status": "error", "error_type": "validation_fail", "reason": reason}
+        if not is_valid: return {"status": "error", "error_type": "validation_fail", "reason": reason}
         
         return {
             "facebook": self.fb_tool.execute({"message": message, "link": link, "media_url": media_url}),
