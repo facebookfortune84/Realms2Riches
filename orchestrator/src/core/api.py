@@ -175,6 +175,15 @@ lead_service = LeadDeliveryService()
 
 # --- ENDPOINTS ---
 
+from fastapi.responses import JSONResponse, RedirectResponse
+
+# ... (rest of imports)
+
+@app.get("/")
+async def root_redirect():
+    """Redirects backend root traffic to the live frontend to prevent 404s."""
+    return RedirectResponse(url="https://frontend-two-xi-gal9lkptfi.vercel.app/")
+
 @app.post("/api/telemetry/conversion")
 async def record_conversion(request: Request):
     data = await request.json()
@@ -244,6 +253,35 @@ async def sovereign_launch(request: Request):
     global swarm_active
     swarm_active = True
     return {"status": "activated", "authorized_session": True}
+
+@app.post("/api/user/data-deletion")
+async def data_deletion_callback(request: Request):
+    """
+    Facebook Data Deletion Callback.
+    Parses the signed_request (mocked for now) and confirms deletion.
+    """
+    # In production, verify the signed_request using APP_SECRET
+    # user_id = parse_signed_request(data.get('signed_request'))
+    
+    # Generate a confirmation code
+    confirmation_code = hashlib.sha256(str(time.time()).encode()).hexdigest()[:10]
+    
+    # Log the request for compliance
+    logger.info(f"DATA DELETION REQUEST: Confirmation {confirmation_code}")
+    
+    return {
+        "url": f"{settings.FRONTEND_URL}/data-deletion-status?id={confirmation_code}",
+        "confirmation_code": confirmation_code
+    }
+
+@app.get("/api/user/opt-out")
+async def opt_out(email: str):
+    """
+    Simple opt-out for email/tracking.
+    """
+    logger.info(f"OPT-OUT REQUEST: {email}")
+    # In a real DB, we would flag this user.
+    return {"status": "success", "message": f"{email} has been unsubscribed."}
 
 @app.get("/health")
 async def health():

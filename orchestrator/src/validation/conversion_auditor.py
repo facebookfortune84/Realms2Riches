@@ -8,13 +8,10 @@ class LinkBeautifier:
     
     @staticmethod
     def beautify(url: str) -> str:
-        # In a real setup, this would hit Bitly/Dub API.
-        # Here we provide a 'Sovereign' display transform.
-        if "checkout.stripe.com" in url:
-            return "https://sovereign.link/acquire-platinum"
-        if "ngrok-free.dev" in url:
-            return url.replace("https://", "").split("?")[0]
-        return url
+        # We must keep https:// for clickability.
+        # We just remove the query parameters for a 'cleaner' look in the text.
+        if not url: return ""
+        return url.split("?")[0]
 
 class ConversionAuditor:
     """

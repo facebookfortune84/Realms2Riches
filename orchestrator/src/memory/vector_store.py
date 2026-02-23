@@ -11,7 +11,7 @@ class VectorStore:
         self.path = path
         self.documents: List[Dict[str, Any]] = []
         self.load()
-        logger.info(f"Initialized Sovereign RAG Store at {path}")
+        logger.info(f"Initialized Sovereign RAG Store at {path} | Count: {len(self.documents)}")
 
     def add(self, text: str, metadata: Dict[str, Any]) -> str:
         # Create a content-based ID

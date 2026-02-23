@@ -66,6 +66,20 @@ if (-not $healthy) {
     exit 1
 }
 
+# --- 3.5 SYSTEM INTEGRITY VALIDATION ---
+Write-Host "[3.5/6] Running Comprehensive System Audit..." -ForegroundColor Cyan
+try {
+    # Run the test suite inside the container to ensure environment consistency
+    docker exec docker-orchestrator-api-1 python tests/comprehensive/test_full_system.py
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "WARNING: System Audit reported failures. Check logs above." -ForegroundColor Yellow
+    } else {
+        Write-Host "SUCCESS: All Systems Verified." -ForegroundColor Green
+    }
+} catch {
+    Write-Host "WARNING: Could not execute audit script." -ForegroundColor Yellow
+}
+
 # --- 4. SEEDING ---
 Write-Host "[4/6] Synchronizing Catalog..." -ForegroundColor Cyan
 docker exec docker-orchestrator-api-1 python -m orchestrator.src.core.catalog.ingest
