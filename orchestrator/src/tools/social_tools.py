@@ -40,10 +40,14 @@ class FacebookPostTool(BaseTool):
             # We add the ngrok skip header in case we are pinging our own backend
             headers = {"ngrok-skip-browser-warning": "true"}
             response = requests.post(url, json=payload, headers=headers, timeout=15)
-            response.raise_for_status()
+            
+            if response.status_code != 200:
+                logger.error(f"Facebook API Error Details: {response.status_code} - {response.text}")
+                return {"status": "error", "reason": f"{response.status_code}: {response.text[:150]}"}
+                
             return {"status": "success", "platform": "facebook", "id": response.json().get("id")}
         except Exception as e:
-            logger.error(f"Facebook Post Error: {e}")
+            logger.error(f"Facebook Connection Error: {e}")
             return {"status": "error", "reason": str(e)}
 
 class LinkedInPostTool(BaseTool):
@@ -101,7 +105,11 @@ class LinkedInPostTool(BaseTool):
             if response.status_code == 401 and self._refresh_token():
                 headers["Authorization"] = f"Bearer {self.access_token}"
                 response = requests.post(url, json=payload, headers=headers, timeout=10)
-            if response.status_code != 201: return {"status": "error", "reason": response.text}
+            
+            if response.status_code != 201:
+                logger.error(f"LinkedIn API Error Details: {response.status_code} - {response.text}")
+                return {"status": "error", "reason": f"{response.status_code}: {response.text[:150]}"}
+                
             return {"status": "success", "platform": "linkedin"}
         except Exception as e: return {"status": "error", "reason": str(e)}
 
