@@ -34,6 +34,7 @@ class FacebookPostTool(BaseTool):
             headers = {"ngrok-skip-browser-warning": "true"}
             response = requests.post(url, json=payload, headers=headers, timeout=30)
             if response.status_code != 200:
+                logger.error(f"Facebook API Error: {response.status_code} - {response.text}")
                 return {"status": "error", "reason": response.text[:150]}
             return {"status": "success", "platform": "facebook", "id": response.json().get("id") or response.json().get("post_id")}
         except Exception as e: return {"status": "error", "reason": str(e)}
@@ -77,7 +78,7 @@ class LinkedInPostTool(BaseTool):
         }
         
         if link:
-            payload["content"] = {"article": {"source": link, "title": "🚀 SECURE YOUR SOVEREIGN LICENSE", "description": "Initialize your 1000-agent swarm today."}}
+            payload["content"] = {"article": {"source": link, "title": "🚀 SECURE YOUR SOVEREIGN LICENSE"}}
             if media_url and ".svg" not in media_url.lower():
                 payload["content"]["article"]["thumbnail"] = media_url
 
@@ -86,7 +87,9 @@ class LinkedInPostTool(BaseTool):
             if response.status_code == 401 and self._refresh_token():
                 headers["Authorization"] = f"Bearer {self.access_token}"
                 response = requests.post(url, json=payload, headers=headers, timeout=15)
-            if response.status_code != 201: return {"status": "error", "reason": response.text[:150]}
+            if response.status_code != 201: 
+                logger.error(f"LinkedIn API Error: {response.status_code} - {response.text}")
+                return {"status": "error", "reason": response.text[:150]}
             return {"status": "success", "platform": "linkedin"}
         except: return {"status": "error"}
 
@@ -99,12 +102,26 @@ class SocialMediaMultiplexer(BaseTool):
     def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
         from orchestrator.src.validation.social_validator import SocialPostValidator
         message, link, media_url = params.get("message"), params.get("link"), params.get("media_url")
+        
+        # 1. PRE-FLIGHT VALIDATION
         is_valid, reason = SocialPostValidator.validate(message, link)
-        if not is_valid: return {"status": "error", "error_type": "validation_fail", "reason": reason}
-        return {
+        if not is_valid:
+            logger.warning(f"🛡️ MULTIPLEXER VALIDATION FAIL: {reason}")
+            return {"status": "error", "error_type": "validation_fail", "reason": reason}
+        
+        # 2. DISPATCH
+        results = {
             "facebook": self.fb_tool.execute({"message": message, "link": link, "media_url": media_url}),
             "linkedin": self.li_tool.execute({"message": message, "link": link, "media_url": media_url})
         }
+        
+        # 3. SELF-HEALING FALLBACK
+        failed_channels = [c for c, r in results.items() if r.get("status") == "error"]
+        if failed_channels:
+            logger.error(f"🛡️ CHANNEL DEVIATION DETECTED: {failed_channels}. Initializing recovery track...")
+            # Handled by the recursive loop in scheduler.py
+            
+        return results
 
 def get_social_tools() -> List[BaseTool]:
     cfg = {"type": "object", "properties": {"message": {"type": "string"}, "link": {"type": "string"}}}
