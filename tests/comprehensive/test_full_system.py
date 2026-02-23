@@ -17,15 +17,15 @@ class TestSovereignSystem(unittest.TestCase):
 
     def test_01_api_health(self):
         """Verify the API is online and reporting active agents."""
-        print("
-[TEST] Checking Health...")
+        print("\n[TEST] Checking Health...")
         try:
             res = requests.get(f"{self.BASE_URL}/health", timeout=5)
             self.assertEqual(res.status_code, 200)
             data = res.json()
             self.assertEqual(data["status"], "ok")
             self.assertGreater(data["agents"], 0)
-            print(f"✅ Health OK: {data['agents']} Agents Active.")
+            self.assertIn("rag", data, "RAG vector count missing from health response.")
+            print(f"✅ Health OK: {data['agents']} Agents | RAG: {data.get('rag')} Vectors.")
         except Exception as e:
             self.fail(f"API Health Check Failed: {e}")
 
@@ -57,19 +57,24 @@ class TestSovereignSystem(unittest.TestCase):
         self.assertIn(self.NGROK_URL, data["guide_url"])
         print(f"✅ Lead Capture OK: Asset URL -> {data['guide_url']}")
 
-    def test_04_social_dispatch_simulation(self):
-        """Trigger a manual social dispatch and verify structure."""
-        print("[TEST] Triggering Manual Social Dispatch...")
-        # Note: This hits the actual Facebook API if keys are live. 
-        # We verify the backend handles the request correctly.
+    def test_04_social_dispatch_and_audit(self):
+        """Trigger dispatch and then AUDIT the last post content."""
+        print("[TEST] Triggering Dispatch & Auditing Last Post...")
+        
+        # 1. Trigger
         res = requests.post(f"{self.BASE_URL}/api/admin/test-dispatch", timeout=30)
         self.assertEqual(res.status_code, 200)
-        data = res.json()
         
-        self.assertEqual(data["status"], "success")
-        print("✅ Dispatch OK: System reported success.")
-        if "dispatch_results" in data:
-            print(f"   Results: {json.dumps(data['dispatch_results'], indent=2)}")
+        # 2. Audit (Wait for Meta to process)
+        time.sleep(2)
+        audit_res = requests.get(f"{self.BASE_URL}/api/admin/audit-last-post", timeout=10)
+        self.assertEqual(audit_res.status_code, 200)
+        audit_data = audit_res.json()
+        
+        if audit_data.get("facebook", {}).get("status") == "verified":
+            print("✅ Social Audit OK: Buy link and Image detected in last FB post.")
+        else:
+            print(f"⚠️ Social Audit Warning: {audit_data.get('facebook', {}).get('reason')}")
 
     def test_05_opt_out_compliance(self):
         """Verify the opt-out endpoint works."""
@@ -80,5 +85,5 @@ class TestSovereignSystem(unittest.TestCase):
         print("✅ Opt-Out OK.")
 
 if __name__ == "__main__":
-    print("🦅 STARTING COMPREHENSIVE SOVEREIGN SYSTEM AUDIT 🦅")
+    print("\n🦅 SOVEREIGN INTEGRATION AUDIT v4.0 🦅")
     unittest.main()

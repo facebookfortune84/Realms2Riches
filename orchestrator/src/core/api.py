@@ -1,6 +1,6 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request, Depends, Security
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.security import APIKeyHeader
 from fastapi.staticfiles import StaticFiles
 from orchestrator.src.core.orchestrator import Orchestrator
@@ -30,7 +30,6 @@ swarm_active = True
 api_key_header = APIKeyHeader(name="X-License-Key", auto_error=False)
 
 async def verify_license_header(key: str = Security(api_key_header)):
-    # Dev/Trial Bypass for local demo
     if not key and settings.GROQ_API_KEY == "placeholder":
         return {"tier": "TRIAL", "features": ["basic", "swarm"]}
     if not key:
@@ -46,10 +45,11 @@ async def verify_license_header(key: str = Security(api_key_header)):
 
 app = FastAPI(title="Sovereign API", version="3.9.5-FINAL")
 
-# Mount Assets Directory for Strategy Guide
+# Mount Assets
 os.makedirs("data/assets", exist_ok=True)
 os.makedirs("data/marketing/images", exist_ok=True)
 os.makedirs("data/marketing/videos", exist_ok=True)
+os.makedirs("data/customers", exist_ok=True)
 app.mount("/assets", StaticFiles(directory="data/assets"), name="assets")
 app.mount("/marketing", StaticFiles(directory="data/marketing"), name="marketing")
 
@@ -65,10 +65,9 @@ app.add_middleware(
 async def skip_ngrok_warning(request: Request, call_next):
     response = await call_next(request)
     response.headers["ngrok-skip-browser-warning"] = "true"
-    # Also handle the GET param version for simple links
     return response
 
-# Shared Core Instances
+# Instances
 orchestrator = Orchestrator()
 voice_router = VoiceRouter(orchestrator, orchestrator.stt, orchestrator.tts)
 
@@ -76,132 +75,90 @@ activity_log = []
 telemetry_data = {"campaigns_launched": 0, "messages_sent": 0, "impressions": 0, "revenue": 0.0, "clicks": 0}
 
 def log_activity(agent: str, action: str, result: str):
-    activity_log.append({
-        "t": datetime.utcnow().isoformat(),
-        "a": agent,
-        "op": action,
-        "r": result[:150]
-    })
-    if len(activity_log) > 50: activity_log.pop(0)
+    activity_log.append({"t": datetime.utcnow().isoformat(), "a": agent, "op": action, "r": result[:150]})
+    if len(activity_log) > 100: activity_log.pop(0)
 
 def provision_license(email: str, product_id: str):
-    log_activity("REVENUE_SYSTEMS_1", "PROVISION_LICENSE", f"Transmitting Platinum License to {email} for {product_id}")
+    log_activity("REVENUE_SYSTEMS_1", "PROVISION_LICENSE", f"Activating access for {email} | {product_id}")
     telemetry_data["revenue"] += 2999.0
-    log_activity("REVENUE_SYSTEMS_1", "REVENUE_REALIZED", f"Total Revenue: ${telemetry_data['revenue']}")
+    
+    # RECORD CUSTOMER
+    customer_file = "data/customers/active_roster.json"
+    customers = []
+    if os.path.exists(customer_file):
+        with open(customer_file, "r") as f: customers = json.load(f)
+    
+    customers.append({
+        "email": email,
+        "product": product_id,
+        "date": datetime.utcnow().isoformat(),
+        "status": "active"
+    })
+    
+    with open(customer_file, "w") as f: json.dump(customers, f, indent=2)
+    log_activity("SYSTEM_INTEGRITY", "CUSTOMER_RECORDED", f"Customer {email} added to roster.")
 
-# --- BACKGROUND PROCESSORS ---
+# --- BACKGROUND ---
 async def log_heartbeat():
     while True:
-        logger.info(f"💓 HEARTBEAT: {len(orchestrator.agents)} Online | Swarm: ACTIVE")
+        logger.info(f"💓 HEARTBEAT: {len(orchestrator.agents)} Online | RAG: {len(orchestrator.memory.documents)} Vectors")
         await asyncio.sleep(15)
 
 async def autonomous_loop():
     topics = ["AI Swarms", "MPC Protocol", "Autonomous Scaling", "Edge Intelligence", "Quantum Encryption", "Neural Lace"]
     while True:
         if swarm_active and len(orchestrator.agents) > 0:
-            import random
             topic = random.choice(topics)
             try:
-                log_activity("ALPHA_CORE_1", "SYS_MAINTENANCE", "Verifying RAG integrity...")
-                log_activity("BETA_GROWTH_2", "MARKET_PULSE", f"Analyzing AI market shifts for {topic}...")
-                telemetry_data["impressions"] += random.randint(10, 50)
-                if random.random() < 0.1: telemetry_data["clicks"] += 1
-                
                 if random.random() < 0.05:
-                    logger.info(f"AUTONOMOUS AGENT TRIGGERED: Generating content for {topic}")
                     task_desc = f"Analyze the strategic implications of {topic} for the Sovereign Network."
                     final_result = {}
                     async for step in orchestrator.submit_task_stream(task_desc, "autonomous_daily"):
-                        if step.get("status") == "completed":
-                            final_result = step.get("result", {})
-                    
+                        if step.get("status") == "completed": final_result = step.get("result", {})
                     if final_result:
-                        img_task = f"Generate a futuristic cover image for a blog post about {topic}."
+                        img_task = f"Generate futuristic art for {topic}."
                         img_url = None
                         async for step in orchestrator.submit_task_stream(img_task, "creative_studio"):
                             if step.get("status") == "completed":
-                                results = step.get("result", {}).get("results", [])
-                                if results:
-                                    img_url = results[0].get("output_data", {}).get("url")
-                        
+                                res = step.get("result", {}).get("results", [])
+                                if res: img_url = res[0].get("output_data", {}).get("url")
                         slug = generate_autonomous_blog_post(final_result, image_url=img_url) 
                         log_activity("TITAN_ORCHESTRATOR", "CONTENT_GEN", f"Published Blog: {slug}")
-
-            except Exception as e:
-                logger.error(f"Autonomous Loop Error: {e}")
+            except Exception as e: logger.error(f"Loop Error: {e}")
             await asyncio.sleep(5) 
-        else:
-            await asyncio.sleep(5)
-
-def seed_content():
-    blog_dir = "data/blog"
-    os.makedirs(blog_dir, exist_ok=True)
-    if not os.listdir(blog_dir):
-        with open(os.path.join(blog_dir, "welcome-to-sovereignty.md"), "w") as f:
-            f.write("---\ntitle: \"The Sovereign Era Begins\"\ndate: \"2026-02-20\"\nsummary: \"Welcome to the world's first 1000-agent autonomous workforce.\"\n---\n# Welcome\nThe Matrix is now online.")
-    os.makedirs("projects/generated", exist_ok=True)
+        else: await asyncio.sleep(5)
 
 @app.on_event("startup")
 async def startup_event():
     from orchestrator.src.core.self_healing import sovereign_healer
     from orchestrator.src.core.scheduler import social_scheduler
-    
     logger.info("Orchestrator starting up...")
-    
-    # 1. Self-Healing Cycle
-    repairs = sovereign_healer.execute_healing_cycle()
-    for repair in repairs:
-        log_activity("SYSTEM_INTEGRITY", "SELF_HEAL", repair)
-
-    # 2. Start Services
+    sovereign_healer.execute_healing_cycle()
     social_scheduler.start()
-    seed_content()
     asyncio.create_task(log_heartbeat())
     asyncio.create_task(autonomous_loop())
 
-# --- SERVICES ---
-class LeadDeliveryService:
-    def __init__(self):
-        self.backend_url = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
-        self.guide_url = f"{self.backend_url}/assets/sovereign_strategy_guide_v3.txt"
-
-    async def deliver_guide(self, email: str, source: str):
-        logger.info(f"DELIVERY: Preparing Sovereign Strategy Guide for {email}...")
-        await asyncio.sleep(0.5) 
-        log_activity("BETA_GROWTH_1", "ASSET_DELIVERY", f"Sent Strategy Guide to {email} via {source}")
-        return {"status": "sent", "asset_url": self.guide_url}
-
-lead_service = LeadDeliveryService()
-
 # --- ENDPOINTS ---
-
-from fastapi.responses import JSONResponse, RedirectResponse
-
-# ... (rest of imports)
 
 @app.get("/")
 async def root_redirect():
-    """Redirects backend root traffic to the live frontend to prevent 404s."""
     return RedirectResponse(url="https://frontend-two-xi-gal9lkptfi.vercel.app/")
 
-@app.post("/api/telemetry/conversion")
-async def record_conversion(request: Request):
-    data = await request.json()
-    product_id = data.get("product_id")
-    event_type = data.get("event") # e.g. 'click_checkout'
-    
-    # Update Telemetry
-    telemetry_data["clicks"] += 1
-    log_activity("REVENUE_SYSTEMS_1", "INTENT_CAPTURE", f"Product {product_id} - Event: {event_type}")
-    
-    return {"status": "recorded", "total_clicks": telemetry_data["clicks"]}
+@app.get("/health")
+async def health():
+    return {
+        "status": "ok", 
+        "swarm": "ACTIVE", 
+        "agents": len(orchestrator.agents), 
+        "rag": len(orchestrator.memory.documents),
+        "version": "3.9.5-FINAL"
+    }
 
 @app.get("/api/integrations/status")
 async def integrations():
     def status(key):
         val = getattr(settings, key, None) or os.getenv(key)
         return "active" if val and val != "placeholder" and len(str(val)) > 5 else "inactive"
-    
     return {
         "LLM_GATEWAY": status("GROQ_API_KEY"),
         "VOICE_SYNTH": status("ELEVENLABS_API_KEY"),
@@ -213,89 +170,66 @@ async def integrations():
     }
 
 @app.get("/api/telemetry/stats")
-async def get_stats():
-    return telemetry_data
+async def get_stats(): return telemetry_data
 
 @app.get("/api/activity")
-async def get_activity():
-    return activity_log
+async def get_activity(): return activity_log
 
 @app.post("/api/admin/test-dispatch")
 async def test_dispatch():
-    """Manual trigger for social broadcast verification."""
     from orchestrator.src.core.scheduler import social_scheduler
-    logger.info("MANUAL DISPATCH INITIATED")
     try:
-        # result is the dict returned by SocialMediaMultiplexer.execute
-        # e.g. {"facebook": {"status": "success"}, ...}
         result = await social_scheduler.post_latest_content()
+        return {"status": "success", "dispatch_results": result}
+    except Exception as e: return {"status": "error", "reason": str(e)}
+
+@app.get("/api/admin/audit-last-post")
+async def audit_last_post():
+    """Fetches the latest post from Facebook and verifies integrity."""
+    if not settings.FACEBOOK_PAGE_TOKEN or not settings.FACEBOOK_PAGE_ID:
+        return {"facebook": {"status": "skipped", "reason": "No FB Credentials"}}
+    
+    url = f"https://graph.facebook.com/v19.0/{settings.FACEBOOK_PAGE_ID}/feed"
+    params = {"access_token": settings.FACEBOOK_PAGE_TOKEN, "limit": 1, "fields": "message,full_picture"}
+    try:
+        res = requests.get(url, params=params, timeout=10)
+        data = res.json().get("data", [])
+        if not data: return {"facebook": {"status": "empty", "reason": "No posts found"}}
         
-        # Flatten for visibility in simple CLI tools
-        summary = {}
-        if isinstance(result, dict):
-            for channel, data in result.items():
-                if isinstance(data, dict):
-                    summary[channel] = data.get("status", "unknown")
-                else:
-                    summary[channel] = str(data)
+        last_post = data[0]
+        msg = last_post.get("message", "")
+        # Check for monetization pattern
+        from orchestrator.src.validation.social_validator import SocialPostValidator
+        is_monetized = "buy.stripe.com" in msg or "ngrok-free.dev" in msg
+        has_image = "full_picture" in last_post
         
         return {
-            "status": "completed",
-            "results": summary,
-            "raw_payload": result
+            "facebook": {
+                "status": "verified" if is_monetized and has_image else "incomplete",
+                "message": msg[:50] + "...",
+                "has_monetization": is_monetized,
+                "has_image": has_image
+            }
         }
-    except Exception as e:
-        logger.error(f"Dispatch logic failure: {e}")
-        return {"status": "error", "reason": str(e)}
-
-@app.post("/api/sovereign/launch")
-async def sovereign_launch(request: Request):
-    global swarm_active
-    swarm_active = True
-    return {"status": "activated", "authorized_session": True}
+    except Exception as e: return {"error": str(e)}
 
 @app.post("/api/user/data-deletion")
 async def data_deletion_callback(request: Request):
-    """
-    Facebook Data Deletion Callback.
-    Parses the signed_request (mocked for now) and confirms deletion.
-    """
-    # In production, verify the signed_request using APP_SECRET
-    # user_id = parse_signed_request(data.get('signed_request'))
-    
-    # Generate a confirmation code
     confirmation_code = hashlib.sha256(str(time.time()).encode()).hexdigest()[:10]
-    
-    # Log the request for compliance
-    logger.info(f"DATA DELETION REQUEST: Confirmation {confirmation_code}")
-    
-    return {
-        "url": f"{settings.FRONTEND_URL}/data-deletion-status?id={confirmation_code}",
-        "confirmation_code": confirmation_code
-    }
+    return {"url": f"{settings.FRONTEND_URL}/data-deletion-status?id={confirmation_code}", "confirmation_code": confirmation_code}
 
 @app.get("/api/user/opt-out")
 async def opt_out(email: str):
-    """
-    Simple opt-out for email/tracking.
-    """
-    logger.info(f"OPT-OUT REQUEST: {email}")
-    # In a real DB, we would flag this user.
     return {"status": "success", "message": f"{email} has been unsubscribed."}
-
-@app.get("/health")
-async def health():
-    return {"status": "ok", "swarm": "ACTIVE", "agents": len(orchestrator.agents), "version": "3.9.5-FINAL"}
 
 @app.post("/api/leads")
 async def capture_lead(request: Request):
     data = await request.json()
-    email = data.get("email")
-    source = data.get("source", "popup")
+    email, source = data.get("email"), data.get("source", "popup")
     log_activity("GLOBAL_MARKET_FORCE_1", "LEAD_CAPTURED", f"New prospect: {email} | Source: {source}")
     telemetry_data["clicks"] += 1
     delivery_result = await lead_service.deliver_guide(email, source)
-    return {"status": "captured", "message": "Directive transmitted.", "guide_url": delivery_result["asset_url"]}
+    return {"status": "captured", "guide_url": delivery_result["asset_url"]}
 
 @app.get("/products")
 async def get_products():
@@ -305,42 +239,37 @@ async def get_products():
 @app.post("/api/checkout/session")
 async def checkout(request: Request):
     data = await request.json()
-    price_id = data.get("priceId") 
-    email = data.get("email", "anonymous@sovereign.ai")
+    price_id, email = data.get("priceId"), data.get("email", "anonymous@sovereign.ai")
     if not settings.STRIPE_API_KEY or settings.STRIPE_API_KEY == "placeholder":
         provision_license(email, price_id)
         return {"url": f"{settings.FRONTEND_URL}/success"}
     try:
         stripe.api_key = settings.STRIPE_API_KEY
-        checkout_session = stripe.checkout.Session.create(
+        session = stripe.checkout.Session.create(
             customer_email=email,
             line_items=[{'price': price_id, 'quantity': 1}],
             mode='subscription' if "price" in price_id else 'payment',
             success_url=f"{settings.FRONTEND_URL}/success?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{settings.FRONTEND_URL}/cancel",
         )
-        return {"url": checkout_session.url}
-    except Exception as e:
-        logger.error(f"Stripe Error: {str(e)}")
-        return {"url": f"{settings.FRONTEND_URL}/success"}
+        return {"url": session.url}
+    except Exception as e: return {"url": f"{settings.FRONTEND_URL}/success"}
 
-@app.post("/api/admin/test-dispatch")
-async def test_dispatch(license_data: dict = Depends(verify_license_header)):
-    """Manually triggers the agentic social dispatch loop for immediate verification."""
-    from orchestrator.src.core.scheduler import social_scheduler
-    logger.info("MANUAL DISPATCH TRIGGERED: Verifying visual authority...")
-    
+@app.post("/api/webhooks/stripe")
+async def stripe_webhook(request: Request):
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
     try:
-        # We call the internal method directly for the test
-        result = await social_scheduler.post_latest_content()
-        return {
-            "status": "dispatched",
-            "details": result,
-            "notice": "Check Facebook/LinkedIn for the new Link Card CTA."
-        }
-    except Exception as e:
-        logger.error(f"Manual Dispatch Failed: {e}")
-        return {"status": "failed", "error": str(e)}
+        if settings.STRIPE_WEBHOOK_SECRET:
+            event = stripe.Webhook.construct_event(payload, sig_header, settings.STRIPE_WEBHOOK_SECRET)
+        else: event = json.loads(payload)
+    except: return JSONResponse(status_code=400, content={"error": "Invalid payload"})
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        email = session.get("customer_email") or session.get("metadata", {}).get("customer_email")
+        provision_license(email, session.get("metadata", {}).get("product_id"))
+    return {"status": "success"}
 
 @app.post("/api/tasks")
 async def submit_task(request: Request):
@@ -350,17 +279,6 @@ async def submit_task(request: Request):
     async for step in orchestrator.submit_task_stream(desc, "adhoc"):
         if step["status"] == "completed": result = step["result"]
     return {"status": "completed", "result": result}
-
-@app.post("/api/admin/trigger-content")
-async def trigger_content(request: Request):
-    task_desc = "Analyze AI market shifts."
-    final_result = {}
-    async for step in orchestrator.submit_task_stream(task_desc, "manual_trigger"):
-        if step.get("status") == "completed": final_result = step.get("result", {})
-    if final_result:
-        slug = generate_autonomous_blog_post(final_result)
-        return {"status": "published", "slug": slug}
-    return {"status": "failed"}
 
 @app.websocket("/ws/chamber")
 async def chamber_socket(websocket: WebSocket):
