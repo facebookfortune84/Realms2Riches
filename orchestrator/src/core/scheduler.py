@@ -47,53 +47,54 @@ class SocialScheduler:
         attempt = 1
         last_feedback = ""
         
-        while attempt <= max_attempts:
-            logger.info(f"Dispatch Attempt {attempt}/{max_attempts}...")
+            from orchestrator.src.validation.conversion_auditor import LinkBeautifier, ConversionAuditor
+            
+            # Beautify for the prompt
+            display_link = LinkBeautifier.beautify(checkout_url)
             
             prompt = f"""
-            You are the Sovereign Growth Architect. Write an 'Impressive', high-authority social broadcast.
+            You are the Sovereign Growth Architect. Write a high-ticket sales broadcast.
             
-            TARGET INTEL: {target_post['title']} - {target_post['summary']}
-            TARGET ASSET: {target_p_data['name']} (${target_p_data['price']})
-            MANDATORY CTA LINK: {checkout_url}
+            REPORT: {target_post['title']}
+            PRODUCT: {target_p_data['name']} (${target_p_data['price']})
+            LINK: {checkout_url}
             
-            RULES:
-            1. STYLE: Zero fluff. Technical, elite, sovereign tone.
-            2. HOOK: Start with a technical bottleneck or architectural insight from the report.
-            3. ACTION: You MUST use a strong action verb (e.g. SECURE, ACQUIRE, INITIALIZE, DEPLOY) before the link.
-            4. FORMAT: Use short paragraphs and impactful technical vocabulary.
-            5. GOAL: Prove technical superiority, then offer immediate acquisition.
+            MANDATORY UI REQUIREMENTS:
+            1. You MUST create a 'Visual Button' using emojis (e.g. [ 💳 ACQUIRE NOW ] or 【 ⚡ INITIALIZE 】).
+            2. The post must end with the link clearly visible and beautified.
+            3. Tone: Technically superior, elite, authoritative.
             
             {f"🚨 REPAIR PREVIOUS ERROR: {last_feedback}" if last_feedback else ""}
             """
             
             try:
-                msg = o.llm_provider.generate_response([{"role": "system", "content": "Copywriter."}, {"role": "user", "content": prompt}])
+                msg = o.llm_provider.generate_response([{"role": "system", "content": "Direct Response Copywriter."}, {"role": "user", "content": prompt}])
                 
-                # Visual Asset
-                media_url = None
-                try:
-                    import glob
-                    images = glob.glob("data/marketing/images/*.*")
-                    if images:
-                        media_url = f"https://glowfly-sizeable-lazaro.ngrok-free.dev/marketing/images/{os.path.basename(random.choice(images))}"
-                except: pass
+                # --- CONVERSION AUDIT ---
+                is_valid, reason = ConversionAuditor.audit(msg, checkout_url)
+                
+                if is_valid:
+                    # Visual Asset
+                    media_url = None
+                    try:
+                        import glob, os
+                        images = glob.glob("data/marketing/images/*.*")
+                        if images:
+                            media_url = f"https://glowfly-sizeable-lazaro.ngrok-free.dev/marketing/images/{os.path.basename(random.choice(images))}"
+                    except: pass
 
-                # Attempt Broadcast
-                res = self.multiplexer.execute({"message": msg, "link": checkout_url, "media_url": media_url})
-                
-                if res.get("status") != "error":
-                    logger.info("✅ SUCCESS: Post dispatched.")
-                    return res
-                elif res.get("error_type") == "validation_fail":
-                    last_feedback = res.get("reason")
-                    logger.warning(f"⚠️ SELF-HEALING: Attempt {attempt} failed: {last_feedback}")
-                    attempt += 1
+                    # Attempt Broadcast
+                    res = self.multiplexer.execute({"message": msg, "link": checkout_url, "media_url": media_url})
+                    
+                    if res.get("status") != "error":
+                        logger.info("✅ SUCCESS: Post dispatched with verified conversion path.")
+                        return res
+                    else:
+                        last_feedback = res.get("reason")
+                        attempt += 1
                 else:
-                    logger.error(f"❌ FATAL ERROR: {res.get('reason')}")
-                    break
-            except Exception as e:
-                logger.error(f"Loop Error: {e}")
-                break
+                    last_feedback = reason
+                    logger.warning(f"⚠️ AUDIT FAIL: {reason}. Kicking back to agent...")
+                    attempt += 1
 
 social_scheduler = SocialScheduler()
