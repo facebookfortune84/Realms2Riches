@@ -90,7 +90,7 @@ export default function Pricing() {
               </div>
               <p className="text-gray-400 text-sm mb-10">{p.description}</p>
               <button 
-                onClick={() => handleCheckout(price?.stripe_price_id || price?.product_id)}
+                onClick={() => handleCheckout(p.prices?.[0]?.stripe_price_id || p.id)}
                 className="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase hover:bg-primary transition-colors"
               >
                 Acquire

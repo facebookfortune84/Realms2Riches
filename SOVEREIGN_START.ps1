@@ -67,14 +67,14 @@ if (-not $healthy) {
 }
 
 # --- 3.5 SYSTEM INTEGRITY VALIDATION ---
-Write-Host "[3.5/6] Running Comprehensive System Audit..." -ForegroundColor Cyan
+Write-Host "[3.5/6] Running Master Integrity Audit (Grand Wizard Standard)..." -ForegroundColor Cyan
 try {
-    # Run the test suite inside the container to ensure environment consistency
-    docker exec docker-orchestrator-api-1 python tests/comprehensive/test_full_system.py
+    # Run the high-density test suite inside the container
+    docker exec docker-orchestrator-api-1 python tests/comprehensive/test_system_integrity.py
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "WARNING: System Audit reported failures. Check logs above." -ForegroundColor Yellow
+        Write-Host "CRITICAL WARNING: System Audit reported failures. Swarm may be unstable." -ForegroundColor Red
     } else {
-        Write-Host "SUCCESS: All Systems Verified." -ForegroundColor Green
+        Write-Host "SUCCESS: All Tracks Synchronized & Verified." -ForegroundColor Green
     }
 } catch {
     Write-Host "WARNING: Could not execute audit script." -ForegroundColor Yellow

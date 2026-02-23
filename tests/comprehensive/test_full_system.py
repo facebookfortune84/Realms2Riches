@@ -12,7 +12,6 @@ class TestSovereignSystem(unittest.TestCase):
     NGROK_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
 
     def setUp(self):
-        # Wait for API to be ready if needed
         pass
 
     def test_01_api_health(self):
@@ -49,13 +48,18 @@ class TestSovereignSystem(unittest.TestCase):
         """Verify lead capture returns the correct asset URL."""
         print("[TEST] Checking Lead Capture...")
         payload = {"email": "test_automator@sovereign.ai", "source": "integration_test"}
-        res = requests.post(f"{self.BASE_URL}/api/leads", json=payload, timeout=5)
-        self.assertEqual(res.status_code, 200)
-        data = res.json()
-        
-        self.assertIn("guide_url", data)
-        self.assertIn(self.NGROK_URL, data["guide_url"])
-        print(f"✅ Lead Capture OK: Asset URL -> {data['guide_url']}")
+        try:
+            res = requests.post(f"{self.BASE_URL}/api/leads", json=payload, timeout=5)
+            if res.status_code != 200:
+                print(f"❌ Lead Capture FAILED with status {res.status_code}: {res.text}")
+            self.assertEqual(res.status_code, 200)
+            data = res.json()
+            
+            self.assertIn("guide_url", data)
+            self.assertIn("assets/sovereign_strategy_guide_v3.txt", data["guide_url"])
+            print(f"✅ Lead Capture OK: Asset URL -> {data['guide_url']}")
+        except Exception as e:
+            self.fail(f"Lead Capture Exception: {e}")
 
     def test_04_social_dispatch_and_audit(self):
         """Trigger dispatch and then AUDIT the last post content."""

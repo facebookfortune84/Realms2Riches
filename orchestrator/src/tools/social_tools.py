@@ -17,11 +17,9 @@ class FacebookPostTool(BaseTool):
         message, link, media_url = params.get("message"), params.get("link"), params.get("media_url")
         if not self.access_token or self.access_token == "placeholder": return {"status": "skipped"}
 
-        # 1. Determine Media Type
         is_video = media_url and ".mp4" in media_url.lower()
-        is_raster = media_url and (".png" in media_url.lower() or ".jpg" in media_url.lower() or ".jpeg" in media_url.lower())
+        is_raster = media_url and any(ext in media_url.lower() for ext in [".png", ".jpg", ".jpeg"])
         
-        # 2. Select Endpoint
         if is_video:
             url = f"https://graph.facebook.com/v19.0/{self.page_id}/videos"
             payload = {"file_url": media_url, "description": f"ACQUIRE NOW: {link}\n\n{message}", "access_token": self.access_token}
@@ -29,7 +27,6 @@ class FacebookPostTool(BaseTool):
             url = f"https://graph.facebook.com/v19.0/{self.page_id}/photos"
             payload = {"url": media_url, "caption": f"ACQUIRE NOW: {link}\n\n{message}", "access_token": self.access_token}
         else:
-            # Fallback to Link Card if no supported media
             url = f"https://graph.facebook.com/v19.0/{self.page_id}/feed"
             payload = {"message": message, "link": link, "access_token": self.access_token}
 
@@ -37,8 +34,7 @@ class FacebookPostTool(BaseTool):
             headers = {"ngrok-skip-browser-warning": "true"}
             response = requests.post(url, json=payload, headers=headers, timeout=30)
             if response.status_code != 200:
-                logger.error(f"Facebook API Error: {response.status_code} - {response.text}")
-                return {"status": "error", "reason": f"{response.status_code}: {response.text[:100]}"}
+                return {"status": "error", "reason": response.text[:150]}
             return {"status": "success", "platform": "facebook", "id": response.json().get("id") or response.json().get("post_id")}
         except Exception as e: return {"status": "error", "reason": str(e)}
 
@@ -48,11 +44,28 @@ class LinkedInPostTool(BaseTool):
         self.access_token = settings.LINKEDIN_ACCESS_TOKEN
         self.author_urn = settings.LINKEDIN_PROFILE_URN or "urn:li:person:placeholder"
 
+    def _refresh_token(self) -> bool:
+        if not all([settings.LINKEDIN_REFRESH_TOKEN, settings.LINKEDIN_CLIENT_ID, settings.LINKEDIN_CLIENT_SECRET]): return False
+        url = "https://www.linkedin.com/oauth/v2/accessToken"
+        payload = {"grant_type": "refresh_token", "refresh_token": settings.LINKEDIN_REFRESH_TOKEN, "client_id": settings.LINKEDIN_CLIENT_ID, "client_secret": settings.LINKEDIN_CLIENT_SECRET}
+        try:
+            res = requests.post(url, data=payload, headers={"Content-Type": "application/x-www-form-urlencoded"}, timeout=15)
+            if res.status_code == 200:
+                new_tok = res.json().get("access_token")
+                settings.LINKEDIN_ACCESS_TOKEN = new_tok
+                self.access_token = new_tok
+                return True
+            return False
+        except: return False
+
     def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
         text, link, media_url = params.get("message"), params.get("link"), params.get("media_url")
-        if not self.access_token or self.access_token == "placeholder": return {"status": "skipped"}
+        token = self.access_token
+        if not token or token == "placeholder": return {"status": "skipped"}
+        if token.startswith("Bearer "): token = token.replace("Bearer ", "")
+
         url = "https://api.linkedin.com/rest/posts"
-        headers = {"Authorization": f"Bearer {self.access_token}", "Content-Type": "application/json", "X-Restli-Protocol-Version": "2.0.0", "LinkedIn-Version": "202401"}
+        headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json", "X-Restli-Protocol-Version": "2.0.0", "LinkedIn-Version": "202401"}
         
         payload = {
             "author": self.author_urn,
@@ -64,13 +77,16 @@ class LinkedInPostTool(BaseTool):
         }
         
         if link:
-            payload["content"] = {"article": {"source": link, "title": "🚀 SECURE YOUR SOVEREIGN LICENSE"}}
+            payload["content"] = {"article": {"source": link, "title": "🚀 SECURE YOUR SOVEREIGN LICENSE", "description": "Initialize your 1000-agent swarm today."}}
             if media_url and ".svg" not in media_url.lower():
                 payload["content"]["article"]["thumbnail"] = media_url
 
         try:
-            response = requests.post(url, json=payload, headers=headers, timeout=10)
-            if response.status_code != 201: return {"status": "error", "reason": response.text[:100]}
+            response = requests.post(url, json=payload, headers=headers, timeout=15)
+            if response.status_code == 401 and self._refresh_token():
+                headers["Authorization"] = f"Bearer {self.access_token}"
+                response = requests.post(url, json=payload, headers=headers, timeout=15)
+            if response.status_code != 201: return {"status": "error", "reason": response.text[:150]}
             return {"status": "success", "platform": "linkedin"}
         except: return {"status": "error"}
 

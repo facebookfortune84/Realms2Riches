@@ -15,6 +15,7 @@ from orchestrator.src.tools.content_sharder import ContentSharderTool
 from orchestrator.src.tools.media_tools import ImageGenerationTool, VideoGenerationTool
 from orchestrator.src.tools.revenue_tools import PaymentTool, ProductForgeTool, YieldAuditorTool
 from orchestrator.src.tools.seo_tools import SEOTool
+from orchestrator.src.tools.audit_tools import SystemAuditTool, SelfHealingOptimizationTool
 from orchestrator.src.tools.universal_tools import get_multiplexer_tool
 from orchestrator.src.memory.vector_store import VectorStore
 from orchestrator.src.memory.sql_store import SQLStore
@@ -86,6 +87,8 @@ class Orchestrator:
             PaymentTool(ToolConfig(tool_id="payments", name="Payments", description="Manage fiscal transmissions", parameters_schema={}, allowed_agents=["*"]), stripe_key=settings.STRIPE_API_KEY),
             ProductForgeTool(ToolConfig(tool_id="product_forge", name="Product_Forge", description="Create new modular product slots", parameters_schema={"id": "string", "name": "string", "price": "number", "description": "string"}, allowed_agents=["GAMMA_OPS_1"])),
             YieldAuditorTool(ToolConfig(tool_id="yield_auditor", name="Yield_Auditor", description="Audit monetization potential", parameters_schema={}, allowed_agents=["GAMMA_OPS_1"])),
+            SystemAuditTool(ToolConfig(tool_id="system_audit", name="System_Audit", description="Grand Wizard Health Scan", parameters_schema={}, allowed_agents=["*"])),
+            SelfHealingOptimizationTool(ToolConfig(tool_id="self_healer", name="Self_Healer", description="Fix system deviations", parameters_schema={"issue": "string"}, allowed_agents=["*"])),
             SEOTool(ToolConfig(tool_id="seo", name="SEO_Master", description="Optimize content for organic reach", parameters_schema={}, allowed_agents=["*"])),
             get_multiplexer_tool()
         ]
@@ -105,6 +108,10 @@ class Orchestrator:
         self.cells["GAMMA"] = SovereignCell("GAMMA_OPS", [
             Agent(c, all_tools, self.memory, self.llm_provider) 
             for c in fleet if any(k in c.id.lower() for k in ["strategic", "legal", "revenue", "integrity"])
+        ])
+        self.cells["DELTA"] = SovereignCell("DELTA_OPTIMIZATION", [
+            Agent(c, all_tools, self.memory, self.llm_provider) 
+            for c in fleet if "integrity" in c.id.lower() or "ops" in c.id.lower()
         ])
 
         self.agents = {a.config.id: a for cell in self.cells.values() for a in cell.agent_pool}
