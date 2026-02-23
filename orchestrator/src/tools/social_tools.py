@@ -21,32 +21,33 @@ class FacebookPostTool(BaseTool):
         if not self.access_token or self.access_token == "placeholder":
             return {"status": "skipped", "reason": "No valid FACEBOOK_PAGE_TOKEN"}
 
-        # LOGIC: If we have an image, we MUST use /photos to avoid domain verification errors
+        # THE BUTTON FIX: We use /feed + link to generate a Clickable Preview Card.
+        # This is the most reliable way to get a 'Buy Button' experience organically.
+        url = f"https://graph.facebook.com/v19.0/{self.page_id}/feed"
+        
+        payload = {
+            "message": message,
+            "link": link,
+            "access_token": self.access_token
+        }
+        
+        # We include picture as a hint for the card, but don't force it to avoid ownership errors.
         if media_url:
-            url = f"https://graph.facebook.com/v19.0/{self.page_id}/photos"
-            # Put the link at the VERY TOP of the caption for maximum conversion
-            caption = f"BUY NOW: {link}\n\n{message}"
-            payload = {
-                "url": media_url,
-                "caption": caption,
-                "access_token": self.access_token
-            }
-        else:
-            # Pure link post
-            url = f"https://graph.facebook.com/v19.0/{self.page_id}/feed"
-            payload = {
-                "message": message,
-                "link": link,
-                "access_token": self.access_token
-            }
+            payload["picture"] = media_url
             
         try:
+            # We add the ngrok skip header in case we are pinging our own backend
             headers = {"ngrok-skip-browser-warning": "true"}
             response = requests.post(url, json=payload, headers=headers, timeout=15)
             
             if response.status_code != 200:
                 logger.error(f"Facebook API Error Details: {response.status_code} - {response.text}")
                 return {"status": "error", "reason": f"{response.status_code}: {response.text[:150]}"}
+                
+            return {"status": "success", "platform": "facebook", "id": response.json().get("id")}
+        except Exception as e:
+            logger.error(f"Facebook Connection Error: {e}")
+            return {"status": "error", "reason": str(e)}
                 
             return {"status": "success", "platform": "facebook", "id": response.json().get("id")}
         except Exception as e:
