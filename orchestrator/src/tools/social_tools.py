@@ -21,23 +21,26 @@ class FacebookPostTool(BaseTool):
         if not self.access_token or self.access_token == "placeholder":
             return {"status": "skipped", "reason": "No valid FACEBOOK_PAGE_TOKEN"}
 
-        url = f"https://graph.facebook.com/v19.0/{self.page_id}/feed"
-        payload = {
-            "message": message,
-            "access_token": self.access_token,
-            "link": link,
-            "call_to_action": {
-                "type": "SHOP_NOW",
-                "value": {
-                    "link": link
-                }
-            }
-        }
+        # LOGIC: If we have an image, we MUST use /photos to avoid domain verification errors
         if media_url:
-            payload["picture"] = media_url
+            url = f"https://graph.facebook.com/v19.0/{self.page_id}/photos"
+            # Put the link at the VERY TOP of the caption for maximum conversion
+            caption = f"BUY NOW: {link}\n\n{message}"
+            payload = {
+                "url": media_url,
+                "caption": caption,
+                "access_token": self.access_token
+            }
+        else:
+            # Pure link post
+            url = f"https://graph.facebook.com/v19.0/{self.page_id}/feed"
+            payload = {
+                "message": message,
+                "link": link,
+                "access_token": self.access_token
+            }
             
         try:
-            # We add the ngrok skip header in case we are pinging our own backend
             headers = {"ngrok-skip-browser-warning": "true"}
             response = requests.post(url, json=payload, headers=headers, timeout=15)
             
@@ -84,7 +87,12 @@ class LinkedInPostTool(BaseTool):
         if not self.access_token or self.access_token == "placeholder": return {"status": "skipped"}
 
         url = "https://api.linkedin.com/rest/posts"
-        headers = {"Authorization": f"Bearer {self.access_token}", "Content-Type": "application/json", "X-Restli-Protocol-Version": "2.0.0", "LinkedIn-Version": "202501"}
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+            "X-Restli-Protocol-Version": "2.0.0",
+            "LinkedIn-Version": "202401" 
+        }
         
         payload = {
             "author": self.author_urn,
