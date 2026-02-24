@@ -12,9 +12,17 @@ export default function LeadGenPopup() {
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev";
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsOpen(true), 15000); // 15 seconds delay
-    return () => clearTimeout(timer);
+    const isClosed = localStorage.getItem('leadGenClosed');
+    if (!isClosed) {
+      const timer = setTimeout(() => setIsOpen(true), 15000); // 15 seconds delay
+      return () => clearTimeout(timer);
+    }
   }, []);
+
+  const handleClose = () => {
+    setIsOpen(false);
+    localStorage.setItem('leadGenClosed', 'true');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,6 +40,7 @@ export default function LeadGenPopup() {
             setGuideUrl(data.guide_url);
         }
         setSubmitted(true);
+        localStorage.setItem('leadGenClosed', 'true');
       } catch (err) {
         console.error("Lead submission failed", err);
       }
@@ -50,7 +59,7 @@ export default function LeadGenPopup() {
       >
         <div className="bg-black border border-primary/30 rounded-2xl p-6 shadow-[0_0_50px_rgba(0,255,136,0.2)] relative overflow-hidden">
           <div className="absolute inset-0 bg-primary/5 pointer-events-none" />
-          <button onClick={() => setIsOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
+          <button onClick={handleClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
             <X size={16} />
           </button>
 

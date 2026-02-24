@@ -10,6 +10,11 @@ export default function LaunchControl() {
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
+    const savedStatus = localStorage.getItem('sovereign_status');
+    if (savedStatus) {
+      setStatus(savedStatus);
+    }
+
     const probe = async () => {
         try {
             const res = await fetch(`${BACKEND_URL}/health`, { mode: 'cors' });
@@ -43,6 +48,7 @@ export default function LaunchControl() {
         
         setLaunchData(data);
         setStatus('active');
+        localStorage.setItem('sovereign_status', 'active');
     } catch (err) {
         setLogs(prev => [...prev, "❌ ERROR: CONNECTION REFUSED BY TUNNEL", "💡 Fix: Ensure ngrok is running and URL matches .env.prod"]);
         setStatus('idle');
