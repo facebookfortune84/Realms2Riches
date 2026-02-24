@@ -137,12 +137,27 @@ async def autonomous_loop():
             await asyncio.sleep(5) 
         else: await asyncio.sleep(5)
 
+def seed_rag():
+    """Initializes the RAG store with foundational knowledge."""
+    if not orchestrator.memory.documents:
+        foundations = [
+            "The Sovereign Intelligence Network is a 1000-agent autonomous workforce.",
+            "Platinum Matrix provides full access to specialized cells: ALPHA, BETA, GAMMA, DELTA.",
+            "Monetization is achieved via Stripe integration and modular product slots.",
+            "System integrity is maintained via SHA-256 cryptographic hashing.",
+            "Direct conversion is optimized through visual authority and agentic copywriting."
+        ]
+        for f in foundations:
+            orchestrator.memory.add(f, {"type": "foundation", "timestamp": datetime.utcnow().isoformat()})
+        logger.info(f"✅ RAG SEEDED: {len(orchestrator.memory.documents)} Vectors initialized.")
+
 @app.on_event("startup")
 async def startup_event():
     from orchestrator.src.core.self_healing import sovereign_healer
     from orchestrator.src.core.scheduler import social_scheduler
     logger.info("Orchestrator starting up...")
     sovereign_healer.execute_healing_cycle()
+    seed_rag()
     social_scheduler.start()
     asyncio.create_task(log_heartbeat())
     asyncio.create_task(autonomous_loop())
@@ -231,8 +246,8 @@ async def audit_last_post():
 
 @app.post("/api/user/data-deletion")
 async def data_deletion_callback(request: Request):
-    conf_code = hashlib.sha256(str(time.time()).encode()).hexdigest()[:10]
-    return {"url": f"https://frontend-two-xi-gal9lkptfi.vercel.app/data-deletion-status?id={conf_code}", "confirmation_code": conf_code}
+    confirmation_code = hashlib.sha256(str(time.time()).encode()).hexdigest()[:10]
+    return {"url": f"https://frontend-two-xi-gal9lkptfi.vercel.app/data-deletion-status?id={confirmation_code}", "confirmation_code": confirmation_code}
 
 @app.get("/api/user/opt-out")
 async def opt_out(email: str):
@@ -275,6 +290,22 @@ async def checkout(request: Request):
         )
         return {"url": session.url}
     except Exception as e: return {"url": f"https://frontend-two-xi-gal9lkptfi.vercel.app/success"}
+
+@app.post("/api/webhooks/stripe")
+async def stripe_webhook(request: Request):
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
+    try:
+        if settings.STRIPE_WEBHOOK_SECRET:
+            event = stripe.Webhook.construct_event(payload, sig_header, settings.STRIPE_WEBHOOK_SECRET)
+        else: event = json.loads(payload)
+    except: return JSONResponse(status_code=400, content={"error": "Invalid payload"})
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        email = session.get("customer_email") or session.get("metadata", {}).get("customer_email")
+        provision_license(email, session.get("metadata", {}).get("product_id"))
+    return {"status": "success"}
 
 @app.post("/api/tasks")
 async def submit_task(request: Request):

@@ -1,0 +1,9 @@
+{
+  "id": null,
+  "name": null,
+  "price": null,
+  "description": null,
+  "category": "General",
+  "stripe_price_id": "pending",
+  "checkout_url": "#"
+}

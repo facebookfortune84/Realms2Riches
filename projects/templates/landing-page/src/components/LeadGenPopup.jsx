@@ -1,30 +1,36 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mail, Sparkles } from 'lucide-react';
+import { X, Mail, Sparkles, Download } from 'lucide-react';
 
 export default function LeadGenPopup() {
   const [isOpen, setIsOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [guideUrl, setGuideUrl] = useState('');
+
+  // Use the verified ngrok backend as fallback
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev";
 
   useEffect(() => {
     const timer = setTimeout(() => setIsOpen(true), 15000); // 15 seconds delay
     return () => clearTimeout(timer);
   }, []);
 
-  const [guideUrl, setGuideUrl] = useState('');
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (email) {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev"}/api/leads`, {
+        const response = await fetch(`${BACKEND_URL}/api/leads`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, source: 'popup' })
         });
         const data = await response.json();
-        if (data.guide_url) setGuideUrl(data.guide_url);
+        console.log("LEAD CAPTURE RESPONSE:", data);
+        if (data.guide_url) {
+            console.log("SETTING GUIDE URL:", data.guide_url);
+            setGuideUrl(data.guide_url);
+        }
         setSubmitted(true);
       } catch (err) {
         console.error("Lead submission failed", err);
@@ -70,24 +76,28 @@ export default function LeadGenPopup() {
                   required
                 />
                 <button type="submit" className="w-full bg-primary text-black font-black text-[10px] py-4 rounded-xl hover:bg-white transition-all uppercase tracking-[0.2em] shadow-[0_5px_20px_rgba(0,255,136,0.2)]">
-                  Acquire Guide
+                  Initialize Transmission
                 </button>
               </form>
             </>
           ) : (
-            <div className="text-center py-6">
+            <div className="text-center py-6 flex flex-col items-center">
               <motion.div initial={{ scale: 0.5 }} animate={{ scale: 1 }} className="text-primary text-5xl mb-4">⚡</motion.div>
-              <h3 className="text-white font-black text-sm uppercase tracking-tighter italic">Guide Dispatched</h3>
-              <p className="text-[10px] text-gray-500 mt-2 mb-6 uppercase tracking-widest">Access established.</p>
+              <h3 className="text-white font-black text-sm uppercase tracking-tighter italic">Transmission Sent</h3>
+              <p className="text-[10px] text-gray-500 mt-2 mb-6 uppercase tracking-widest">Guide arriving in sub-60s.</p>
+              
               {guideUrl && (
-                <a 
-                  href={guideUrl} 
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="bg-white text-black font-black text-[10px] px-6 py-3 rounded-lg hover:bg-primary transition-all uppercase tracking-widest"
+                <motion.a 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  href={guideUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-white text-black font-black text-[10px] py-3 px-6 rounded-xl hover:bg-primary transition-all uppercase tracking-widest shadow-[0_5px_15px_rgba(255,255,255,0.1)]"
                 >
-                  Download Guide
-                </a>
+                  <Download size={14} />
+                  Download Guide Now
+                </motion.a>
               )}
             </div>
           )}

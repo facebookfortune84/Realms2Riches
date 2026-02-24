@@ -27,9 +27,7 @@ class GrandWizardAudit:
         print(f"{status} | {name}: {details}")
 
     async def run_all(self):
-        print("
-🧙‍♂️ STARTING GRAND WIZARD MASTER AUDIT v4.2 🧙‍♂️
-")
+        print("\n🧙‍♂️ STARTING GRAND WIZARD MASTER AUDIT v4.2 🧙‍♂️\n")
         
         # 1. API Pulse & RAG Integrity
         try:
@@ -100,16 +98,13 @@ class GrandWizardAudit:
         # Summary
         total = len(self.results)
         passed = sum(1 for r in self.results.values() if r["success"])
-        print(f"
-📊 AUDIT SUMMARY: {passed}/{total} Tracks Online.")
+        print(f"\n📊 AUDIT SUMMARY: {passed}/{total} Tracks Online.")
         
         if passed == total:
-            print("
-✅ SYSTEM ALIGNED. READY FOR EXPANSION.")
+            print("\n✅ SYSTEM ALIGNED. READY FOR EXPANSION.")
             return True
         else:
-            print("
-❌ SYSTEM DEVIATED. Repairs required.")
+            print("\n❌ SYSTEM DEVIATED. Repairs required.")
             return False
 
 if __name__ == "__main__":

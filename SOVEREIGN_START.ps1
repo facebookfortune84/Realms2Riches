@@ -48,7 +48,7 @@ while ($retry -lt $maxRetries) {
         if ($res.status -eq "ok") {
             $healthy = $true
             Write-Host "SUCCESS: Neural Link Established." -ForegroundColor Green
-            Write-Host "   Agents: $($res.agents) | RAG: $($res.rag) Vectors" -ForegroundColor Gray
+            Write-Host "   Agents: $($res.agents) | RAG: $($res.rag) Vectors ONLINE" -ForegroundColor Cyan
             Write-Host "   Version: $($res.version)" -ForegroundColor DarkGray
             break
         }
