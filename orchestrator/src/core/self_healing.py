@@ -42,6 +42,27 @@ class SelfHealingService:
         logger.info(f"✅ HEALING COMPLETE: {len(self.repair_log)} repairs performed.")
         return self.repair_log
 
+    def route_to_secondary_core(self, file_path: str, error_msg: str):
+        """Pass failed code/logic to the 2nd core for background repair and testing."""
+        import shutil
+        target_dir = "core_secondary/quarantine"
+        os.makedirs(target_dir, exist_ok=True)
+        base_name = os.path.basename(file_path)
+        quarantine_path = os.path.join(target_dir, base_name)
+        
+        try:
+            shutil.copy2(file_path, quarantine_path)
+            # Create a repair ticket for the secondary core
+            repair_ticket = f"{quarantine_path}.ticket.json"
+            with open(repair_ticket, "w") as f:
+                json.dump({"error": error_msg, "original_path": file_path, "status": "PENDING_REPAIR"}, f)
+            logger.warning(f"🚨 [SELF-HEALING] Routed {base_name} to 2nd Core Quarantine due to: {error_msg}")
+            self.repair_log.append(f"Routed {base_name} to secondary core.")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to route {file_path} to secondary core: {e}")
+            return False
+
     def _repair_directories(self):
         for d in self.REQUIRED_DIRS:
             if not os.path.exists(d):

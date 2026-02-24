@@ -7,10 +7,7 @@ from datetime import datetime
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
 def print_banner(msg):
-    print(f"
-{'='*60}
-{msg}
-{'='*60}")
+    print(f"\n{'='*60}\n{msg}\n{'='*60}")
 
 def run_step(name, func):
     print(f"Running: {name}...", end=" ", flush=True)
@@ -19,8 +16,7 @@ def run_step(name, func):
         print("✅")
         return True, result
     except Exception as e:
-        print(f"❌
-ERROR: {e}")
+        print(f"❌\nERROR: {e}")
         return False, None
 
 def check_integrity():

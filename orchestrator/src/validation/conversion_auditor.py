@@ -4,12 +4,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 class LinkBeautifier:
-    """Transforms raw Stripe/ngrok URLs into clean, high-authority dispatches."""
-    
     @staticmethod
     def beautify(url: str) -> str:
-        # We must keep https:// for clickability.
-        # We just remove the query parameters for a 'cleaner' look in the text.
         if not url: return ""
         return url.split("?")[0]
 
@@ -18,20 +14,23 @@ class ConversionAuditor:
     The 'Final Gatekeeper'. 
     Ensures posts have BOTH a visual button and a beautified link.
     """
-    
     @staticmethod
     def audit(message: str, link: str) -> tuple:
         # 1. Check for 'Visual Button' (Emoji-based UI)
-        button_pattern = r"(\[.*\]|【.*】|▶️|💳|💰)"
+        # More inclusive pattern: checks for any bracketed text with or without emojis
+        button_pattern = r"(\[.*\]|【.*】|▶️|💳|💰|🛒)"
         has_visual_button = re.search(button_pattern, message)
         
-        # 2. Check for Clickable link density
-        has_link = link is not None and len(link) > 10
+        # 2. Check for the link in the message body
+        # Many social platforms need the link in the text to be clickable
+        has_link_in_text = link.lower() in message.lower() if link else False
         
         if not has_visual_button:
-            return False, "Post lacks a 'Visual Button' (Emoji UI). Organic feeds require visual triggers."
+            logger.warning(f"Auditor: Missing visual button in msg: {message[:100]}...")
+            return False, "Post lacks a 'Visual Button' (Emoji UI)."
         
-        if not has_link:
-            return False, "Post lacks a functional conversion link."
+        if not has_link_in_text and link:
+            logger.warning(f"Auditor: Link {link} not found in msg.")
+            return False, "Post lacks the direct conversion link in the text."
             
         return True, "CONVERSION PATH VERIFIED"

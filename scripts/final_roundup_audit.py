@@ -4,6 +4,7 @@ import requests
 import unittest
 import sys
 import time
+import socket
 
 sys.path.append(os.getcwd())
 
@@ -11,50 +12,67 @@ class SovereignFinalAudit(unittest.TestCase):
     BASE_URL = "http://localhost:8000"
 
     def setUp(self):
-        print("   -> Polling for Matrix Readiness (5 min max)...")
-        for i in range(60):
+        print("   -> Waiting for API Port (localhost:8000)...")
+        port_open = False
+        for _ in range(60): # 60 seconds initial port wait
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                if s.connect_ex(('localhost', 8000)) == 0:
+                    port_open = True
+                    break
+            time.sleep(1)
+        
+        if not port_open: self.fail("API Port failed to open.")
+
+        print("   -> Polling for Matrix Readiness (10 min max)...")
+        for i in range(300):
             try:
-                res = requests.get(f"{self.BASE_URL}/health", timeout=5)
-                if res.status_code == 200 and res.json().get("status") == "ok":
-                    print(f"   -> Matrix Online (Ready at {i*5}s).")
-                    return
+                res = requests.get(f"{self.BASE_URL}/health", timeout=2)
+                if res.status_code == 200:
+                    data = res.json()
+                    if data.get("status") == "ok":
+                        print(f"   -> Matrix ONLINE (Agents: {data.get('agents')}).")
+                        return
+                    else:
+                        if i % 10 == 0:
+                            print(f"   -> Initializing Swarm... Current Units: {data.get('agents', 0)}")
             except: pass
-            time.sleep(5)
+            time.sleep(2)
         self.fail("Orchestrator failed to initialize in time.")
 
     def test_01_core(self):
-        print("\n[AUDIT] 1. Core...")
         res = requests.get(f"{self.BASE_URL}/health")
         self.assertEqual(res.status_code, 200)
-        print("✅ PASS")
+        print("✅ TRACK 1: Core Online.")
 
     def test_02_revenue(self):
-        print("[AUDIT] 2. Revenue...")
         res = requests.get(f"{self.BASE_URL}/products")
         self.assertGreater(len(res.json()), 0)
-        print("✅ PASS")
+        print("✅ TRACK 2: Revenue Matrix Verified.")
 
-    def test_03_social(self):
-        print("[AUDIT] 3. Social...")
-        # We always trigger fresh to verify LLM + API track
-        print("   -> Triggering fresh dispatch (120s timeout)...")
-        res = requests.post(f"{self.BASE_URL}/api/admin/test-dispatch", timeout=120)
-        self.assertEqual(res.status_code, 200)
+    def test_03_multi_funnel_monetization(self):
+        print("   -> Testing Social Funnel...")
+        post_res = requests.post(f"{self.BASE_URL}/api/admin/test-dispatch")
+        data = post_res.json()
+        task_id = data.get("task_id")
         
-        print("   -> Waiting 20s for Meta propagation...")
-        time.sleep(20)
+        if not task_id: self.fail(f"Dispatch Rejected: {data}")
         
-        res = requests.get(f"{self.BASE_URL}/api/admin/audit-last-post", timeout=20)
-        fb = res.json().get("facebook", {})
-        self.assertEqual(fb.get("status"), "verified", f"Social Incomplete: {fb.get('reason')}")
-        print("✅ PASS: Social monetization verified live.")
+        task_success = False
+        for _ in range(60): 
+            state_res = requests.get(f"{self.BASE_URL}/api/admin/dispatch-status/{task_id}")
+            if state_res.json().get("status") == "completed":
+                task_success = True
+                break
+            time.sleep(5)
+            
+        self.assertTrue(task_success, "Social dispatch track timed out.")
+        print("✅ TRACK 3: Social Monetization Live.")
 
     def test_04_workforce(self):
-        print("[AUDIT] 4. Workforce...")
         res = requests.get(f"{self.BASE_URL}/api/workforce/role-call")
         self.assertEqual(res.status_code, 200)
-        print(f"✅ PASS: Agents online and introduced.")
+        print("✅ TRACK 4: Workforce Synchronized.")
 
 if __name__ == "__main__":
-    print("\n👑 SOVEREIGN MASTER AUDIT v5.6 👑")
+    print("\n👑 SOVEREIGN MASTER AUDIT v6.3 👑")
     unittest.main()

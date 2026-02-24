@@ -5,13 +5,13 @@ import json
 import hashlib
 import shutil
 import time
-import random
+import random # RESTORED MISSING IMPORT
 from datetime import datetime
 
 from orchestrator.src.core.agent import Agent
 from orchestrator.src.core.llm_provider import GroqProvider
 from orchestrator.src.core.config import settings
-from orchestrator.src.validation.schemas import TaskSpec, AgentConfig, ToolConfig
+from orchestrator.src.validation.schemas import TaskSpec, AgentConfig, ToolConfig, ToolInvocation
 from orchestrator.src.logging.logger import get_logger
 from orchestrator.src.agents.fleet import generate_grand_fleet
 from orchestrator.src.core.voice.mock_adapters import MockSTTAdapter, MockTTSAdapter
@@ -20,8 +20,8 @@ from orchestrator.src.tools.base import BaseTool
 logger = get_logger(__name__)
 
 class OracleProxyTool(BaseTool):
-    def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        return {"status": "success", "oracle_logic": self.config.name, "data": params}
+    def execute(self, invocation: ToolInvocation) -> Dict[str, Any]:
+        return {"status": "success", "oracle_logic": self.config.name, "data": invocation.input_data}
 
 class SovereignCell:
     def __init__(self, cell_id: str, agents: List[Agent]):
@@ -47,10 +47,6 @@ class SovereignBridge:
                 os.makedirs(dst, exist_ok=True)
                 logger.info(f"Bridge Sync: {p}")
 
-    def failover(self):
-        self.active_core = "SECONDARY"
-        logger.warning("🚨 FAILOVER ACTIVE")
-
 class Orchestrator:
     def __init__(self):
         self.is_ready = False
@@ -66,10 +62,7 @@ class Orchestrator:
         from orchestrator.src.memory.vector_store import VectorStore
         from orchestrator.src.memory.sql_store import SQLStore
         self.memory, self.sql_store = VectorStore(), SQLStore()
-        
-        # Build Matrix in Thread to keep API alive
         await asyncio.to_thread(self._initialize_matrix)
-        
         self.bridge.sync_critical_assets()
         self.is_ready = True
         logger.info("💎 SOVEREIGN MATRIX ONLINE.")
@@ -93,22 +86,18 @@ class Orchestrator:
     def _initialize_matrix(self):
         fleet = generate_grand_fleet()
         from orchestrator.src.tools.social_tools import SocialMediaMultiplexer
-        from orchestrator.src.tools.project_tools import ProjectGeneratorTool
-        from orchestrator.src.tools.revenue_tools import YieldAuditorTool
-        from orchestrator.src.tools.audit_tools import SystemAuditTool
+        from orchestrator.src.tools.multiplication_tools import OutreachSwarmTool, SEOContentFactoryTool
         from orchestrator.src.tools.file_tools import FileTool
         from orchestrator.src.tools.git_tools import GitTool
         from orchestrator.src.tools.browser_agent import BrowserAgentTool
 
-        # Pre-cache all tools for reuse
         all_tools = [
             GitTool(ToolConfig(tool_id="git", name="Git", description="Ops", parameters_schema={}, allowed_agents=["*"])),
             FileTool(ToolConfig(tool_id="file", name="File", description="I/O", parameters_schema={}, allowed_agents=["*"])),
             BrowserAgentTool(ToolConfig(tool_id="browser", name="Browser", description="Web Automation", parameters_schema={}, allowed_agents=["*"])),
             SocialMediaMultiplexer(ToolConfig(tool_id="multiplexer", name="Broadcast", description="Omni", parameters_schema={}, allowed_agents=["*"])),
-            ProjectGeneratorTool(ToolConfig(tool_id="genesis", name="Forge", description="Genesis", parameters_schema={}, allowed_agents=["*"])),
-            YieldAuditorTool(ToolConfig(tool_id="auditor", name="Yield", description="Finance", parameters_schema={}, allowed_agents=["*"])),
-            SystemAuditTool(ToolConfig(tool_id="sys_audit", name="Integrity", description="Security", parameters_schema={}, allowed_agents=["*"]))
+            OutreachSwarmTool(ToolConfig(tool_id="outreach", name="Outreach", description="Direct Sales", parameters_schema={}, allowed_agents=["*"])),
+            SEOContentFactoryTool(ToolConfig(tool_id="seo", name="SEO", description="SEO Engine", parameters_schema={}, allowed_agents=["*"]))
         ]
         all_tools.extend(self._load_oracle_tools())
 
@@ -118,31 +107,20 @@ class Orchestrator:
                 Agent(config, all_tools, self.memory, self.llm_provider)
                 for config in fleet if dept.lower() in config.id.lower()
             ])
-
         self.agents = {a.config.id: a for cell in self.cells.values() for a in cell.agent_pool}
 
     async def submit_task_stream(self, task_description: str, project_id: str) -> AsyncGenerator[Dict[str, Any], None]:
-        if not self.is_ready:
-            yield {"status": "error", "reason": "Initializing..."}
-            return
+        if not self.is_ready: yield {"status": "error", "reason": "Initializing..."}; return
         task_id = hashlib.sha256(f"{task_description}{time.time()}".encode()).hexdigest()[:8]
         desc = task_description.lower()
-        if any(k in desc for k in ["code", "build"]): cell_key = "CYBERNETIC_ENGINEERING"
-        elif any(k in desc for k in ["market", "post"]): cell_key = "GLOBAL_MARKET_FORCE"
-        elif any(k in desc for k in ["price", "revenue"]): cell_key = "REVENUE_SYSTEMS"
-        elif any(k in desc for k in ["security", "ethics"]): cell_key = "INTEGRITY_SHIELD"
-        elif any(k in desc for k in ["fix", "audit"]): cell_key = "FALLBACK_OPTIMIZATION"
-        elif any(k in desc for k in ["design", "visual"]): cell_key = "VISUAL_INTELLIGENCE"
+        if any(k in desc for k in ["outreach", "dm", "sale"]): cell_key = "GLOBAL_MARKET_FORCE"
+        elif any(k in desc for k in ["seo", "blog", "content"]): cell_key = "GLOBAL_MARKET_FORCE"
+        elif any(k in desc for k in ["code", "fix"]): cell_key = "CYBERNETIC_ENGINEERING"
         else: cell_key = "STRATEGIC_OPERATIONS"
 
-        yield {"status": "routing", "task_id": task_id, "destination": cell_key, "core": self.bridge.active_core}
+        yield {"status": "routing", "task_id": task_id, "destination": cell_key}
         try:
             task = TaskSpec(id=task_id, project_id=project_id, description=task_description)
             result = await self.cells[cell_key].execute(task)
             yield {"status": "completed", "task_id": task_id, "result": result}
-        except Exception as e:
-            self.bridge.failover()
-            yield {"status": "failed", "task_id": task_id, "reason": str(e)}
-
-    def get_matrix_status(self) -> Dict[str, Any]:
-        return {name: {"active": "CLOSED", "load": c.task_queue.qsize(), "units": len(c.agent_pool)} for name, c in self.cells.items()}
+        except Exception as e: yield {"status": "failed", "task_id": task_id, "reason": str(e)}
