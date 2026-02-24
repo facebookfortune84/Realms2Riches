@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import AsyncGenerator, Generator, Optional, Any
 
-class STTAdapter(ABC):
+class STTInterface(ABC):
     @abstractmethod
     async def transcribe_stream(self, audio_chunk_stream: AsyncGenerator[bytes, None]) -> AsyncGenerator[str, None]:
         """
@@ -16,7 +16,11 @@ class STTAdapter(ABC):
         """
         pass
 
-class TTSAdapter(ABC):
+    # Optional: Legacy support if needed
+    async def transcribe(self, audio_chunk: bytes) -> str:
+        return await self.transcribe_chunk(audio_chunk)
+
+class TTSInterface(ABC):
     @abstractmethod
     async def synthesize_stream(self, text_stream: AsyncGenerator[str, None]) -> AsyncGenerator[bytes, None]:
         """
@@ -30,3 +34,7 @@ class TTSAdapter(ABC):
         Synthesizes a complete text string into audio bytes.
         """
         pass
+
+    # Optional: Legacy support if needed
+    async def synthesize(self, text: str) -> bytes:
+        return await self.synthesize_text(text)

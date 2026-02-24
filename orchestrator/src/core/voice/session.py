@@ -2,7 +2,7 @@ import asyncio
 import uuid
 from typing import Dict, Any, Optional
 from enum import Enum, auto
-from orchestrator.src.core.voice.interfaces import STTAdapter, TTSAdapter
+from orchestrator.src.core.voice.interfaces import STTInterface, TTSInterface
 from orchestrator.src.core.orchestrator import Orchestrator
 from orchestrator.src.logging.logger import get_logger
 
@@ -15,7 +15,7 @@ class VoiceSessionState(Enum):
     SPEAKING = auto()
 
 class VoiceSession:
-    def __init__(self, session_id: str, stt: STTAdapter, tts: TTSAdapter, orchestrator: Orchestrator):
+    def __init__(self, session_id: str, stt: STTInterface, tts: TTSInterface, orchestrator: Orchestrator):
         self.session_id = session_id
         self.stt = stt
         self.tts = tts
@@ -57,27 +57,22 @@ class VoiceSession:
                     
                     # 1. Barge-in Check
                     if self.state == VoiceSessionState.SPEAKING:
-                        # Simple energy/length check for interruption
                         if len(chunk) > 100: 
                             logger.info("Barge-in detected! Interrupting...")
                             await self._handle_interruption()
-                            continue # Skip processing this chunk as part of old turn, or treat as new?
-                                     # Usually treat as start of new turn.
+                            continue
 
                     # 2. Accumulate
                     audio_buffer.extend(chunk)
                     self.state = VoiceSessionState.LISTENING
                     
-                    # 3. VAD / End-of-Speech Trigger (Mock: > 1000)
+                    # 3. Utterance Trigger
                     if len(audio_buffer) > 1000:
                         logger.info("Utterance detected, processing...")
                         
-                        # Create a task for the heavy lifting so we don't block input reading
-                        # But wait, if we spawn a task, we must track it to cancel it on barge-in.
                         if self.processing_task and not self.processing_task.done():
                              self.processing_task.cancel()
                         
-                        # Copy buffer and clear
                         audio_data = bytes(audio_buffer)
                         audio_buffer.clear()
                         
@@ -92,7 +87,6 @@ class VoiceSession:
         """Cancels current processing and clears output queue to stop playback immediately."""
         logger.warning(f"🛑 BARGE-IN TRIGGERED: {reason}")
         
-        # 1. Cancel the current thinking/speaking task
         if self.processing_task and not self.processing_task.done():
             self.processing_task.cancel()
             try:
@@ -101,48 +95,35 @@ class VoiceSession:
                 pass
             self.processing_task = None
         
-        # 2. Drain the output queue (Stop the TTS stream from sending more chunks)
         while not self.output_queue.empty():
             try:
                 self.output_queue.get_nowait()
             except asyncio.QueueEmpty:
                 break
         
-        # 3. Send explicit STOP command to frontend
         await self.output_queue.put({"type": "control", "action": "stop_audio", "reason": reason})
-        
-        # 4. Reset State
         self.state = VoiceSessionState.IDLE
-        
-        # 5. (Future) Update LLM Context with "User interrupted me"
-        # self.context.append({"role": "system", "content": "User interrupted previous response."})
 
     async def _process_turn(self, audio_data: bytes):
         try:
             self.state = VoiceSessionState.THINKING
             await self.output_queue.put({"type": "state", "state": "thinking"})
             
-            # STT
             transcript = await self.stt.transcribe_chunk(audio_data)
             await self.output_queue.put({"type": "transcript", "text": transcript, "is_final": True})
             
-            # LLM
-            # Mocking the Orchestrator call
+            # Response Logic
             response_text = f"I heard {len(audio_data)} bytes. You said: {transcript}"
             await self.output_queue.put({"type": "text", "text": response_text})
             
-            # TTS
             self.state = VoiceSessionState.SPEAKING
             await self.output_queue.put({"type": "state", "state": "speaking"})
             
-            # Synthesize Stream
             async def text_gen():
                 yield response_text
             
             async for audio_chunk in self.tts.synthesize_stream(text_gen()):
                 await self.output_queue.put({"type": "audio", "data": audio_chunk.hex()})
-                # Check for cancellation implicitly via the loop, but since we are in a task,
-                # if the task is cancelled, this loop aborts automatically.
 
             self.state = VoiceSessionState.IDLE
             await self.output_queue.put({"type": "state", "state": "idle"})

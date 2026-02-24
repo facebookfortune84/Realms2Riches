@@ -2,12 +2,12 @@ import os
 import aiohttp
 import io
 from typing import AsyncGenerator
-from orchestrator.src.core.voice.interfaces import STTAdapter, TTSAdapter
+from orchestrator.src.core.voice.interfaces import STTInterface, TTSInterface
 from orchestrator.src.logging.logger import get_logger
 
 logger = get_logger(__name__)
 
-class OpenAIWhisperAdapter(STTAdapter):
+class OpenAIWhisperAdapter(STTInterface):
     def __init__(self, api_key: str):
         self.api_key = api_key
         self.url = "https://api.openai.com/v1/audio/transcriptions"
@@ -42,7 +42,7 @@ class OpenAIWhisperAdapter(STTAdapter):
                         return data.get("text", "")
                     return ""
 
-class ElevenLabsAdapter(TTSAdapter):
+class ElevenLabsAdapter(TTSInterface):
     def __init__(self, api_key: str, voice_id: str = "21m00Tcm4TlvDq8ikWAM"):
         self.api_key = api_key
         self.voice_id = voice_id
