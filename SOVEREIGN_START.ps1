@@ -54,7 +54,7 @@ docker-compose -f infra/docker/docker-compose.prod.yml up -d --build
 
 # --- 3. PULSE CHECK ---
 Write-Host "[3/6] Detecting Neural Heartbeat..." -ForegroundColor Cyan
-$maxRetries = 25
+$maxRetries = 100
 $retry = 0
 $healthy = $false
 

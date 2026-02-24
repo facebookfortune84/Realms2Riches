@@ -70,7 +70,12 @@ async def root():
 @app.get("/health")
 async def health():
     if not orchestrator.is_ready:
-        return {"status": "initializing", "message": "Matrix building in progress..."}
+        return {
+            "status": "initializing", 
+            "agents": len(orchestrator.agents),
+            "rag": len(orchestrator.memory.documents) if orchestrator.memory else 0,
+            "message": "Matrix building in progress..."
+        }
     return {
         "status": "ok", 
         "agents": len(orchestrator.agents), 
