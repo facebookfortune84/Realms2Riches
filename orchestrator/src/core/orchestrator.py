@@ -3,6 +3,7 @@ import asyncio
 import os
 import random
 import time
+import hashlib
 from datetime import datetime
 from pydantic import ValidationError
 
@@ -12,6 +13,10 @@ from orchestrator.src.core.config import settings
 from orchestrator.src.validation.schemas import TaskSpec, AgentConfig, ToolConfig, ToolInvocation
 from orchestrator.src.logging.logger import get_logger
 from orchestrator.src.agents.fleet import generate_grand_fleet
+
+# Voice & Multimodal Adapters
+from orchestrator.src.core.voice.mock_adapters import MockSTTAdapter, MockTTSAdapter
+# from orchestrator.src.core.voice.real_adapters import DeepgramSTT, ElevenLabsTTS # Ready for expansion
 
 # Tools & Logic
 from orchestrator.src.tools.git_tools import GitTool
@@ -63,13 +68,11 @@ class SovereignCell:
             return {"status": "failed", "reason": "Cell Circuit Breaker is OPEN"}
             
         await self.task_queue.put(task)
-        # Select agent with lowest current load (simple RR here)
         agent = random.choice(self.agent_pool)
         
         try:
-            # Execute in thread to keep the event loop free for telemetry
             result = await asyncio.to_thread(agent.process_task, task)
-            self.circuit_breaker.failures = max(0, self.circuit_breaker.failures - 1)
+            self.circuit_breaker.failures = max(0, self.failures_reduction())
             return result
         except Exception as e:
             self.circuit_breaker.record_failure()
@@ -77,24 +80,33 @@ class SovereignCell:
         finally:
             await self.task_queue.get()
 
+    def failures_reduction(self):
+        return self.circuit_breaker.failures - 1
+
 class Orchestrator:
     """
     Sovereign Swarm Master.
-    Aligns with NVIDIA's Multi-Agent architecture for high-velocity inference.
+    NVIDIA-Style Orchestration with Voice & Telemetry.
     """
     def __init__(self):
+        # 1. Base Infrastructure
         self.memory = VectorStore()
         self.sql_store = SQLStore()
         self.llm_provider = GroqProvider()
+        
+        # 2. Voice Engine (Fixed: Restored for api.py compatibility)
+        self.stt = MockSTTAdapter()
+        self.tts = MockTTSAdapter()
+        
+        # 3. Matrix State
         self.cells: Dict[str, SovereignCell] = {}
-        self.tools: Dict[str, Any] = {}
+        self.agents: Dict[str, Agent] = {}
         self._initialize_matrix()
 
-    def _initialize_sovereign_matrix(self):
-        # Implementation of 1000-agent partitioning
+    def _initialize_matrix(self):
         fleet = generate_grand_fleet()
         
-        # 1. Load Quad-Core Tools
+        # Load Quad-Core Tools
         all_tools = [
             GitTool(ToolConfig(tool_id="git", name="Git", description="Ops", parameters_schema={}, allowed_agents=["*"])),
             FileTool(ToolConfig(tool_id="file", name="File", description="I/O", parameters_schema={}, allowed_agents=["*"])),
@@ -106,7 +118,7 @@ class Orchestrator:
             SystemAuditTool(ToolConfig(tool_id="sys_audit", name="Integrity", description="Security", parameters_schema={}, allowed_agents=["*"]))
         ]
 
-        # 2. Partition into NVIDIA-Style specialized clusters
+        # Partition into Meta-Departments
         depts = ["CYBERNETIC_ENGINEERING", "GLOBAL_MARKET_FORCE", "REVENUE_SYSTEMS", "INTEGRITY_SHIELD", "FALLBACK_OPTIMIZATION"]
         for dept in depts:
             self.cells[dept] = SovereignCell(dept, [
@@ -117,15 +129,9 @@ class Orchestrator:
         self.agents = {a.config.id: a for cell in self.cells.values() for a in cell.agent_pool}
         logger.info(f"💎 PLATINUM BASELINE ESTABLISHED: {len(self.agents)} Specialized Units Online.")
 
-    def _initialize_matrix(self):
-        # Placeholder for complex init, logic moved to _initialize_sovereign_matrix
-        self._initialize_sovereign_matrix()
-
     async def submit_task_stream(self, task_description: str, project_id: str) -> AsyncGenerator[Dict[str, Any], None]:
-        """High-velocity task streaming with telemetry."""
         task_id = hashlib.sha256(f"{task_description}{time.time()}".encode()).hexdigest()[:8]
         
-        # Determine Routing
         desc = task_description.lower()
         if any(k in desc for k in ["code", "build", "infra"]): cell_key = "CYBERNETIC_ENGINEERING"
         elif any(k in desc for k in ["post", "market", "viral"]): cell_key = "GLOBAL_MARKET_FORCE"

@@ -25,20 +25,21 @@ class Agent:
         self.history: List[Dict[str, str]] = []
 
     def process_task(self, task: TaskSpec) -> Dict[str, Any]:
+        # FIXED: Ensure task.id is used for traceability
         trace_id = hashlib.sha256(f"{task.id}{time.time()}".encode()).hexdigest()[:12]
         span = telemetry.start_span("process_task", self.config.id, trace_id)
         
         logger.info(f"Agent {self.config.name} initiated trace {trace_id}")
         
         try:
-            # 1. RAG Context Injection (Industry standard recursive retrieval)
+            # 1. RAG Context Injection
             context_docs = self.memory.search(task.description, limit=5)
             context_text = "\n".join([f"- {doc['text']}" for doc in context_docs])
             
             # 2. Planning Phase
             plan = self._formulate_plan(task.description, context_text)
             
-            # 3. Execution Phase with Pre/Post Hooks
+            # 3. Execution Phase
             results = []
             for step in plan.get("steps", []):
                 tool_id = step.get("tool_id")
@@ -51,10 +52,9 @@ class Agent:
                         input_data=step.get("inputs", {})
                     )
                     
-                    # RUN TOOL
                     result = self.tools[tool_id].run(invocation)
                     
-                    # Cryptographic Signature of Artifacts
+                    # Cryptographic Signature
                     result.integrity_hash = hashlib.sha256(result.model_dump_json().encode()).hexdigest()
                     results.append(result.model_dump(mode="json"))
                     
@@ -65,7 +65,7 @@ class Agent:
             # 4. Success Completion
             telemetry.end_span(span, status="SUCCESS", metadata={"steps_count": len(results)})
             
-            # Log to memory for recursive learning
+            # Recursive Learning
             self.memory.add(f"Task result for '{task.description}': {plan.get('reasoning')}", {"type": "recursive_memory"})
 
             return {
@@ -82,14 +82,13 @@ class Agent:
             return {"status": "failed", "error": str(e), "trace_id": trace_id}
 
     def _formulate_plan(self, prompt: str, context: str) -> Dict[str, Any]:
-        """Systematic LLM routing with strict JSON enforcement."""
         tools_list = "\n".join([f"- {t.config.tool_id}: {t.config.description}" for t in self.tools.values()])
         
         system_prompt = f"""{self.config.system_prompt}
         TOOLS:
         {tools_list}
         
-        OUTPUT SCHEMA:
+        OUTPUT SCHEMA (STRICT JSON):
         {{
           "reasoning": "thought process",
           "steps": [ {{ "tool_id": "id", "inputs": {{}} }} ]
@@ -105,6 +104,12 @@ class Agent:
         ])
         
         try:
-            return json.loads(response[response.find('{') : response.rfind('}') + 1])
-        except:
-            return {"reasoning": "Plan parsing failure.", "steps": []}
+            # Robust JSON extraction
+            start = response.find('{')
+            end = response.rfind('}')
+            if start != -1 and end != -1:
+                return json.loads(response[start:end+1])
+            return {"reasoning": "No JSON found in response.", "steps": []}
+        except Exception as e:
+            logger.error(f"Plan formulation parsing failed: {e}")
+            return {"reasoning": f"Plan parsing failure: {str(e)}", "steps": []}
