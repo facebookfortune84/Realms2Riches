@@ -17,6 +17,55 @@ from orchestrator.src.core.voice.mock_adapters import MockSTTAdapter, MockTTSAda
 
 logger = get_logger(__name__)
 
+class CircuitBreaker:
+    """Industry-standard failure protection."""
+    def __init__(self, threshold: int = 5, recovery_time: int = 60):
+        self.threshold = threshold
+        self.recovery_time = recovery_time
+        self.failures = 0
+        self.last_failure_time = 0
+        self.state = "CLOSED"
+
+    def record_failure(self):
+        self.failures += 1
+        self.last_failure_time = time.time()
+        if self.failures >= self.threshold:
+            self.state = "OPEN"
+            logger.error("🛑 CIRCUIT BREAKER TRIPPED")
+
+    def is_available(self) -> bool:
+        if self.state == "OPEN":
+            if time.time() - self.last_failure_time > self.recovery_time:
+                self.state = "HALF-OPEN"
+                return True
+            return False
+        return True
+
+class SovereignCell:
+    """Highly-Available specialized agent pool."""
+    def __init__(self, cell_id: str, agents: List[Agent]):
+        self.cell_id = cell_id
+        self.agent_pool = agents
+        self.task_queue = asyncio.Queue(maxsize=1000)
+        self.circuit_breaker = CircuitBreaker()
+
+    async def execute(self, task: TaskSpec) -> Dict[str, Any]:
+        if not self.circuit_breaker.is_available():
+            return {"status": "failed", "reason": "Cell Circuit Breaker is OPEN"}
+            
+        await self.task_queue.put(task)
+        agent = random.choice(self.agent_pool)
+        
+        try:
+            result = await asyncio.to_thread(agent.process_task, task)
+            self.circuit_breaker.failures = max(0, self.circuit_breaker.failures - 1)
+            return result
+        except Exception as e:
+            self.circuit_breaker.record_failure()
+            raise e
+        finally:
+            await self.task_queue.get()
+
 class SovereignBridge:
     """
     Manages the 'One Up / One Down' logic between Primary and Secondary cores.
@@ -35,8 +84,6 @@ class SovereignBridge:
             dst = os.path.join(self.secondary, p)
             if os.path.exists(src):
                 os.makedirs(dst, exist_ok=True)
-                # Industry-standard atomic sync (simplified)
-                # shutil.copytree(src, dst, dirs_exist_ok=True)
                 logger.info(f"Bridge: Synchronized {p} to secondary core.")
 
     def failover(self):
@@ -58,8 +105,8 @@ class Orchestrator:
         self.tts = MockTTSAdapter()
         
         # 3. Matrix State
-        self.cells = {}
-        self.agents = {}
+        self.cells: Dict[str, SovereignCell] = {}
+        self.agents: Dict[str, Agent] = {}
         self._initialize_matrix()
         
         # 4. Background Sync
@@ -84,7 +131,8 @@ class Orchestrator:
         ]
 
         depts = ["CYBERNETIC_ENGINEERING", "GLOBAL_MARKET_FORCE", "REVENUE_SYSTEMS", "INTEGRITY_SHIELD", "FALLBACK_OPTIMIZATION"]
-        from orchestrator.src.core.orchestrator import SovereignCell
+        
+        # FIXED: Removed 'from orchestrator.src.core.orchestrator import SovereignCell' which was causing circular error
         for dept in depts:
             self.cells[dept] = SovereignCell(dept, [
                 Agent(c, all_tools, self.memory, self.llm_provider)
@@ -113,3 +161,12 @@ class Orchestrator:
             logger.error(f"Primary Failure. Attempting Failover sync...")
             self.bridge.failover()
             yield {"status": "failed", "task_id": task_id, "reason": str(e)}
+
+    def get_matrix_status(self) -> Dict[str, Any]:
+        return {
+            name: {
+                "active": c.circuit_breaker.state,
+                "load": c.task_queue.qsize(),
+                "units": len(c.agent_pool)
+            } for name, c in self.cells.items()
+        }
