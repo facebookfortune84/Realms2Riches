@@ -182,6 +182,15 @@ lead_service = LeadDeliveryService()
 async def root_redirect():
     return RedirectResponse(url="https://frontend-two-xi-gal9lkptfi.vercel.app/")
 
+@app.get("/api/workforce/roster")
+async def get_roster():
+    from orchestrator.src.core.workforce import workforce
+    return {
+        "total_units": len(workforce.roster),
+        "total_accrued_wages": workforce.get_total_payroll(),
+        "units": [d.to_dict() for d in workforce.roster.values()]
+    }
+
 @app.get("/health")
 async def health():
     return {

@@ -12,6 +12,22 @@ Write-Host "`n  REALMS  2  RICHES" -ForegroundColor Green
 Write-Host "  SOVEREIGN INTELLIGENCE NETWORK" -ForegroundColor Green
 Write-Host "  v3.7.2-PLATINUM | SYSTEM: INITIALIZING`n" -ForegroundColor Gray
 
+# --- 0. SOVEREIGN GIT & LINEAGE SYNC ---
+Write-Host "[0/6] Synchronizing Git Pulse & Lineage..." -ForegroundColor Cyan
+try {
+    # 1. Staging untracked contributions
+    git add .
+    
+    # 2. Automated Tagging
+    $timestamp = Get-Date -Format "yyyyMMdd-HHmm"
+    $tag = "sov-pulse-$timestamp"
+    git commit -m "Sovereign Swarm Pulse: $timestamp [Automated Lineage Commit]" --allow-empty
+    git tag -a $tag -m "Sovereign Intelligence Network Lifecycle Point: $tag"
+    Write-Host "SUCCESS: Repository Tagged as $tag" -ForegroundColor Green
+} catch {
+    Write-Host "WARNING: Git Pulse skipped (No repo or no changes)." -ForegroundColor Yellow
+}
+
 # --- 1. DOCKER VALIDATION ---
 Write-Host "[1/6] Verifying Docker Desktop..." -ForegroundColor Cyan
 if (-not (Get-Process "Docker Desktop" -ErrorAction SilentlyContinue)) {
