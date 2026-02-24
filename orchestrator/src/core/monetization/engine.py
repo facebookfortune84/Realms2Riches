@@ -123,12 +123,22 @@ class MonetizationEngine:
             FastDeployMonetizationStream()
         ]
 
-    async def run_all_streams(self) -> List[Dict[str, Any]]:
-        logger.info("Initializing 10-Stream Monetization Engine with REALMS TO RICHES Scraped Links...")
+    async def run_all_streams(self, orchestrator=None) -> List[Dict[str, Any]]:
+        logger.info("Initializing 13-Stream Monetization Engine with REALMS TO RICHES Scraped Links...")
         results = []
         for stream in self.streams:
             try:
-                res = stream.execute()
+                # If it's a stream that can be automated via the orchestrator
+                if orchestrator and isinstance(stream, (SEOTrafficStream, ColdOutreachStream, AffiliateArbitrageStream)):
+                    logger.info(f"Dispatching REAL-WORLD task for {stream.__class__.__name__}...")
+                    desc = f"Execute {stream.__class__.__name__} operation to maximize revenue."
+                    # We run it in the background/stream it
+                    async for step in orchestrator.submit_task_stream(desc, "monetization"):
+                        if step["status"] == "completed":
+                            res = {"stream": stream.__class__.__name__, "status": "executed", "result": step["result"]}
+                            break
+                else:
+                    res = stream.execute()
                 results.append(res)
             except Exception as e:
                 logger.error(f"Stream {stream.__class__.__name__} failed: {e}")

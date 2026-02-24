@@ -111,8 +111,30 @@ async def get_stats(): return telemetry_data
 @app.get("/api/workforce/role-call")
 async def role_call():
     if not orchestrator.is_ready: raise HTTPException(status_code=503, detail="Not Ready")
-    introductions = [f"Unit {a.dossier.tax_id} ({a.agent_name}) online as {a.active_persona['title'] if a.active_persona else 'BASE'}" for a in list(orchestrator.agents.values())[:10]]
-    return {"status": "synchronized", "roster": introductions}
+    from orchestrator.src.core.workforce import workforce
+    
+    total_agents = len(orchestrator.agents)
+    total_payroll = workforce.get_total_payroll()
+    
+    # Get a sample of 25 agents
+    sample_agents = list(orchestrator.agents.values())[:25]
+    roster = []
+    for a in sample_agents:
+        roster.append({
+            "name": a.agent_name,
+            "tax_id": a.dossier.tax_id,
+            "persona": a.active_persona["title"] if a.active_persona else "BASE",
+            "earnings": round(a.dossier.accrued_cost, 4)
+        })
+
+    return {
+        "status": "synchronized",
+        "swarm_size": total_agents,
+        "total_value_generated": round(total_payroll, 2),
+        "currency": "USD",
+        "roster_sample": roster,
+        "active_monetization_streams": 13
+    }
 
 @app.post("/api/voice/interrupt")
 async def interrupt_voice():

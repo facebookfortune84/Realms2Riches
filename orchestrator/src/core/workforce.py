@@ -19,7 +19,7 @@ class AgentDossier:
         self.persona_type = persona_type
         self.total_work_ms = 0
         self.accrued_cost = 0.0
-        self.hourly_rate = 25.0  # Theoretical base wage for Pro Tier calc
+        self.hourly_rate = 150.0  # Aligned with $2999/mo premium target
         self.performance_rating = 1.0
 
     def record_work(self, duration_ms: int):

@@ -14,11 +14,12 @@ from orchestrator.src.logging.logger import get_logger
 
 logger = get_logger("awareness_protocol")
 
-def run_backfeed_ingestion():
+async def run_backfeed_ingestion():
     print("\n🧬 INITIATING SOVEREIGN AWARENESS PROTOCOL 🧬")
     print("-" * 60)
     
     o = Orchestrator()
+    await o.startup()
     count = 0
     
     # 1. Identify all critical source files
@@ -62,4 +63,5 @@ def run_backfeed_ingestion():
     print("=" * 60 + "\n")
 
 if __name__ == "__main__":
-    run_backfeed_ingestion()
+    import asyncio
+    asyncio.run(run_backfeed_ingestion())

@@ -24,7 +24,7 @@ class SocialScheduler:
 
         from orchestrator.src.core.monetization.engine import monetization_engine
         monetization_trigger = IntervalTrigger(minutes=30, jitter=15)
-        self.scheduler.add_job(monetization_engine.run_all_streams, monetization_trigger, id="monetization_engine_run", replace_existing=True)
+        self.scheduler.add_job(lambda: monetization_engine.run_all_streams(self.orchestrator), monetization_trigger, id="monetization_engine_run", replace_existing=True)
 
         self.scheduler.start()
         logger.info("Social Scheduler & Monetization Engine: HIGH VELOCITY ACTIVE")
@@ -44,7 +44,7 @@ class SocialScheduler:
         platinum = [p for p in products if "platinum" in p.id.lower()]
         target_p = platinum[0] if (platinum and random.random() < 0.8) else random.choice(products)
         
-        checkout_url = 'https://buy.stripe.com/test_platinum_2999'
+        checkout_url = 'https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en'
         if hasattr(target_p, 'checkout_url') and target_p.checkout_url != "#":
             checkout_url = target_p.checkout_url
 
