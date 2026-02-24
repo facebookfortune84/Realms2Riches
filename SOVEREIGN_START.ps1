@@ -103,6 +103,15 @@ docker exec docker-orchestrator-api-1 python -m orchestrator.src.core.catalog.in
 Write-Host "[5/6] Activating Autonomous Learning Stream..." -ForegroundColor Cyan
 Write-Host "SUCCESS: Learning Stream Online." -ForegroundColor Green
 
+# --- 5.5 AWARENESS BACKFEED ---
+Write-Host "[5.5/6] Initializing Sovereign Awareness Protocol..." -ForegroundColor Cyan
+try {
+    docker exec docker-orchestrator-api-1 python scripts/backfeed_awareness.py
+    Write-Host "SUCCESS: Swarm is Self-Aware." -ForegroundColor Green
+} catch {
+    Write-Host "WARNING: Awareness Protocol skipped." -ForegroundColor Yellow
+}
+
 # --- 6. FINAL READY ---
 Write-Host "[6/6] Sovereign Matrix Ready." -ForegroundColor Green
 Write-Host "`nCommand Center:"

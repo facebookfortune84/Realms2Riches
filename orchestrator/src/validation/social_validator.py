@@ -9,8 +9,8 @@ class SocialPostValidator:
     Ensures every post has a verifiable monetization path.
     """
     
-    # Regex to match Stripe or local checkout API links
-    CTA_REGEX = r"(https://checkout\.stripe\.com/c/pay/|https://glowfly-sizeable-lazaro\.ngrok-free\.dev/api/checkout/)"
+    # Robust Regex for all Stripe and local checkout patterns
+    CTA_REGEX = r"(checkout\.stripe\.com|buy\.stripe\.com|glowfly-sizeable-lazaro\.ngrok-free\.dev/api/checkout)"
 
     @staticmethod
     def validate(message: str, link: str) -> tuple:
@@ -27,9 +27,9 @@ class SocialPostValidator:
         if not has_revenue_link:
             return False, f"Link '{link}' is not a verified revenue pattern."
 
-        # 2. Action Verb Check (The 'Button' in text)
+        # 2. Action Verb Check
         action_verbs = r"(Secure|Acquire|Access|Buy|Join|Initialize|Deploy|Get)"
         if not re.search(action_verbs, message, re.IGNORECASE):
-            return False, "Post lacks a clear action verb (Secure, Acquire, etc.). Post must be a direct driver."
+            return False, "Post lacks a direct action verb (Secure, Buy, etc.)."
 
         return True, ""
