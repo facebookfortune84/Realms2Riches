@@ -58,6 +58,12 @@ class Settings(BaseSettings):
     STRIPE_API_KEY: Optional[str] = None
     STRIPE_WEBHOOK_SECRET: Optional[str] = None
 
+    # --- RELIABILITY & OBSERVABILITY ---
+    TELEMETRY_ENABLED: bool = True
+    CIRCUIT_BREAKER_THRESHOLD: int = 5
+    RECOVERY_TIMEOUT: int = 60
+    TASK_QUEUE_MAX_SIZE: int = 1000
+
     # --- PROPERTIES ---
     @property
     def db_config(self) -> DatabaseConfig:

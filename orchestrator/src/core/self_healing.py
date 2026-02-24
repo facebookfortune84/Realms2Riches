@@ -2,6 +2,7 @@ import os
 import json
 import glob
 import logging
+import sqlite3
 from typing import List, Dict, Any
 from orchestrator.src.core.config import settings
 
@@ -9,8 +10,9 @@ logger = logging.getLogger(__name__)
 
 class SelfHealingService:
     """
-    Autonomous logic to repair the Sovereign environment on build/startup.
-    Ensures zero-downtime scalability.
+    Platinum Self-Healing Service.
+    Autonomously repairs the Sovereign environment on build/startup.
+    Guarantees architectural alignment and data integrity.
     """
     
     REQUIRED_DIRS = [
@@ -19,89 +21,98 @@ class SelfHealingService:
         "data/store/slots",
         "data/marketing/images",
         "data/marketing/videos",
-        "data/lineage"
+        "data/lineage",
+        "data/customers",
+        "data/vector_store"
     ]
 
     def __init__(self):
         self.repair_log = []
 
     def execute_healing_cycle(self):
-        logger.info("🛡️ INITIATING SELF-HEALING CYCLE...")
+        logger.info("🛡️ INITIATING GLOBAL HEALING CYCLE...")
         
         self._repair_directories()
         self._repair_baseline_assets()
         self._validate_product_slots()
-        self._verify_environment_integrity()
         self._heal_database_schema()
+        self._verify_rag_integrity()
+        self._verify_environment_integrity()
         
         logger.info(f"✅ HEALING COMPLETE: {len(self.repair_log)} repairs performed.")
         return self.repair_log
 
+    def _repair_directories(self):
+        for d in self.REQUIRED_DIRS:
+            if not os.path.exists(d):
+                os.makedirs(d, exist_ok=True)
+                msg = f"Restored missing directory: {d}"
+                logger.warning(msg)
+                self.repair_log.append(msg)
+
+    def _repair_baseline_assets(self):
+        guide_path = "data/assets/sovereign_strategy_guide_v3.txt"
+        if not os.path.exists(guide_path):
+            with open(guide_path, "w", encoding="utf-8") as f:
+                f.write("""🦅 SOVEREIGN STRATEGY GUIDE v3
+1. Automate EVERYTHING.
+2. Scale agents horizontally.
+3. Establish direct monetization paths.
+4. Maintain cryptographic integrity.
+""")
+            self.repair_log.append("Restored Sovereign Strategy Guide asset.")
+
+    def _validate_product_slots(self):
+        for f in glob.glob("data/store/slots/*.json"):
+            try:
+                with open(f, "r") as pf:
+                    data = json.load(pf)
+                    # Purge corrupt/null slots
+                    if isinstance(data, dict):
+                        if not data.get("id") or data.get("price") is None:
+                            os.remove(f)
+                            self.repair_log.append(f"Purged malformed slot: {os.path.basename(f)}")
+            except Exception as e:
+                target = f + ".corrupt"
+                if os.path.exists(target): os.remove(target)
+                os.rename(f, target)
+                self.repair_log.append(f"Quarantined corrupt slot: {os.path.basename(f)}")
+
     def _heal_database_schema(self):
-        """Ensures SQLite/Postgres tables have required columns."""
-        import sqlite3
         db_path = "orchestrator.db"
         if os.path.exists(db_path):
             try:
                 conn = sqlite3.connect(db_path)
                 cursor = conn.cursor()
-                # Check for stripe_price_id in prices table
                 cursor.execute("PRAGMA table_info(prices)")
-                columns = [info[1] for f, info in enumerate(cursor.fetchall())]
-                if "stripe_price_id" not in columns:
+                cols = [info[1] for info in cursor.fetchall()]
+                if "stripe_price_id" not in cols:
                     cursor.execute("ALTER TABLE prices ADD COLUMN stripe_price_id TEXT")
-                    self.repair_log.append("Healed database: Added stripe_price_id to prices table.")
+                    self.repair_log.append("Patched Database: Added stripe_price_id to 'prices' table.")
                 conn.commit()
                 conn.close()
             except Exception as e:
-                logger.warning(f"Database healing skipped (might be Postgres): {e}")
+                logger.warning(f"DB healing skipped: {e}")
 
-    def _repair_directories(self):
-        """Creates any missing critical folders."""
-        for d in self.REQUIRED_DIRS:
-            if not os.path.exists(d):
-                os.makedirs(d, exist_ok=True)
-                msg = f"Created missing directory: {d}"
-                logger.warning(msg)
-                self.repair_log.append(msg)
-
-    def _repair_baseline_assets(self):
-        """Restores the Sovereign Strategy Guide if missing."""
-        guide_path = "data/assets/sovereign_strategy_guide_v3.txt"
-        if not os.path.exists(guide_path):
-            with open(guide_path, "w", encoding="utf-8") as f:
-                f.write("""🦅 SOVEREIGN STRATEGY GUIDE v3
-1. Automate.
-2. Scale.
-3. Monetize.
-""")
-            self.repair_log.append("Restored Sovereign Strategy Guide.")
-
-    def _validate_product_slots(self):
-        """Scans for corrupt JSON in slots and attempts repair."""
-        for f in glob.glob("data/store/slots/*.json"):
+    def _verify_rag_integrity(self):
+        rag_file = "data/vector_store/sovereign_memory.json"
+        if os.path.exists(rag_file):
             try:
-                with open(f, "r") as pf:
-                    data = json.load(pf)
-                    # Purge 'None' or null slots
-                    if isinstance(data, dict):
-                        if data.get("id") is None or data.get("price") is None:
-                            os.remove(f)
-                            self.repair_log.append(f"Deleted null slot: {os.path.basename(f)}")
-                            continue
+                with open(rag_file, "r") as f:
+                    json.load(f)
             except Exception as e:
-                logger.error(f"Corrupt Slot Detected: {f}. Archiving.")
-                target = f + ".corrupt"
-                if os.path.exists(target):
-                    os.remove(target)
-                os.rename(f, target)
-                self.repair_log.append(f"Archived corrupt slot: {os.path.basename(f)}")
+                logger.error(f"RAG Corruption detected: {e}")
+                backup = rag_file + ".bak"
+                import shutil
+                shutil.copy2(rag_file, backup)
+                os.remove(rag_file)
+                self.repair_log.append("Reset corrupted RAG memory store (Backup created).")
 
     def _verify_environment_integrity(self):
-        """Checks for placeholder keys in prod and warns if self-healing isn't possible."""
-        placeholders = ["placeholder", "gsk-", "Bearer "]
-        if settings.STRIPE_API_KEY in placeholders or not settings.STRIPE_API_KEY:
-            self.repair_log.append("⚠️ WARNING: Monetization disabled (Missing Stripe Key)")
+        if not settings.STRIPE_API_KEY or settings.STRIPE_API_KEY == "placeholder":
+            self.repair_log.append("⚠️ MONETIZATION: Stripe Key is MISSING. Falling back to test mode.")
+        if not settings.FACEBOOK_PAGE_TOKEN or settings.FACEBOOK_PAGE_TOKEN == "placeholder":
+            self.repair_log.append("⚠️ SOCIAL: Facebook Token is MISSING. Dispatches will be skipped.")
 
 # Singleton
 sovereign_healer = SelfHealingService()

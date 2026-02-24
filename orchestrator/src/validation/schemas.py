@@ -34,6 +34,7 @@ class AgentConfig(BaseEntity):
 # --- Task & Result Schemas ---
 
 class TaskSpec(BaseEntity):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4())[:8])
     project_id: str
     description: str
     context: Dict[str, Any] = Field(default_factory=dict)

@@ -67,17 +67,16 @@ if (-not $healthy) {
 }
 
 # --- 3.5 SYSTEM INTEGRITY VALIDATION ---
-Write-Host "[3.5/6] Running Grand Wizard Master Audit v4.2..." -ForegroundColor Cyan
+Write-Host "[3.5/6] Running MASTER ROUNDUP AUDIT v5.0..." -ForegroundColor Cyan
 try {
-    # Run the high-density test suite inside the container
-    docker exec docker-orchestrator-api-1 python scripts/grand_wizard_audit.py
+    docker exec docker-orchestrator-api-1 python scripts/final_roundup_audit.py
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "CRITICAL WARNING: System Audit reported failures. Swarm may be unstable." -ForegroundColor Red
-    } else {
-        Write-Host "SUCCESS: All Tracks Online, Synchronized & Monetized." -ForegroundColor Green
+        Write-Host "CRITICAL SYSTEM DEVIATION DETECTED." -ForegroundColor Red
+        exit 1
     }
 } catch {
-    Write-Host "WARNING: Could not execute audit script." -ForegroundColor Yellow
+    Write-Host "FATAL AUDIT FAILURE." -ForegroundColor Red
+    exit 1
 }
 
 # --- 4. SEEDING ---

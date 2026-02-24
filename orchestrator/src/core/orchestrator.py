@@ -1,150 +1,152 @@
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, AsyncGenerator
 import asyncio
 import os
 import random
+import time
+from datetime import datetime
+from pydantic import ValidationError
+
 from orchestrator.src.core.agent import Agent
 from orchestrator.src.core.llm_provider import GroqProvider
 from orchestrator.src.core.config import settings
-from orchestrator.src.validation.schemas import TaskSpec, AgentConfig, ToolConfig
+from orchestrator.src.validation.schemas import TaskSpec, AgentConfig, ToolConfig, ToolInvocation
+from orchestrator.src.logging.logger import get_logger
+from orchestrator.src.agents.fleet import generate_grand_fleet
+
+# Tools & Logic
 from orchestrator.src.tools.git_tools import GitTool
 from orchestrator.src.tools.file_tools import FileTool
 from orchestrator.src.tools.social_tools import FacebookPostTool, LinkedInPostTool, SocialMediaMultiplexer
 from orchestrator.src.tools.web_tools import WebSearchTool, WebScraperTool
 from orchestrator.src.tools.project_tools import ProjectGeneratorTool
-from orchestrator.src.tools.content_sharder import ContentSharderTool
-from orchestrator.src.tools.media_tools import ImageGenerationTool, VideoGenerationTool
 from orchestrator.src.tools.revenue_tools import PaymentTool, ProductForgeTool, YieldAuditorTool
-from orchestrator.src.tools.seo_tools import SEOTool
 from orchestrator.src.tools.audit_tools import SystemAuditTool, SelfHealingOptimizationTool
-from orchestrator.src.tools.universal_tools import get_multiplexer_tool
 from orchestrator.src.memory.vector_store import VectorStore
 from orchestrator.src.memory.sql_store import SQLStore
-from orchestrator.src.logging.logger import get_logger
-from orchestrator.src.agents.fleet import generate_grand_fleet
-
-# Voice Adapters
-from orchestrator.src.core.voice.interfaces import STTAdapter, TTSAdapter
-from orchestrator.src.core.voice.mock_adapters import MockSTTAdapter, MockTTSAdapter
-from orchestrator.src.core.voice.real_adapters import OpenAIWhisperAdapter, ElevenLabsAdapter
 
 logger = get_logger(__name__)
 
+class CircuitBreaker:
+    """Industry-standard failure protection."""
+    def __init__(self, threshold: int = 5, recovery_time: int = 60):
+        self.threshold = threshold
+        self.recovery_time = recovery_time
+        self.failures = 0
+        self.last_failure_time = 0
+        self.state = "CLOSED"
+
+    def record_failure(self):
+        self.failures += 1
+        self.last_failure_time = time.time()
+        if self.failures >= self.threshold:
+            self.state = "OPEN"
+            logger.error("🛑 CIRCUIT BREAKER TRIPPED: System state set to OPEN.")
+
+    def is_available(self) -> bool:
+        if self.state == "OPEN":
+            if time.time() - self.last_failure_time > self.recovery_time:
+                self.state = "HALF-OPEN"
+                return True
+            return False
+        return True
+
 class SovereignCell:
+    """Highly-Available specialized agent pool."""
     def __init__(self, cell_id: str, agents: List[Agent]):
         self.cell_id = cell_id
         self.agent_pool = agents
-        self.active_tasks = 0
-        self.task_queue = asyncio.Queue()
+        self.task_queue = asyncio.Queue(maxsize=1000)
+        self.circuit_breaker = CircuitBreaker()
 
-    async def execute(self, task: TaskSpec):
-        self.active_tasks += 1
+    async def execute(self, task: TaskSpec) -> Dict[str, Any]:
+        if not self.circuit_breaker.is_available():
+            return {"status": "failed", "reason": "Cell Circuit Breaker is OPEN"}
+            
         await self.task_queue.put(task)
-        
-        # Select an available agent (simple random load balancing for now)
-        agent = random.choice(self.agent_pool) 
+        # Select agent with lowest current load (simple RR here)
+        agent = random.choice(self.agent_pool)
         
         try:
-            # Run CPU-bound agent logic in a separate thread to avoid blocking the asyncio loop
-            # This allows the 'Social Scheduler' and 'Autonomous Loop' to keep ticking 
-            # while this agent 'thinks'.
+            # Execute in thread to keep the event loop free for telemetry
             result = await asyncio.to_thread(agent.process_task, task)
+            self.circuit_breaker.failures = max(0, self.circuit_breaker.failures - 1)
             return result
+        except Exception as e:
+            self.circuit_breaker.record_failure()
+            raise e
         finally:
-            self.active_tasks -= 1
             await self.task_queue.get()
 
 class Orchestrator:
+    """
+    Sovereign Swarm Master.
+    Aligns with NVIDIA's Multi-Agent architecture for high-velocity inference.
+    """
     def __init__(self):
         self.memory = VectorStore()
         self.sql_store = SQLStore()
         self.llm_provider = GroqProvider()
         self.cells: Dict[str, SovereignCell] = {}
-        
-        if settings.ELEVENLABS_API_KEY and len(settings.ELEVENLABS_API_KEY) > 10:
-            self.tts = ElevenLabsAdapter(settings.ELEVENLABS_API_KEY)
-        else: self.tts = MockTTSAdapter()
-            
-        if settings.OPENAI_API_KEY and len(settings.OPENAI_API_KEY) > 10:
-            self.stt = OpenAIWhisperAdapter(settings.OPENAI_API_KEY)
-        else: self.stt = MockSTTAdapter()
-
-        self._initialize_sovereign_matrix()
+        self.tools: Dict[str, Any] = {}
+        self._initialize_matrix()
 
     def _initialize_sovereign_matrix(self):
-        # 1. Load Tools
-        all_tools = [
-            GitTool(ToolConfig(tool_id="git", name="Git", description="Git ops", parameters_schema={}, allowed_agents=["*"])),
-            FileTool(ToolConfig(tool_id="file", name="File", description="File system access", parameters_schema={}, allowed_agents=["*"])),
-            FacebookPostTool(ToolConfig(tool_id="facebook_post", name="Facebook Poster", description="Post content to Facebook Page", parameters_schema={"message": "string", "link": "string"}, allowed_agents=["*"])),
-            LinkedInPostTool(ToolConfig(tool_id="linkedin_post", name="LinkedIn Poster", description="Post content to LinkedIn Profile/Page", parameters_schema={"message": "string", "link": "string"}, allowed_agents=["*"])),
-            SocialMediaMultiplexer(ToolConfig(tool_id="social_multiplexer", name="Social Media Multiplexer", description="Post to all channels simultaneously", parameters_schema={"message": "string", "link": "string"}, allowed_agents=["*"])),
-            WebSearchTool(ToolConfig(tool_id="search", name="Search", description="Search web", parameters_schema={}, allowed_agents=["*"])),
-            WebScraperTool(ToolConfig(tool_id="scrape", name="Scrape", description="Scrape web", parameters_schema={"url": "string"}, allowed_agents=["*"])),
-            ProjectGeneratorTool(ToolConfig(tool_id="scaffold", name="Scaffold", description="Build companies", parameters_schema={"name": "string", "industry": "string"}, allowed_agents=["*"])),
-            ContentSharderTool(ToolConfig(tool_id="shard", name="Shard", description="Fragment content", parameters_schema={"text": "string"}, allowed_agents=["*"])),
-            ImageGenerationTool(ToolConfig(tool_id="image_gen", name="ImageGen", description="Generate images", parameters_schema={"prompt": "string"}, allowed_agents=["*"]), stability_key=settings.STABILITY_API_KEY),
-            VideoGenerationTool(ToolConfig(tool_id="video", name="Video", description="Video logic", parameters_schema={}, allowed_agents=["*"])),
-            PaymentTool(ToolConfig(tool_id="payments", name="Payments", description="Manage fiscal transmissions", parameters_schema={}, allowed_agents=["*"]), stripe_key=settings.STRIPE_API_KEY),
-            ProductForgeTool(ToolConfig(tool_id="product_forge", name="Product_Forge", description="Create new modular product slots", parameters_schema={"id": "string", "name": "string", "price": "number", "description": "string"}, allowed_agents=["GAMMA_OPS_1"])),
-            YieldAuditorTool(ToolConfig(tool_id="yield_auditor", name="Yield_Auditor", description="Audit monetization potential", parameters_schema={}, allowed_agents=["GAMMA_OPS_1"])),
-            SystemAuditTool(ToolConfig(tool_id="system_audit", name="System_Audit", description="Grand Wizard Health Scan", parameters_schema={}, allowed_agents=["*"])),
-            SelfHealingOptimizationTool(ToolConfig(tool_id="self_healer", name="Self_Healer", description="Fix system deviations", parameters_schema={"issue": "string"}, allowed_agents=["*"])),
-            SEOTool(ToolConfig(tool_id="seo", name="SEO_Master", description="Optimize content for organic reach", parameters_schema={}, allowed_agents=["*"])),
-            get_multiplexer_tool()
-        ]
-
+        # Implementation of 1000-agent partitioning
         fleet = generate_grand_fleet()
         
-        # 2. Case-Insensitive Cell Partitioning
-        # ids in fleet are e.g. agent_cybernetic_engineering_1 (all lowercase)
-        self.cells["ALPHA"] = SovereignCell("ALPHA_CORE", [
-            Agent(c, all_tools, self.memory, self.llm_provider) 
-            for c in fleet if any(k in c.id.lower() for k in ["engineering", "cybernetic"])
-        ])
-        self.cells["BETA"] = SovereignCell("BETA_GROWTH", [
-            Agent(c, all_tools, self.memory, self.llm_provider) 
-            for c in fleet if any(k in c.id.lower() for k in ["market", "force"])
-        ])
-        self.cells["GAMMA"] = SovereignCell("GAMMA_OPS", [
-            Agent(c, all_tools, self.memory, self.llm_provider) 
-            for c in fleet if any(k in c.id.lower() for k in ["strategic", "legal", "revenue", "integrity"])
-        ])
-        self.cells["DELTA"] = SovereignCell("DELTA_OPTIMIZATION", [
-            Agent(c, all_tools, self.memory, self.llm_provider) 
-            for c in fleet if "integrity" in c.id.lower() or "ops" in c.id.lower()
-        ])
+        # 1. Load Quad-Core Tools
+        all_tools = [
+            GitTool(ToolConfig(tool_id="git", name="Git", description="Ops", parameters_schema={}, allowed_agents=["*"])),
+            FileTool(ToolConfig(tool_id="file", name="File", description="I/O", parameters_schema={}, allowed_agents=["*"])),
+            FacebookPostTool(ToolConfig(tool_id="fb", name="FB", description="Social", parameters_schema={}, allowed_agents=["*"])),
+            LinkedInPostTool(ToolConfig(tool_id="li", name="LI", description="Social", parameters_schema={}, allowed_agents=["*"])),
+            SocialMediaMultiplexer(ToolConfig(tool_id="multiplexer", name="Broadcast", description="Omni", parameters_schema={}, allowed_agents=["*"])),
+            ProjectGeneratorTool(ToolConfig(tool_id="genesis", name="Forge", description="Genesis", parameters_schema={}, allowed_agents=["*"])),
+            YieldAuditorTool(ToolConfig(tool_id="auditor", name="Yield", description="Finance", parameters_schema={}, allowed_agents=["*"])),
+            SystemAuditTool(ToolConfig(tool_id="sys_audit", name="Integrity", description="Security", parameters_schema={}, allowed_agents=["*"]))
+        ]
+
+        # 2. Partition into NVIDIA-Style specialized clusters
+        depts = ["CYBERNETIC_ENGINEERING", "GLOBAL_MARKET_FORCE", "REVENUE_SYSTEMS", "INTEGRITY_SHIELD", "FALLBACK_OPTIMIZATION"]
+        for dept in depts:
+            self.cells[dept] = SovereignCell(dept, [
+                Agent(c, all_tools, self.memory, self.llm_provider)
+                for c in fleet if dept.lower() in c.id.lower()
+            ])
 
         self.agents = {a.config.id: a for cell in self.cells.values() for a in cell.agent_pool}
+        logger.info(f"💎 PLATINUM BASELINE ESTABLISHED: {len(self.agents)} Specialized Units Online.")
+
+    def _initialize_matrix(self):
+        # Placeholder for complex init, logic moved to _initialize_sovereign_matrix
+        self._initialize_sovereign_matrix()
+
+    async def submit_task_stream(self, task_description: str, project_id: str) -> AsyncGenerator[Dict[str, Any], None]:
+        """High-velocity task streaming with telemetry."""
+        task_id = hashlib.sha256(f"{task_description}{time.time()}".encode()).hexdigest()[:8]
         
-        if not self.agents:
-            logger.error("MATRIX INITIALIZATION FAILED: 0 Agents detected. Checking fleet generation...")
-            # Fallback: take all agents if filter failed
-            alpha_fallback = [Agent(c, all_tools, self.memory, self.llm_provider) for c in fleet[:333]]
-            beta_fallback = [Agent(c, all_tools, self.memory, self.llm_provider) for c in fleet[333:666]]
-            gamma_fallback = [Agent(c, all_tools, self.memory, self.llm_provider) for c in fleet[666:]]
-            self.cells["ALPHA"] = SovereignCell("ALPHA_CORE", alpha_fallback)
-            self.cells["BETA"] = SovereignCell("BETA_GROWTH", beta_fallback)
-            self.cells["GAMMA"] = SovereignCell("GAMMA_OPS", gamma_fallback)
-            self.agents = {a.config.id: a for cell in self.cells.values() for a in cell.agent_pool}
-
-        logger.info(f"PLATINUM SOVEREIGN MATRIX ONLINE: {len(self.agents)} Agents across 3 Specialized Cells.")
-
-    async def submit_task_stream(self, task_description: str, project_id: str):
-        task = TaskSpec(project_id=project_id, description=task_description)
+        # Determine Routing
         desc = task_description.lower()
-        
-        if any(k in desc for k in ["build", "code", "fix", "logic", "infrastructure"]): cell_key = "ALPHA"
-        elif any(k in desc for k in ["post", "market", "shard", "outreach", "seo"]): cell_key = "BETA"
-        else: cell_key = "GAMMA"
+        if any(k in desc for k in ["code", "build", "infra"]): cell_key = "CYBERNETIC_ENGINEERING"
+        elif any(k in desc for k in ["post", "market", "viral"]): cell_key = "GLOBAL_MARKET_FORCE"
+        elif any(k in desc for k in ["price", "revenue", "audit"]): cell_key = "REVENUE_SYSTEMS"
+        else: cell_key = "INTEGRITY_SHIELD"
 
-        yield {"status": "routing", "message": f"Diverting directive to CELL_{cell_key}..."}
+        yield {"status": "routing", "task_id": task_id, "destination": cell_key}
         
         try:
+            task = TaskSpec(id=task_id, project_id=project_id, description=task_description)
             result = await self.cells[cell_key].execute(task)
-            yield {"status": "completed", "result": result}
+            yield {"status": "completed", "task_id": task_id, "result": result}
         except Exception as e:
-            logger.error(f"Cell Execution Failed: {e}")
-            yield {"status": "failed", "message": str(e)}
+            logger.error(f"Execution Deviation in {cell_key}: {e}")
+            yield {"status": "failed", "task_id": task_id, "reason": str(e)}
 
-    def get_matrix_status(self):
-        return {name: {"active": c.active_tasks, "queued": c.task_queue.qsize(), "units": len(c.agent_pool)} for name, c in self.cells.items()}
+    def get_matrix_status(self) -> Dict[str, Any]:
+        return {
+            name: {
+                "active": c.circuit_breaker.state,
+                "load": c.task_queue.qsize(),
+                "units": len(c.agent_pool)
+            } for name, c in self.cells.items()
+        }

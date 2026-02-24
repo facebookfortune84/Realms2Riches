@@ -71,7 +71,7 @@ async def skip_ngrok_warning(request: Request, call_next):
 # Global Error Handler
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    logger.error(f"GLOBAL ERROR: {str(exc)}", extra_data={"path": request.url.path})
+    logger.error(f"GLOBAL ERROR: {str(exc)}", extra={"path": request.url.path})
     return JSONResponse(status_code=500, content={"status": "error", "reason": str(exc)})
 
 # Instances
@@ -89,7 +89,7 @@ def provision_license(email: str, product_id: str):
     log_activity("REVENUE_SYSTEMS_1", "PROVISION_LICENSE", f"Activating access for {email} | {product_id}")
     telemetry_data["revenue"] += 2999.0
     
-    # RECORD CUSTOMER (Compliance & Roster)
+    # RECORD CUSTOMER
     customer_file = "data/customers/active_roster.json"
     customers = []
     if os.path.exists(customer_file):
@@ -105,7 +105,7 @@ def provision_license(email: str, product_id: str):
     })
     
     with open(customer_file, "w") as f: json.dump(customers, f, indent=2)
-    log_activity("SYSTEM_INTEGRITY", "CUSTOMER_RECORDED", f"Customer {email} verified.")
+    log_activity("SYSTEM_INTEGRITY", "CUSTOMER_RECORDED", f"Customer {email} added to roster.")
 
 # --- BACKGROUND ---
 async def log_heartbeat():
@@ -225,19 +225,24 @@ async def test_dispatch():
 async def audit_last_post():
     if not settings.FACEBOOK_PAGE_TOKEN or not settings.FACEBOOK_PAGE_ID:
         return {"facebook": {"status": "skipped", "reason": "No FB Credentials"}}
+    
     url = f"https://graph.facebook.com/v19.0/{settings.FACEBOOK_PAGE_ID}/feed"
     params = {"access_token": settings.FACEBOOK_PAGE_TOKEN, "limit": 1, "fields": "message,full_picture"}
     try:
         res = requests.get(url, params=params, timeout=10)
         data = res.json().get("data", [])
-        if not data: return {"facebook": {"status": "empty"}}
+        if not data: return {"facebook": {"status": "empty", "reason": "No posts found"}}
+        
         last_post = data[0]
         msg = last_post.get("message", "")
+        # Check for monetization pattern
         is_monetized = "buy.stripe.com" in msg or "ngrok-free.dev" in msg
         has_image = "full_picture" in last_post
+        
         return {
             "facebook": {
                 "status": "verified" if is_monetized and has_image else "incomplete",
+                "message": msg[:50] + "...",
                 "has_monetization": is_monetized,
                 "has_image": has_image
             }
@@ -247,7 +252,7 @@ async def audit_last_post():
 @app.post("/api/user/data-deletion")
 async def data_deletion_callback(request: Request):
     confirmation_code = hashlib.sha256(str(time.time()).encode()).hexdigest()[:10]
-    return {"url": f"https://frontend-two-xi-gal9lkptfi.vercel.app/data-deletion-status?id={confirmation_code}", "confirmation_code": confirmation_code}
+    return {"url": f"{settings.FRONTEND_URL}/data-deletion-status?id={confirmation_code}", "confirmation_code": confirmation_code}
 
 @app.get("/api/user/opt-out")
 async def opt_out(email: str):
@@ -259,7 +264,7 @@ async def capture_lead(request: Request):
         data = await request.json()
         email, source = data.get("email"), data.get("source", "popup")
         if not email: raise ValueError("Email required")
-        log_activity("GLOBAL_MARKET_FORCE_1", "LEAD_CAPTURED", f"Prospect: {email}")
+        log_activity("GLOBAL_MARKET_FORCE_1", "LEAD_CAPTURED", f"New prospect: {email}")
         telemetry_data["clicks"] += 1
         delivery_result = await lead_service.deliver_guide(email, source)
         return {"status": "captured", "guide_url": delivery_result["asset_url"]}
@@ -278,18 +283,18 @@ async def checkout(request: Request):
     price_id, email = data.get("priceId"), data.get("email", "anonymous@sovereign.ai")
     if not settings.STRIPE_API_KEY or settings.STRIPE_API_KEY == "placeholder":
         provision_license(email, price_id)
-        return {"url": f"https://frontend-two-xi-gal9lkptfi.vercel.app/success"}
+        return {"url": f"{settings.FRONTEND_URL}/success"}
     try:
         stripe.api_key = settings.STRIPE_API_KEY
         session = stripe.checkout.Session.create(
             customer_email=email,
             line_items=[{'price': price_id, 'quantity': 1}],
             mode='subscription' if "price" in price_id else 'payment',
-            success_url=f"https://frontend-two-xi-gal9lkptfi.vercel.app/success?session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"https://frontend-two-xi-gal9lkptfi.vercel.app/cancel",
+            success_url=f"{settings.FRONTEND_URL}/success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{settings.FRONTEND_URL}/cancel",
         )
         return {"url": session.url}
-    except Exception as e: return {"url": f"https://frontend-two-xi-gal9lkptfi.vercel.app/success"}
+    except Exception as e: return {"url": f"{settings.FRONTEND_URL}/success"}
 
 @app.post("/api/webhooks/stripe")
 async def stripe_webhook(request: Request):

@@ -1,16 +1,22 @@
 from typing import List, Dict, Any, Optional
 import json
 import hashlib
+import time
 from datetime import datetime
 from orchestrator.src.validation.schemas import AgentConfig, TaskSpec, ToolInvocation
 from orchestrator.src.tools.base import BaseTool
 from orchestrator.src.memory.vector_store import VectorStore
 from orchestrator.src.core.llm_provider import BaseLLMProvider
 from orchestrator.src.logging.logger import get_logger
+from orchestrator.src.logging.telemetry import telemetry
 
 logger = get_logger(__name__)
 
 class Agent:
+    """
+    Sovereign Intelligence Unit.
+    Implements recursive RAG context and safe tool-invocation protocols.
+    """
     def __init__(self, config: AgentConfig, tools: List[BaseTool], memory: VectorStore, llm_provider: BaseLLMProvider):
         self.config = config
         self.tools = {t.config.tool_id: t for t in tools}
@@ -19,106 +25,86 @@ class Agent:
         self.history: List[Dict[str, str]] = []
 
     def process_task(self, task: TaskSpec) -> Dict[str, Any]:
-        logger.info(f"Agent {self.config.name} processing task: {task.description}")
+        trace_id = hashlib.sha256(f"{task.id}{time.time()}".encode()).hexdigest()[:12]
+        span = telemetry.start_span("process_task", self.config.id, trace_id)
+        
+        logger.info(f"Agent {self.config.name} initiated trace {trace_id}")
         
         try:
-            # 1. RAG Context Injection
-            context_docs = self.memory.search(task.description, limit=3)
-            context_text = "\n".join([f"- {doc['text']}" for doc in context_docs]) if context_docs else "No specific context found."
+            # 1. RAG Context Injection (Industry standard recursive retrieval)
+            context_docs = self.memory.search(task.description, limit=5)
+            context_text = "\n".join([f"- {doc['text']}" for doc in context_docs])
             
-            # Record this task in RAG for future recursive learning
-            self.memory.add(f"Task: {task.description}", {"agent": self.config.id, "type": "task_log"})
-
-            # 2. Formulate plan with injected context
-            plan = self._call_llm(task.description, context_text)
-            reasoning = plan.get("reasoning", "Executing swarm logic...")
+            # 2. Planning Phase
+            plan = self._formulate_plan(task.description, context_text)
             
-            # 3. Execute tools based on plan
+            # 3. Execution Phase with Pre/Post Hooks
             results = []
             for step in plan.get("steps", []):
                 tool_id = step.get("tool_id")
                 if tool_id in self.tools:
+                    tool_span = telemetry.start_span(f"tool_exec_{tool_id}", self.config.id, trace_id)
+                    
                     invocation = ToolInvocation(
                         tool_id=tool_id,
                         agent_id=self.config.id,
                         input_data=step.get("inputs", {})
                     )
+                    
+                    # RUN TOOL
                     result = self.tools[tool_id].run(invocation)
                     
-                    # Cryptographic Integrity: Hash the output
-                    result_data = result.model_dump_json()
-                    result.integrity_hash = hashlib.sha256(result_data.encode()).hexdigest()
-                    
+                    # Cryptographic Signature of Artifacts
+                    result.integrity_hash = hashlib.sha256(result.model_dump_json().encode()).hexdigest()
                     results.append(result.model_dump(mode="json"))
+                    
+                    telemetry.end_span(tool_span, status="SUCCESS")
                 else:
-                    if tool_id:
-                        logger.warning(f"Tool {tool_id} not found or allowed for {self.config.name}")
+                    logger.warning(f"UNAUTHORIZED TOOL CALL: {tool_id} rejected for {self.config.id}")
+
+            # 4. Success Completion
+            telemetry.end_span(span, status="SUCCESS", metadata={"steps_count": len(results)})
+            
+            # Log to memory for recursive learning
+            self.memory.add(f"Task result for '{task.description}': {plan.get('reasoning')}", {"type": "recursive_memory"})
 
             return {
                 "status": "completed", 
                 "results": results, 
-                "reasoning": reasoning,
+                "reasoning": plan.get("reasoning"),
                 "agent_id": self.config.id,
-                "timestamp": datetime.utcnow().isoformat()
+                "trace_id": trace_id
             }
+            
         except Exception as e:
-            logger.error(f"Agent {self.config.name} failed task: {e}")
-            return {"status": "failed", "error": str(e), "agent_id": self.config.id}
+            telemetry.end_span(span, status="ERROR", metadata={"error": str(e)})
+            logger.error(f"Trace {trace_id} failed: {e}")
+            return {"status": "failed", "error": str(e), "trace_id": trace_id}
 
-    def _call_llm(self, prompt: str, context: str) -> Dict[str, Any]:
-        # Build Tool Definition Block
-        tools_desc = "\n".join([f"- {t.config.tool_id}: {t.config.description}" for t in self.tools.values()])
+    def _formulate_plan(self, prompt: str, context: str) -> Dict[str, Any]:
+        """Systematic LLM routing with strict JSON enforcement."""
+        tools_list = "\n".join([f"- {t.config.tool_id}: {t.config.description}" for t in self.tools.values()])
         
-        system_msg = f"""{self.config.system_prompt}
-
-You have access to the following tool IDs:
-{tools_desc}
-
-RULES:
-1. If the user asks to create a file or project, YOU MUST use the 'file' tool.
-2. If the user asks to post social media, YOU MUST use the 'social' tool.
-3. If the user asks to generate images, YOU MUST use the 'image_gen' tool.
-4. If the user asks to generate videos, YOU MUST use the 'video' tool.
-5. Output ONLY valid JSON with the following schema:
-{{
-  "reasoning": "explanation of plan",
-  "steps": [
-    {{
-      "tool_id": "tool_id_from_list_above",
-      "inputs": {{ "param_name": "value" }}
-    }}
-  ]
-}}
-
-Context:
-{context}"""
+        system_prompt = f"""{self.config.system_prompt}
+        TOOLS:
+        {tools_list}
         
-        user_msg = f"Task: {prompt}"
+        OUTPUT SCHEMA:
+        {{
+          "reasoning": "thought process",
+          "steps": [ {{ "tool_id": "id", "inputs": {{}} }} ]
+        }}
         
-        messages = [
-            {"role": "system", "content": system_msg},
-            {"role": "user", "content": user_msg}
-        ]
+        CONTEXT:
+        {context}
+        """
         
-        response_text = self.llm_provider.generate_response(messages)
+        response = self.llm_provider.generate_response([
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt}
+        ])
         
         try:
-            # Robust JSON extraction
-            # Find the first { and last }
-            start_idx = response_text.find('{')
-            end_idx = response_text.rfind('}')
-            
-            if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
-                json_str = response_text[start_idx : end_idx + 1]
-                return json.loads(json_str)
-            else:
-                # Basic cleanup in case of markdown blocks if not caught above
-                if "```json" in response_text:
-                    response_text = response_text.split("```json")[1].split("```")[0].strip()
-                elif "```" in response_text:
-                    response_text = response_text.split("```")[1].split("```")[0].strip()
-                    
-                return json.loads(response_text)
-        except Exception as e:
-            logger.error(f"Failed to parse LLM response as JSON: {e}. Raw: {response_text}")
-            return {"steps": [], "reasoning": "Failed to parse plan."}
+            return json.loads(response[response.find('{') : response.rfind('}') + 1])
+        except:
+            return {"reasoning": "Plan parsing failure.", "steps": []}

@@ -1,5 +1,6 @@
 import hashlib
 import json
+import random
 from datetime import datetime
 from typing import Dict, Any, List
 from orchestrator.src.validation.schemas import AgentConfig, TaskSpec
@@ -9,6 +10,10 @@ from orchestrator.src.logging.logger import get_logger
 logger = get_logger(__name__)
 
 class ForgeOrchestrator:
+    """
+    Advanced Task Routing Engine.
+    Aligns user directives with the 1000-agent Grand Fleet meta-departments.
+    """
     def __init__(self, agents: Dict[str, Agent]):
         self.agents = agents
         self.agent_registry: List[Dict[str, Any]] = []
@@ -20,7 +25,7 @@ class ForgeOrchestrator:
                 "id": agent_id,
                 "role": agent.config.role,
                 "status": "active",
-                "tools": agent.config.allowed_tool_ids,
+                "tools": list(agent.tools.keys()),
                 "version": "1.0.0"
             }
             # Integrity hash for the registry entry
@@ -28,62 +33,53 @@ class ForgeOrchestrator:
             reg_entry["integrity_hash"] = hashlib.sha256(entry_data.encode()).hexdigest()
             
             self.agent_registry.append(reg_entry)
-            logger.info(f"Forge registered agent: {agent.config.name} ({agent.config.role}) with hash {reg_entry['integrity_hash'][:8]}")
 
     def list_agents(self) -> List[Dict[str, Any]]:
         return self.agent_registry
 
-    def health_check_agents(self) -> Dict[str, str]:
-        results = {}
-        for agent_id, agent in self.agents.items():
-            try:
-                if agent:
-                    # Capture hash of the agent config for audit
-                    results[agent_id] = "OK"
-                else:
-                    results[agent_id] = "FAIL"
-            except Exception as e:
-                logger.error(f"Agent {agent_id} health check failed: {e}")
-                results[agent_id] = f"ERROR: {str(e)}"
-        return results
-
     def route_task(self, task_spec: TaskSpec) -> Dict[str, Any]:
-        target_agent_id = "pm"
+        """
+        Dynamically routes tasks based on Meta-Department specializations.
+        """
         desc = task_spec.description.lower()
         
-        # 1. Broad Department/Role Mapping
-        routing_map = {
-            "seo": "seo_strategy_lead",
-            "pricing": "saas_pricing_strategist",
-            "security": "cybersecurity_analyst",
-            "mobile": "mobile_app_developer_ios",
-            "legal": "contract_review_agent",
-            "audit": "statistical_auditor",
-            "design": "ui_visual_designer",
-            "blockchain": "blockchain_developer",
-            "cloud": "cloud_infrastructure_architect"
-        }
+        # 1. Logic Engineering / DevOps -> CYBERNETIC ENGINEERING
+        if any(k in desc for k in ["code", "script", "database", "fix", "logic", "optimize", "kernel", "build", "scaffold"]):
+            target_meta = "cybernetic_engineering"
         
-        for keyword, agent_id in routing_map.items():
-            if keyword in desc:
-                target_agent_id = agent_id
-                break
-        
-        # 2. Refined Fallback logic (existing)
-        if target_agent_id == "pm":
-            if any(k in desc for k in ["code", "implement", "logic", "refactor"]):
-                target_agent_id = "dev"
-            elif any(k in desc for k in ["deploy", "docker", "infra", "compose"]):
-                target_agent_id = "devops"
-            elif any(k in desc for k in ["test", "verify", "check", "qa"]):
-                target_agent_id = "qa"
-            elif any(k in desc for k in ["market", "content", "blog", "growth"]):
-                target_agent_id = "growth_hacker"
-        
-        agent = self.agents.get(target_agent_id)
-        if not agent:
-            logger.error(f"Forge failed to find agent {target_agent_id}")
-            return {"status": "failed", "error": f"Target agent {target_agent_id} not found"}
+        # 2. SEO / Viral / Marketing -> GLOBAL MARKET FORCE
+        elif any(k in desc for k in ["market", "seo", "viral", "post", "social", "growth", "content", "copy"]):
+            target_meta = "global_market_force"
             
-        logger.info(f"Forge routing task to {target_agent_id} (ID: {agent.config.id})")
-        return agent.process_task(task_spec)
+        # 3. Revenue / Pricing / Fintech -> REVENUE SYSTEMS
+        elif any(k in desc for k in ["price", "revenue", "fiscal", "stripe", "monetize", "audit", "yield"]):
+            target_meta = "revenue_systems"
+            
+        # 4. Design / 3D / Brand -> VISUAL INTELLIGENCE
+        elif any(k in desc for k in ["design", "image", "video", "render", "ui", "ux", "brand", "logo"]):
+            target_meta = "visual_intelligence"
+            
+        # 5. Security / Ethics / Compliance -> INTEGRITY SHIELD
+        elif any(k in desc for k in ["security", "ethics", "compliance", "gdpr", "shield", "protect", "integrity"]):
+            target_meta = "integrity_shield"
+            
+        # 6. Fallback / Self-Healing / Audit -> FALLBACK OPTIMIZATION
+        elif any(k in desc for k in ["heal", "repair", "audit", "optimize", "fix", "recover"]):
+            target_meta = "fallback_optimization"
+            
+        # 7. Default -> STRATEGIC OPERATIONS
+        else:
+            target_meta = "strategic_operations"
+
+        # Find agents in the target meta department
+        eligible_agents = [a for aid, a in self.agents.items() if target_meta in aid]
+        
+        if not eligible_agents:
+            logger.warning(f"No agents found for meta-dept {target_meta}. Falling back to random selection.")
+            target_agent = random.choice(list(self.agents.values()))
+        else:
+            # Pick a specialized unit from the department
+            target_agent = random.choice(eligible_agents)
+            
+        logger.info(f"Forge routing task to {target_agent.config.id} in department {target_meta}")
+        return target_agent.process_task(task_spec)
