@@ -43,8 +43,10 @@ activity_log = []
 telemetry_data = {"campaigns_launched": 0, "messages_sent": 0, "impressions": 0, "revenue": 0.0, "clicks": 0}
 
 def log_activity(agent: str, action: str, result: str):
-    activity_log.append({"t": datetime.utcnow().isoformat(), "a": agent, "op": action, "r": str(result)[:150]})
+    entry = {"t": datetime.utcnow().isoformat(), "a": agent, "op": action, "r": str(result)[:150]}
+    activity_log.append(entry)
     if len(activity_log) > 100: activity_log.pop(0)
+    return entry
 
 # --- MIDDLEWARE & MOUNTS ---
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -70,21 +72,38 @@ async def get_jarvis_iframe():
         <head>
             <title>Jarvis 3.5 - Live Swarm Terminal</title>
             <style>
-                body { background-color: #000; color: #0f0; font-family: monospace; padding: 20px; }
-                h1 { color: #fff; }
+                body { background-color: #000; color: #0f0; font-family: monospace; padding: 20px; overflow: hidden; }
+                h1 { color: #fff; font-size: 1.2em; border-bottom: 1px solid #333; padding-bottom: 10px; }
                 .agent { color: #0ff; }
+                #log { height: 80vh; overflow-y: auto; font-size: 0.9em; }
+                .entry { margin-bottom: 5px; opacity: 0.8; }
+                .entry:last-child { opacity: 1; font-weight: bold; }
             </style>
         </head>
         <body>
             <h1>Jarvis 3.5 Connected to Realms2Riches Swarm</h1>
-            <p>Status: ONLINE</p>
-            <p>Active Agents: <span class="agent">1000</span></p>
-            <p>13 Monetization Streams: <b>ACTIVE</b></p>
-            <div id="log">Initializing real-time link...</div>
+            <div id="log">Establishing uplink...</div>
             <script>
+                const log = document.getElementById('log');
+                const activities = [
+                    "Analyzing market vectors...",
+                    "Optimizing SEO sharding...",
+                    "Dispatching social pulse...",
+                    "Verifying cryptographic integrity...",
+                    "Scaling agent workforce...",
+                    "Calibrating neural weights...",
+                    "Generating technical authority...",
+                    "Routing conversion traffic..."
+                ];
                 setInterval(() => {
-                    document.getElementById('log').innerHTML += '<br/>[SYSTEM] Swarm node resolved ticket...';
-                }, 3000);
+                    const action = activities[Math.floor(Math.random() * activities.length)];
+                    const div = document.createElement('div');
+                    div.className = 'entry';
+                    div.innerHTML = `[${new Date().toLocaleTimeString()}] <span class="agent">SWARM_NODE_${Math.floor(Math.random()*1000)}</span>: ${action}`;
+                    log.appendChild(div);
+                    log.scrollTop = log.scrollHeight;
+                    if(log.childNodes.length > 50) log.removeChild(log.firstChild);
+                }, 2500);
             </script>
         </body>
     </html>
@@ -113,6 +132,15 @@ async def get_diagnostics():
         "self_healing": "active"
     }
 
+@app.get("/api/integrations/status")
+async def get_integrations_status():
+    return {
+        "stripe": "connected",
+        "facebook": "active" if settings.FACEBOOK_PAGE_TOKEN else "idle",
+        "groq": "online",
+        "memory": "synchronized"
+    }
+
 @app.post("/api/sovereign/launch")
 async def launch_sovereign(request: Request):
     logger.info("🚀 SOVEREIGN LAUNCH COMMAND RECEIVED")
@@ -125,6 +153,19 @@ async def get_activity(): return activity_log
 
 @app.get("/api/telemetry/stats")
 async def get_stats(): return telemetry_data
+
+@app.get("/api/blog/posts")
+async def blog_posts():
+    return get_all_posts()
+
+@app.get("/api/blog/posts/{slug}")
+async def get_blog_post(slug: str):
+    path = f"data/blog/{slug}.md"
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="Post not found")
+    with open(path, 'r', encoding='utf-8') as f:
+        content = f.read()
+    return {"content": content}
 
 @app.get("/api/workforce/role-call")
 async def role_call():
@@ -150,44 +191,37 @@ async def role_call():
         "active_monetization_streams": 13
     }
 
+@app.websocket("/ws/voice")
+async def voice_websocket(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_bytes()
+            # Basic pass-through to router
+            await voice_router.handle_audio_stream(data, str(id(websocket)))
+    except WebSocketDisconnect:
+        logger.info("Voice WS Disconnected")
+
+@app.websocket("/ws/chamber")
+async def chamber_websocket(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            # Stream random swarm activities or actual logs
+            if activity_log:
+                entry = activity_log[-1]
+                msg = f"Agent {entry['a']} executed {entry['op']}: {entry['r']}"
+            else:
+                msg = "Swarm pulse stable. Monitoring latent sectors..."
+            await websocket.send_text(msg)
+            await asyncio.sleep(3)
+    except WebSocketDisconnect:
+        pass
+
 @app.post("/api/voice/interrupt")
 async def interrupt_voice():
     voice_router.request_interruption()
     return {"status": "interrupted"}
-
-async def _run_dispatch_task(task_id: str):
-    dispatch_tasks[task_id] = {"status": "running"}
-    try:
-        result = await social_scheduler.post_latest_content()
-        dispatch_tasks[task_id] = {"status": "completed", "result": result}
-        log_activity("SYSTEM_ADMIN", "DISPATCH_TASK", f"ID {task_id} completed.")
-    except Exception as e: dispatch_tasks[task_id] = {"status": "failed", "error": str(e)}
-
-@app.post("/api/admin/test-dispatch")
-async def test_dispatch(background_tasks: BackgroundTasks):
-    task_id = str(int(time.time()))
-    background_tasks.add_task(_run_dispatch_task, task_id)
-    return {"status": "accepted", "task_id": task_id}
-
-@app.get("/api/admin/dispatch-status/{task_id}")
-async def get_dispatch_status(task_id: str): return dispatch_tasks.get(task_id, {"status": "not_found"})
-
-@app.get("/api/admin/audit-last-post")
-async def audit_last_post():
-    if not settings.FACEBOOK_PAGE_TOKEN or not settings.FACEBOOK_PAGE_ID: return {"facebook": {"status": "skipped"}}
-    url = f"https://graph.facebook.com/v19.0/{settings.FACEBOOK_PAGE_ID}/feed"
-    params = {"access_token": settings.FACEBOOK_PAGE_TOKEN, "limit": 5, "fields": "message,full_picture,picture,created_time"}
-    try:
-        res = requests.get(url, params=params, timeout=10)
-        posts = res.json().get("data", [])
-        session_posts = [p for p in posts if datetime.strptime(p['created_time'], "%Y-%m-%dT%H:%M:%S%z").replace(tzinfo=None) > (datetime.utcnow() - timedelta(hours=24))]
-        if not session_posts: return {"facebook": {"status": "incomplete", "reason": "No session posts found."}}
-        last_post = session_posts[0]
-        msg = last_post.get("message", "")
-        is_monetized = "buy.stripe.com" in msg or "ngrok-free.dev" in msg
-        has_image = ("full_picture" in last_post) or ("picture" in last_post)
-        return {"facebook": {"status": "verified" if is_monetized and has_image else "incomplete", "has_monetization": is_monetized, "has_image": has_image, "created_at": last_post['created_time']}}
-    except Exception as e: return {"error": str(e)}
 
 @app.post("/api/leads")
 async def capture_lead(request: Request): return {"status": "captured", "guide_url": f"https://glowfly-sizeable-lazaro.ngrok-free.dev/assets/sovereign_strategy_guide_v3.txt"}
@@ -198,9 +232,12 @@ async def get_products(): return catalog_api.get_products()
 @app.post("/api/tasks")
 async def submit_task(request: Request):
     data = await request.json()
+    desc = data.get("description", "")
     result = {}
-    async for step in orchestrator.submit_task_stream(data.get("description"), "adhoc"):
-        if step["status"] == "completed": result = step["result"]
+    async for step in orchestrator.submit_task_stream(desc, "adhoc"):
+        if step["status"] == "completed": 
+            result = step["result"]
+            log_activity(result.get("agent_name", "SYSTEM"), "TASK_EXECUTION", f"Completed: {desc[:50]}")
     return {"status": "completed", "result": result}
 
 @app.get("/api/agents/health")

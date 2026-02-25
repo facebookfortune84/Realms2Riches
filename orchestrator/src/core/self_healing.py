@@ -100,20 +100,51 @@ class SelfHealingService:
                 self.repair_log.append(f"Quarantined corrupt slot: {os.path.basename(f)}")
 
     def _heal_database_schema(self):
-        db_path = "orchestrator.db"
-        if os.path.exists(db_path):
-            try:
-                conn = sqlite3.connect(db_path)
-                cursor = conn.cursor()
-                cursor.execute("PRAGMA table_info(prices)")
-                cols = [info[1] for info in cursor.fetchall()]
-                if "stripe_price_id" not in cols:
-                    cursor.execute("ALTER TABLE prices ADD COLUMN stripe_price_id TEXT")
-                    self.repair_log.append("Patched Database: Added stripe_price_id to 'prices' table.")
+        from sqlalchemy import create_engine, text
+        db_url = settings.db_config.connection_url
+        if not db_url: return
+
+        try:
+            engine = create_engine(db_url)
+            with engine.connect() as conn:
+                # 1. Patch Prices table
+                res = conn.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name='prices' AND column_name='stripe_price_id'"))
+                if not res.fetchone():
+                    conn.execute(text("ALTER TABLE prices ADD COLUMN stripe_price_id TEXT"))
+                    self.repair_log.append("Patched Postgres: Added stripe_price_id to 'prices'.")
+                
+                # 2. Patch Products table
+                res = conn.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name='products' AND column_name='image_url'"))
+                if not res.fetchone():
+                    conn.execute(text("ALTER TABLE products ADD COLUMN image_url TEXT"))
+                    self.repair_log.append("Patched Postgres: Added image_url to 'products'.")
+                
                 conn.commit()
-                conn.close()
-            except Exception as e:
-                logger.warning(f"DB healing skipped: {e}")
+            engine.dispose()
+        except Exception as e:
+            logger.warning(f"DB healing (Postgres) skipped or failed: {e}")
+            
+            # Fallback to SQLite check if local
+            db_path = "orchestrator.db"
+            if os.path.exists(db_path):
+                try:
+                    import sqlite3
+                    conn = sqlite3.connect(db_path)
+                    cursor = conn.cursor()
+                    # Patch Prices
+                    cursor.execute("PRAGMA table_info(prices)")
+                    cols = [info[1] for info in cursor.fetchall()]
+                    if "stripe_price_id" not in cols:
+                        cursor.execute("ALTER TABLE prices ADD COLUMN stripe_price_id TEXT")
+                    # Patch Products
+                    cursor.execute("PRAGMA table_info(products)")
+                    cols = [info[1] for info in cursor.fetchall()]
+                    if "image_url" not in cols:
+                        cursor.execute("ALTER TABLE products ADD COLUMN image_url TEXT")
+                    conn.commit()
+                    conn.close()
+                except Exception as e2:
+                    logger.warning(f"DB healing (SQLite) failed: {e2}")
 
     def _verify_rag_integrity(self):
         rag_file = "data/vector_store/sovereign_memory.json"

@@ -28,12 +28,14 @@ def seed_catalog(products_csv_path="data/catalog/products.csv", prices_csv_path=
                 existing_product.name = row['name']
                 existing_product.description = row['description']
                 existing_product.category = row['category']
+                existing_product.image_url = row.get('image_url')
             else:
                 new_product = ProductModel(
                     id=product_id,
                     name=row['name'],
                     description=row['description'],
-                    category=row['category']
+                    category=row['category'],
+                    image_url=row.get('image_url')
                 )
                 session.add(new_product)
         

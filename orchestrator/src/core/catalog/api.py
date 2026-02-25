@@ -61,6 +61,7 @@ class CatalogAPI:
                     name=p.name,
                     description=p.description,
                     category=p.category,
+                    image_url=p.image_url,
                     prices=[
                         PriceSchema(
                             product_id=pr.product_id,
@@ -86,6 +87,7 @@ class CatalogAPI:
                 name=p.name,
                 description=p.description,
                 category=p.category,
+                image_url=p.image_url,
                 prices=[
                     PriceSchema(
                         product_id=pr.product_id,
