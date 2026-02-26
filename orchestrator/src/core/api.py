@@ -271,8 +271,38 @@ async def agents_health():
     return {f"agent_{i}": "OK" for i in range(10)}
 
 @app.post("/api/admin/test-dispatch")
-async def test_dispatch():
-    return {"status": "dispatched"}
+async def test_dispatch(background_tasks: BackgroundTasks):
+    task_desc = "INTERNAL_TEST_DISPATCH: Run a full social media broadcast cycle to verify all integrations."
+    
+    # We use a background task to not block the API response
+    # and immediately return a task_id for polling.
+    async def run_in_background():
+        async for step in orchestrator.submit_task_stream(task_desc, "internal_audit"):
+            if step["status"] == "completed":
+                dispatch_tasks[task_id]["status"] = "completed"
+                dispatch_tasks[task_id]["result"] = step["result"]
+            elif step["status"] == "failed":
+                dispatch_tasks[task_id]["status"] = "failed"
+                dispatch_tasks[task_id]["result"] = step.get("reason")
+    
+    task_id = f"audit_{str(time.time())}"
+    dispatch_tasks[task_id] = {"status": "dispatched", "started": datetime.utcnow()}
+    background_tasks.add_task(run_in_background)
+    
+    return {"status": "dispatched", "task_id": task_id}
+
+@app.get("/api/admin/dispatch-status/{task_id}")
+async def get_dispatch_status(task_id: str):
+    task = dispatch_tasks.get(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    # Prune old tasks
+    if (datetime.utcnow() - task["started"]).total_seconds() > 300:
+        dispatch_tasks.pop(task_id, None)
+        raise HTTPException(status_code=410, detail="Task expired")
+        
+    return {"task_id": task_id, "status": task["status"], "result": task.get("result")}
 
 @app.get("/api/admin/audit-last-post")
 async def audit_last_post():
