@@ -13,37 +13,33 @@ def seed_catalog(products_csv_path="data/catalog/products.csv", prices_csv_path=
     session = store.Session()
 
     try:
+        # 0. Clear Existing Data (Purge for clean state)
+        session.query(PriceModel).delete()
+        session.query(ProductModel).delete()
+        session.commit()
+
         # Load CSVs
         products_df = pd.read_csv(products_csv_path)
         prices_df = pd.read_csv(prices_csv_path)
 
-        # 1. Seed Products (Upsert Logic)
+        # 1. Seed Products
         seeded_product_ids = set()
         for _, row in products_df.iterrows():
             product_id = str(row['id']).strip()
             seeded_product_ids.add(product_id)
-            existing_product = session.query(ProductModel).filter_by(id=product_id).first()
             
-            if existing_product:
-                existing_product.name = row['name']
-                existing_product.description = row['description']
-                existing_product.category = row['category']
-                existing_product.image_url = row.get('image_url')
-            else:
-                new_product = ProductModel(
-                    id=product_id,
-                    name=row['name'],
-                    description=row['description'],
-                    category=row['category'],
-                    image_url=row.get('image_url')
-                )
-                session.add(new_product)
+            new_product = ProductModel(
+                id=product_id,
+                name=row['name'],
+                description=row['description'],
+                category=row['category'],
+                image_url=row.get('image_url')
+            )
+            session.add(new_product)
         
         session.flush()
 
         # 2. Seed Prices
-        session.query(PriceModel).delete()
-        
         for _, row in prices_df.iterrows():
             pid = str(row['product_id']).strip()
             if pid not in seeded_product_ids:

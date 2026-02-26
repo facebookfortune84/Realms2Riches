@@ -44,6 +44,7 @@ export default function Pricing() {
     "prod_titan_basic": "https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en",
     "prod_titan_pro": "https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en",
     "prod_platinum_matrix": "https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en",
+    "prod_audit_report": "https://checkout.realmstoriches.xyz/b/7sYdR93I1ceKd7Q6Uh0x206",
     "prod_svc_mgmt": "https://checkout.realmstoriches.xyz/b/28EfZh0vPceK1p87Yl0x200",
     "prod_svc_brand": "https://checkout.realmstoriches.xyz/b/4gMbJ1emFfqW9VE6Uh0x201",
     "prod_svc_marketing": "https://checkout.realmstoriches.xyz/b/cNi14n6UdfqWebU6Uh0x202",
