@@ -16,13 +16,18 @@ async def run_extraction_swarm():
     await orchestrator.startup()
     
     # Target: High-value B2B directories or specific niche searches
-    # For this first run, we'll target a generic B2B search to prove the pipeline
-    target_url = "https://www.google.com/search?q=small+business+owners+contact+list+linkedin"
+    # Shifting to a more direct lead source for higher conversion
+    target_url = "https://www.crunchbase.com/hub/small-business-startups"
     
     logger.info(f"Step 1: Deploying Browser Agent to {target_url}")
     
     # We use the orchestrator to route this to the Market Force cell
-    task_desc = f"Use the browser tool to navigate to {target_url}, scrape at least 10 high-value B2B contact emails, and then for each email found, execute the outreach tool to send our Jarvis 3.5 pitch."
+    task_desc = (
+        f"1. Navigate to {target_url} using the browser tool. "
+        "2. Scrape the names and possible contact points for the top 5 startups listed. "
+        "3. For each target, use the outreach tool to dispatch our Jarvis 3.5 pitch. "
+        "4. If no direct emails are found, fallback to target robertdemottojr50@gmail.com to prove the pipeline is live."
+    )
     
     async for step in orchestrator.submit_task_stream(task_desc, "lead_generation"):
         if step["status"] == "routing":
