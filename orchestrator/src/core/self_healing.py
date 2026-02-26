@@ -168,10 +168,10 @@ class SelfHealingService:
                 self.repair_log.append("Reset corrupted RAG memory store (Backup created).")
 
     def _verify_environment_integrity(self):
-        if not settings.STRIPE_API_KEY or settings.STRIPE_API_KEY == "placeholder":
+        if not settings.STRIPE_API_KEY or "placeholder" in settings.STRIPE_API_KEY:
             self.repair_log.append("⚠️ MONETIZATION: Stripe Key is MISSING. Falling back to test mode.")
-        if not settings.FACEBOOK_PAGE_TOKEN or settings.FACEBOOK_PAGE_TOKEN == "placeholder":
-            self.repair_log.append("⚠️ SOCIAL: Facebook Token is MISSING. Dispatches will be skipped.")
+        if not settings.GROQ_API_KEY:
+            self.repair_log.append("⚠️ INTELLIGENCE: Groq Key is MISSING. LLM will be in mock mode.")
 
 # Singleton
 sovereign_healer = SelfHealingService()
