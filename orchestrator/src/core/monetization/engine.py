@@ -18,13 +18,13 @@ AFFILIATE_LINKS = {
 }
 
 STRIPE_MONETIZATION = {
-    "jarvis_basic": "https://buy.stripe.com/9B68wP7ubg7YbAB8avgYU04?locale=en",
-    "jarvis_custom": "https://buy.stripe.com/bJedR97ubdZQ489duPgYU05?locale=en",
-    "jarvis_premium": "https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en",
-    "business_consultation": "https://checkout.realmstoriches.xyz/b/28EfZh0vPceK1p87Yl0x200",
-    "brand_kit": "https://checkout.realmstoriches.xyz/b/4gMbJ1emFfqW9VE6Uh0x201",
-    "elite_support": "https://checkout.realmstoriches.xyz/b/bJecN5diB5Qm5Fo6Uh0x208",
-    "startup_accelerator": "https://checkout.realmstoriches.xyz/b/bJe28rdiB0w21p85Qd0x209"
+    "jarvis_basic": "https://buy.stripe.com/dRm00jg25aw120i5hh8so00",
+    "jarvis_custom": "https://buy.stripe.com/6oUeVdcPTeMheN46ll8so01",
+    "jarvis_premium": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+    "business_consultation": "https://buy.stripe.com/00w8wP7vzcE97kC3998so03",
+    "brand_kit": "https://buy.stripe.com/fZu4gz9DH8nT5cugZZ8so04",
+    "elite_support": "https://buy.stripe.com/eVqbJ13fj5bH48q9xx8so0b",
+    "startup_accelerator": "https://buy.stripe.com/28E6oHbLP33z6gyaBB8so0c"
 }
 
 class AffiliateArbitrageStream:

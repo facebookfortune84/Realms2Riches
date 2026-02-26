@@ -1,0 +1,260 @@
+[
+  {
+    "product_id": "prod_U37Bq4DNHKoO1d",
+    "name": "Digital Growth Monthly",
+    "description": "Continuous optimization, monthly reports, and strategic adjustments.",
+    "images": [
+      "https://www.realmstoriches.xyz/img/service-digitalgrowthmonthly-300.webp"
+    ],
+    "active": true,
+    "price_id": "price_1T50xLDo5o1YgZszyFpi56Re",
+    "price_amount": 400.0,
+    "currency": "usd",
+    "interval": "month",
+    "payment_link": "https://buy.stripe.com/7sY7sLeY1aw1cEWcJJ8so0e"
+  },
+  {
+    "product_id": "prod_U37BUSOF7EyRBH",
+    "name": "Digital Domination Package",
+    "description": "Advanced website, comprehensive marketing, and robust SEO/social media strategies.",
+    "images": [
+      "https://www.realmstoriches.xyz/img/service-digitaldomination-300.webp"
+    ],
+    "active": true,
+    "price_id": "price_1T50xKDo5o1YgZszy3gnjYpj",
+    "price_amount": 4499.0,
+    "currency": "usd",
+    "interval": null,
+    "payment_link": "https://buy.stripe.com/eVqeVd17b5bHfR87pp8so0d"
+  },
+  {
+    "product_id": "prod_U37BgGge6nANpi",
+    "name": "Startup Accelerator Bundle",
+    "description": "Strategic guidance, essential branding, and a professional basic website.",
+    "images": [
+      "https://www.realmstoriches.xyz/img/service-monthlystartup-600.webp"
+    ],
+    "active": true,
+    "price_id": "price_1T50xJDo5o1YgZszLn53RRee",
+    "price_amount": 1999.0,
+    "currency": "usd",
+    "interval": null,
+    "payment_link": "https://buy.stripe.com/28E6oHbLP33z6gyaBB8so0c"
+  },
+  {
+    "product_id": "prod_U37BYgfvvM0xCg",
+    "name": "Realms to Riches Elite Support",
+    "description": "Priority support, monthly strategic coaching, and a curated library of resources.",
+    "images": [
+      "https://www.realmstoriches.xyz/img/service-monthlyelite-300.webp"
+    ],
+    "active": true,
+    "price_id": "price_1T50xIDo5o1YgZsz2hLUkVvy",
+    "price_amount": 250.0,
+    "currency": "usd",
+    "interval": "month",
+    "payment_link": "https://buy.stripe.com/eVqbJ13fj5bH48q9xx8so0b"
+  },
+  {
+    "product_id": "prod_U37BwJvKIH7Ztz",
+    "name": "Social Media Management",
+    "description": "Professional management of your social media presence to engage your audience.",
+    "images": [
+      "https://www.realmstoriches.xyz/img/service-contentcreation-300.webp"
+    ],
+    "active": true,
+    "price_id": "price_1T50xIDo5o1YgZszrGEpYLFy",
+    "price_amount": 600.0,
+    "currency": "usd",
+    "interval": null,
+    "payment_link": "https://buy.stripe.com/28E00jaHLgUp20i5hh8so0a"
+  },
+  {
+    "product_id": "prod_U37BbSq3YSPNqd",
+    "name": "SEO Optimization Package",
+    "description": "Comprehensive search engine optimization to improve your online visibility.",
+    "images": [
+      "https://www.realmstoriches.xyz/img/service-seo-300.webp"
+    ],
+    "active": true,
+    "price_id": "price_1T50xHDo5o1YgZszNu37ly8z",
+    "price_amount": 800.0,
+    "currency": "usd",
+    "interval": null,
+    "payment_link": "https://buy.stripe.com/5kQ4gzcPTbA57kCcJJ8so09"
+  },
+  {
+    "product_id": "prod_U37BqSTI0yy2xz",
+    "name": "E-commerce Website Development",
+    "description": "Full-featured online store development with payment gateway integration.",
+    "images": [
+      "https://www.realmstoriches.xyz/img/service-ecommercewebdesign-300.webp"
+    ],
+    "active": true,
+    "price_id": "price_1T50xGDo5o1YgZszJBIf7V5R",
+    "price_amount": 5000.0,
+    "currency": "usd",
+    "interval": null,
+    "payment_link": "https://buy.stripe.com/bJe4gz9DH33z5cu2558so08"
+  },
+  {
+    "product_id": "prod_U37BXiNJQjYlrT",
+    "name": "Website Design (Advanced)",
+    "description": "Advanced website design with custom features and integrations for growing businesses.",
+    "images": [
+      "https://www.realmstoriches.xyz/img/service-webdesignadvanced-300.webp"
+    ],
+    "active": true,
+    "price_id": "price_1T50xFDo5o1YgZszAiN3HVWC",
+    "price_amount": 3000.0,
+    "currency": "usd",
+    "interval": null,
+    "payment_link": "https://buy.stripe.com/aFa28r8zD5bHeN4dNN8so07"
+  },
+  {
+    "product_id": "prod_U37BN4UEz8bOfh",
+    "name": "Website Design (Basic)",
+    "description": "Professional, responsive website design for small businesses.",
+    "images": [
+      "https://www.realmstoriches.xyz/img/service-webdesignbasic-300.webp"
+    ],
+    "active": true,
+    "price_id": "price_1T50xEDo5o1YgZszyGhwKgdt",
+    "price_amount": 1500.0,
+    "currency": "usd",
+    "interval": null,
+    "payment_link": "https://buy.stripe.com/00wdR95nrfQldJ0dNN8so06"
+  },
+  {
+    "product_id": "prod_U37BwqQG67JuBl",
+    "name": "Marketing Campaign Management",
+    "description": "Expert setup and initial management of your marketing campaign (ad spend not included).",
+    "images": [
+      "https://www.realmstoriches.xyz/img/service-marketing-300.webp"
+    ],
+    "active": true,
+    "price_id": "price_1T50xDDo5o1YgZszLgjM53zT",
+    "price_amount": 700.0,
+    "currency": "usd",
+    "interval": null,
+    "payment_link": "https://buy.stripe.com/4gMfZhcPTfQl20i8tt8so05"
+  },
+  {
+    "product_id": "prod_U37B4uv5oPrYOX",
+    "name": "Basic Brand Kit",
+    "description": "Essential branding elements including logo design, color palette, and typography.",
+    "images": [
+      "https://www.realmstoriches.xyz/img/service-brandkitdesign-300.webp"
+    ],
+    "active": true,
+    "price_id": "price_1T50xCDo5o1YgZsze68Radt8",
+    "price_amount": 450.0,
+    "currency": "usd",
+    "interval": null,
+    "payment_link": "https://buy.stripe.com/fZu4gz9DH8nT5cugZZ8so04"
+  },
+  {
+    "product_id": "prod_U37BS0t9MrjTEf",
+    "name": "Business Management Consultation",
+    "description": "Strategic guidance to streamline your business operations and growth.",
+    "images": [
+      "https://www.realmstoriches.xyz/img/service-consultation-300.webp"
+    ],
+    "active": true,
+    "price_id": "price_1T50xBDo5o1YgZszjypklCRW",
+    "price_amount": 300.0,
+    "currency": "usd",
+    "interval": null,
+    "payment_link": "https://buy.stripe.com/00w8wP7vzcE97kC3998so03"
+  },
+  {
+    "product_id": "prod_U37B60DtCYrKg2",
+    "name": "Jarvis 3.5 Premium Monthly",
+    "description": "Full-stack AI orchestration for scale. Includes 100,000 API calls/month, 50 GB data storage, dedicated onboarding, conversion funnel templates, and early access to all new tools.",
+    "images": [
+      "https://www.realmstoriches.xyz/img/bannerimage(3)-600.webp"
+    ],
+    "active": true,
+    "price_id": "price_1T50xADo5o1YgZsz4GBQ0b0A",
+    "price_amount": 199.99,
+    "currency": "usd",
+    "interval": "month",
+    "payment_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02"
+  },
+  {
+    "product_id": "prod_U37Bs3KZYvdmtB",
+    "name": "Jarvis 3.5 Custom Monthly",
+    "description": "Tailored automation for growing teams. Includes 25,000 API calls/month, 10 GB data storage, custom dashboard branding, and priority support.",
+    "images": [
+      "https://www.realmstoriches.xyz/img/bannerimage(3)-600.webp"
+    ],
+    "active": true,
+    "price_id": "price_1T50x9Do5o1YgZszfybp2X1P",
+    "price_amount": 79.98,
+    "currency": "usd",
+    "interval": "month",
+    "payment_link": "https://buy.stripe.com/6oUeVdcPTeMheN46ll8so01"
+  },
+  {
+    "product_id": "prod_U37BOrYBTkiWyi",
+    "name": "Jarvis 3.5 Basic Monthly",
+    "description": "Launch your startup with lean AI firepower. Includes up to 5,000 API calls/month, 1 GB secure data storage, and access to core Jarvis features.",
+    "images": [
+      "https://www.realmstoriches.xyz/img/bannerimage(3)-600.webp"
+    ],
+    "active": true,
+    "price_id": "price_1T50x8Do5o1YgZszWXoficqV",
+    "price_amount": 29.99,
+    "currency": "usd",
+    "interval": "month",
+    "payment_link": "https://buy.stripe.com/dRm00jg25aw120i5hh8so00"
+  },
+  {
+    "product_id": "prod_TzQuYVuoiYCnnG",
+    "name": "TitanForge Pro",
+    "description": "Pro automation package - $4,999/month",
+    "images": [],
+    "active": true,
+    "price_id": "price_1T1S2UDo5o1YgZszm6U5PlOA",
+    "price_amount": 44999.0,
+    "currency": "usd",
+    "interval": "year",
+    "payment_link": null
+  },
+  {
+    "product_id": "prod_TzQudorQFSUHnK",
+    "name": "TitanForge Basic",
+    "description": "Basic automation package - $2,999/month",
+    "images": [],
+    "active": true,
+    "price_id": "price_1T1S2TDo5o1YgZszgnZEL7lB",
+    "price_amount": 29999.0,
+    "currency": "usd",
+    "interval": "year",
+    "payment_link": null
+  },
+  {
+    "product_id": "prod_TyjBDBlBkIpCuu",
+    "name": "Website Audit & Optimization Report",
+    "description": "Automated, agent-powered comprehensive audit of a target website.",
+    "images": [],
+    "active": true,
+    "price_id": "price_1T0lifDo5o1YgZszzV6oxFaw",
+    "price_amount": 299.0,
+    "currency": "usd",
+    "interval": null,
+    "payment_link": null
+  },
+  {
+    "product_id": "prod_Tyj9HDjs5IaebR",
+    "name": "Micro-Feature Development Package",
+    "description": "Delivery of a small, well-defined software feature.",
+    "images": [],
+    "active": true,
+    "price_id": "price_1T0lhGDo5o1YgZszUwFofKhK",
+    "price_amount": 499.0,
+    "currency": "usd",
+    "interval": null,
+    "payment_link": null
+  }
+]

@@ -52,6 +52,13 @@ class ToolInvocation(BaseEntity):
     error_message: Optional[str] = None
     execution_time_ms: float = 0.0
 
+class ToolResult(BaseModel):
+    tool_id: str
+    agent_id: str
+    output_data: Dict[str, Any]
+    status: Literal["success", "failure"] = "success"
+    error_message: Optional[str] = None
+
 class Artifact(BaseEntity):
     project_id: str
     path: str
@@ -74,6 +81,7 @@ class LineageRecord(BaseEntity):
 # --- Project & Marketing Specs ---
 
 class MarketingConfig(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
     brand_name: str = Field(default="My Brand", alias="BRAND_NAME")
     product_name: str = Field(default="My Product", alias="PRODUCT_NAME")
     website_url: str = Field(default="https://example.com", alias="MARKETING_SITE_URL")
@@ -84,6 +92,7 @@ class MarketingConfig(BaseModel):
     github_url: str = Field(default="https://github.com/mybrand", alias="SOCIAL_GITHUB_URL")
 
 class DatabaseConfig(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
     user: str = Field(default="postgres", alias="POSTGRES_USER")
     password: str = Field(default="postgres", alias="POSTGRES_PASSWORD")
     db: str = Field(default="app_db", alias="POSTGRES_DB")

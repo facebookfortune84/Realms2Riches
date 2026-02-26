@@ -137,8 +137,15 @@ try {
     Write-Host "WARNING: Awareness Protocol skipped." -ForegroundColor Yellow
 }
 
-# --- 7. FINAL READY ---
+# --- 7. FINAL READY & AUTO-MONETIZE ---
 Write-Host "`n[7/7] SOVEREIGN MATRIX IS LIVE." -ForegroundColor Green
+
+if ($Yolo) {
+    Write-Host "`n🔥 YOLO MODE DETECTED: Activating Income Streams..." -ForegroundColor Yellow
+    docker exec docker-orchestrator-api-1 python scripts/yolo_mode_monetization.py
+    Write-Host "SUCCESS: Swarm is actively monetizing." -ForegroundColor Green
+}
+
 Write-Host "`nCommand Center:"
 Write-Host "  > r2r shell" -ForegroundColor White
 Write-Host "  > r2r status" -ForegroundColor White

@@ -26,9 +26,13 @@ class BaseTool(ABC):
             return invocation
 
         try:
-            # Pass input_data (dict) to execute instead of invocation object
-            result = self.execute(invocation.input_data)
-            invocation.output_data = result
+            # Standardized: Pass the entire invocation object
+            result = self.execute(invocation)
+            if isinstance(result, dict):
+                invocation.output_data = result
+            elif hasattr(result, "model_dump"):
+                invocation.output_data = result.model_dump(mode="json")
+            
             invocation.status = "success"
         except Exception as e:
             logger.error(f"Tool execution failed: {e}")

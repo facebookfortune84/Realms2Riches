@@ -89,8 +89,9 @@ class Agent:
                     ))
                     res_dict = res.model_dump(mode="json")
                     results.append(res_dict)
-                    if "path" in res_dict.get("output_data", {}):
-                        artifacts.append(res_dict["output_data"]["path"])
+                    out_data = res_dict.get("output_data")
+                    if out_data and isinstance(out_data, dict) and "path" in out_data:
+                        artifacts.append(out_data["path"])
 
             # Work Accounting
             duration_ms = int((time.time() - start_time) * 1000)

@@ -41,6 +41,13 @@ ruff = "^0.1.0"
 mypy = "^1.8.0"
 black = "^24.0.0"
 pre-commit = "^3.6.0"
+pytest-asyncio = "^1.3.0"
+
+[tool.poetry.scripts]
+start = "orchestrator.src.core.api:app"
+yolo = "scripts.yolo_mode_monetization:activate_yolo_mode"
+verify = "scripts.test_system_integrity:main"
+lineage = "scripts.hash_registry:main"
 
 [tool.ruff]
 line-length = 88

@@ -4,36 +4,68 @@ import logging
 from typing import Dict, Any, List
 from orchestrator.src.tools.base import BaseTool, ToolConfig
 from orchestrator.src.validation.schemas import ToolInvocation
+from orchestrator.src.core.config import settings
 
 logger = logging.getLogger(__name__)
 
 class OutreachSwarmTool(BaseTool):
     """
     Direct Outreach Monetization Funnel.
-    Uses 'Titan' prompts to send high-authority direct messages.
+    Uses 'Titan' prompts to send high-authority cold emails.
     """
     def execute(self, invocation: ToolInvocation) -> Dict[str, Any]:
         params = invocation.input_data
-        target, platform = params.get("target"), params.get("platform")
-        logger.info(f"Outreach Swarm: Targeting {target} on {platform}")
+        target_email = params.get("target_email")
+        target_name = params.get("target_name", "Entrepreneur")
         
-        # Professional Cold Outreach Template
-        draft_message = (
-            f"Hi {target},\n\n"
+        logger.info(f"Outreach Swarm: Targeting {target_email}")
+        
+        conversion_link = "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02" # Jarvis Premium
+        
+        subject = "Autonomous Revenue Operations for your Team"
+        body = (
+            f"Hi {target_name},\n\n"
             f"I noticed your great work and wanted to connect. "
             f"At Realms2Riches, we deploy autonomous AI systems like Jarvis 3.5 "
             f"to streamline operations and scale revenue.\n\n"
             f"Are you open to seeing how this could impact your business?\n"
-            f"More info here: https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en\n"
+            f"More info here: {conversion_link}\n\n"
+            f"Best,\nRobert DeMotto Jr.\nRealms2Riches Operator"
         )
+
+        if settings.SMTP_USER and settings.SMTP_PASS:
+            try:
+                import smtplib
+                from email.mime.text import MIMEText
+                
+                msg = MIMEText(body)
+                msg['Subject'] = subject
+                msg['From'] = settings.SMTP_USER
+                msg['To'] = target_email
+                
+                with smtplib.SMTP(settings.SMTP_SERVER, settings.SMTP_PORT) as server:
+                    server.starttls()
+                    server.login(settings.SMTP_USER, settings.SMTP_PASS)
+                    server.send_message(msg)
+                
+                return {
+                    "status": "success", 
+                    "action": "outreach_dispatched", 
+                    "method": "email",
+                    "target": target_email,
+                    "conversion_link": conversion_link
+                }
+            except Exception as e:
+                logger.error(f"Email outreach failed: {e}")
+                return {"status": "error", "reason": f"SMTP Error: {str(e)}"}
         
         return {
             "status": "success", 
-            "action": "outreach_dispatched", 
-            "target": target,
-            "platform": platform,
-            "draft_message": draft_message,
-            "conversion_link": "https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en"
+            "action": "outreach_simulated", 
+            "reason": "SMTP not configured",
+            "target": target_email,
+            "draft_body": body,
+            "conversion_link": conversion_link
         }
 
 class SEOContentFactoryTool(BaseTool):
