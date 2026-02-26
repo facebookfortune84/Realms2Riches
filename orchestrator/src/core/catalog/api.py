@@ -29,6 +29,7 @@ class CatalogAPI:
                     description=p.description,
                     category=p.category,
                     image_url=p.image_url,
+                    checkout_url=p.checkout_url,
                     prices=[
                         PriceSchema(
                             product_id=pr.product_id,
@@ -89,6 +90,7 @@ class CatalogAPI:
                 description=p.description,
                 category=p.category,
                 image_url=p.image_url,
+                checkout_url=p.checkout_url,
                 prices=[
                     PriceSchema(
                         product_id=pr.product_id,

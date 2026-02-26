@@ -3,6 +3,8 @@ import os
 import json
 import subprocess
 import sys
+import os
+sys.path.append(os.getcwd())
 from datetime import datetime
 from orchestrator.src.core.config import settings
 from orchestrator.src.tools.db_health import check_db_health
@@ -14,9 +16,7 @@ REPORT_PATH = "data/lineage/launch_readiness_report.json"
 client = TestClient(app)
 
 def test_forge_launch_readiness():
-    print("
---- FORGE LAUNCH READINESS META-TEST ---
-")
+    print("\n--- FORGE LAUNCH READINESS META-TEST ---\n")
     
     report = {
         "timestamp": datetime.utcnow().isoformat(),
@@ -101,8 +101,7 @@ def test_forge_launch_readiness():
     with open(REPORT_PATH, "w") as f:
         json.dump(report, f, indent=2)
         
-    print(f"
---- FINAL STATUS: {overall_status} ---")
+    print(f"\n--- FINAL STATUS: {overall_status} ---")
     
     if overall_status != "READY":
         pytest.fail("Forge Launch Readiness Check Failed")

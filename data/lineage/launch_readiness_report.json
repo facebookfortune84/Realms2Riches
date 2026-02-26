@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-02-26T03:00:02.922415",
+  "status": "READY",
+  "checks": {
+    "backend": "pass",
+    "database": "pass",
+    "catalog": "pass",
+    "stripe": "pass",
+    "voice": "pass",
+    "agents": "pass",
+    "task_flow": "pass",
+    "metrics": "fail"
+  }
+}

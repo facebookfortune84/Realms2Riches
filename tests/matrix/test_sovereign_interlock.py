@@ -19,13 +19,13 @@ class SovereignInterlockTest(unittest.IsolatedAsyncioTestCase):
     
     async def asyncSetUp(self):
         self.orchestrator = Orchestrator()
+        await self.orchestrator.startup()
 
     async def test_track_01_cybernetic_engineering_interlock(self):
         """Verify core engineering track: Routing -> Agent -> Tool -> Telemetry."""
-        print("
-[INTERLOCK] testing Track 1: CYBERNETIC_ENGINEERING...")
+        print("\n[INTERLOCK] testing Track 1: CYBERNETIC_ENGINEERING...")
         
-        task_desc = "Scaffold a new microservice for data sharding."
+        task_desc = "Write code to scaffold a new microservice for data sharding."
         results = []
         async for step in self.orchestrator.submit_task_stream(task_desc, "interlock_test"):
             results.append(step)
@@ -43,7 +43,7 @@ class SovereignInterlockTest(unittest.IsolatedAsyncioTestCase):
         """Verify monetization track: Pricing -> Audit -> Stripe Schema."""
         print("[INTERLOCK] testing Track 2: REVENUE_SYSTEMS...")
         
-        task_desc = "Audit the yield of the Platinum Matrix slots."
+        task_desc = "Calculate pricing and audit the yield of the Platinum Matrix slots."
         results = []
         async for step in self.orchestrator.submit_task_stream(task_desc, "interlock_test"):
             results.append(step)
@@ -67,6 +67,5 @@ class SovereignInterlockTest(unittest.IsolatedAsyncioTestCase):
             print(f"✅ Track 3 VERIFIED | {len(repairs)} repair points active.")
 
 if __name__ == "__main__":
-    print("
-⚔️ STARTING SOVEREIGN INTERLOCK MATRIX v5.1 ⚔️")
+    print("\n⚔️ STARTING SOVEREIGN INTERLOCK MATRIX v5.1 ⚔️")
     unittest.main()

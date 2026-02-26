@@ -118,6 +118,11 @@ class SelfHealingService:
                 if not res.fetchone():
                     conn.execute(text("ALTER TABLE products ADD COLUMN image_url TEXT"))
                     self.repair_log.append("Patched Postgres: Added image_url to 'products'.")
+
+                res = conn.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name='products' AND column_name='checkout_url'"))
+                if not res.fetchone():
+                    conn.execute(text("ALTER TABLE products ADD COLUMN checkout_url TEXT"))
+                    self.repair_log.append("Patched Postgres: Added checkout_url to 'products'.")
                 
                 conn.commit()
             engine.dispose()
@@ -141,6 +146,8 @@ class SelfHealingService:
                     cols = [info[1] for info in cursor.fetchall()]
                     if "image_url" not in cols:
                         cursor.execute("ALTER TABLE products ADD COLUMN image_url TEXT")
+                    if "checkout_url" not in cols:
+                        cursor.execute("ALTER TABLE products ADD COLUMN checkout_url TEXT")
                     conn.commit()
                     conn.close()
                 except Exception as e2:

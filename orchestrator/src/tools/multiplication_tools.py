@@ -16,7 +16,25 @@ class OutreachSwarmTool(BaseTool):
         params = invocation.input_data
         target, platform = params.get("target"), params.get("platform")
         logger.info(f"Outreach Swarm: Targeting {target} on {platform}")
-        return {"status": "success", "action": "outreach_dispatched", "target": target, "conversion_link": "https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en"}
+        
+        # Professional Cold Outreach Template
+        draft_message = (
+            f"Hi {target},\n\n"
+            f"I noticed your great work and wanted to connect. "
+            f"At Realms2Riches, we deploy autonomous AI systems like Jarvis 3.5 "
+            f"to streamline operations and scale revenue.\n\n"
+            f"Are you open to seeing how this could impact your business?\n"
+            f"More info here: https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en\n"
+        )
+        
+        return {
+            "status": "success", 
+            "action": "outreach_dispatched", 
+            "target": target,
+            "platform": platform,
+            "draft_message": draft_message,
+            "conversion_link": "https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en"
+        }
 
 class SEOContentFactoryTool(BaseTool):
     """

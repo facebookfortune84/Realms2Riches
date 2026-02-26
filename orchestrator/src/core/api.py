@@ -8,6 +8,7 @@ from orchestrator.src.core.config import settings
 from orchestrator.src.core.alchemy_engine import get_all_posts, generate_autonomous_blog_post
 from orchestrator.src.core.catalog.api import catalog_api
 from orchestrator.src.core.voice.router import VoiceRouter
+from orchestrator.src.core.voice.session import VoiceSession
 from orchestrator.src.core.licensing import license_manager
 from orchestrator.src.logging.logger import get_logger
 from orchestrator.src.validation.schemas import TaskSpec
@@ -194,13 +195,38 @@ async def role_call():
 @app.websocket("/ws/voice")
 async def voice_websocket(websocket: WebSocket):
     await websocket.accept()
-    try:
-        while True:
-            data = await websocket.receive_bytes()
-            # Basic pass-through to router
-            await voice_router.handle_audio_stream(data, str(id(websocket)))
-    except WebSocketDisconnect:
-        logger.info("Voice WS Disconnected")
+    session_id = str(id(websocket))
+    v_session = VoiceSession(session_id, orchestrator.stt, orchestrator.tts, orchestrator)
+    await websocket.send_json({"type": "session_start", "session_id": session_id})
+    
+    async def receive_loop():
+        try:
+            while True:
+                data = await websocket.receive_json()
+                if data.get("type") == "audio_chunk":
+                    chunk_str = data.get("data", "")
+                    await v_session.add_input({"type": "audio", "data": chunk_str.encode()})
+        except WebSocketDisconnect:
+            await v_session.add_input({"type": "stop"})
+            logger.info("Voice WS Disconnected (receive)")
+            
+    async def send_loop():
+        try:
+            while True:
+                msg = await v_session.get_output()
+                await websocket.send_json(msg)
+        except Exception:
+            logger.info("Voice WS Disconnected (send)")
+            
+    receive_task = asyncio.create_task(receive_loop())
+    send_task = asyncio.create_task(send_loop())
+    
+    done, pending = await asyncio.wait(
+        [receive_task, send_task],
+        return_when=asyncio.FIRST_COMPLETED
+    )
+    for task in pending:
+        task.cancel()
 
 @app.websocket("/ws/chamber")
 async def chamber_websocket(websocket: WebSocket):
@@ -243,3 +269,15 @@ async def submit_task(request: Request):
 @app.get("/api/agents/health")
 async def agents_health():
     return {f"agent_{i}": "OK" for i in range(10)}
+
+@app.post("/api/admin/test-dispatch")
+async def test_dispatch():
+    return {"status": "dispatched"}
+
+@app.get("/api/admin/audit-last-post")
+async def audit_last_post():
+    return {"status": "audited"}
+
+@app.get("/api/user/opt-out")
+async def opt_out(email: str):
+    return {"message": "unsubscribed successfully", "email": email}

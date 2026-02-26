@@ -116,6 +116,7 @@ class Orchestrator:
         if any(k in desc for k in ["outreach", "dm", "sale"]): cell_key = "GLOBAL_MARKET_FORCE"
         elif any(k in desc for k in ["seo", "blog", "content"]): cell_key = "GLOBAL_MARKET_FORCE"
         elif any(k in desc for k in ["code", "fix"]): cell_key = "CYBERNETIC_ENGINEERING"
+        elif any(k in desc for k in ["price", "pricing", "yield", "audit"]): cell_key = "REVENUE_SYSTEMS"
         else: cell_key = "STRATEGIC_OPERATIONS"
 
         yield {"status": "routing", "task_id": task_id, "destination": cell_key}

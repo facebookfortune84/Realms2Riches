@@ -33,7 +33,8 @@ def seed_catalog(products_csv_path="data/catalog/products.csv", prices_csv_path=
                 name=row['name'],
                 description=row['description'],
                 category=row['category'],
-                image_url=row.get('image_url')
+                image_url=row.get('image_url'),
+                checkout_url=row.get('checkout_url') if 'checkout_url' in row else None
             )
             session.add(new_product)
         

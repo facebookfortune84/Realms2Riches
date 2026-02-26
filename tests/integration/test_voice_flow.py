@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.getcwd())
 from fastapi.testclient import TestClient
 from orchestrator.src.core.api import app
 import pytest

@@ -131,7 +131,12 @@ class MonetizationEngine:
                 # If it's a stream that can be automated via the orchestrator
                 if orchestrator and isinstance(stream, (SEOTrafficStream, ColdOutreachStream, AffiliateArbitrageStream)):
                     logger.info(f"Dispatching REAL-WORLD task for {stream.__class__.__name__}...")
-                    desc = f"Execute {stream.__class__.__name__} operation to maximize revenue."
+                    desc = (
+                        f"ACTIVATE YOLO MODE: Execute an aggressive, high-converting {stream.__class__.__name__} operation. "
+                        f"Target top-tier enterprise clients and high-intent buyers. "
+                        f"Use powerful, authoritative marketing prompts to guarantee maximum income reach. "
+                        f"No hesitation, maximize visibility and conversion for these links: {', '.join(stream.execute().get('links', []))}"
+                    )
                     # We run it in the background/stream it
                     async for step in orchestrator.submit_task_stream(desc, "monetization"):
                         if step["status"] == "completed":
