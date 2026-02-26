@@ -1,5 +1,5 @@
 # ============================================================
-# SOVEREIGN_START.ps1 - Platinum Robust Launcher (v4.0 Matrix Edition)
+# SOVEREIGN_START.ps1 - Platinum Robust Launcher (v4.1 Matrix Edition)
 # ============================================================
 param (
     [switch]$Prune,
@@ -10,7 +10,7 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "`n  R E A L M S   2   R I C H E S" -ForegroundColor Magenta
 Write-Host "  S O V E R E I G N   M A T R I X" -ForegroundColor Green
-Write-Host "  v4.0-VANGUARD | SYSTEM: INITIALIZING`n" -ForegroundColor DarkGray
+Write-Host "  v4.1-VANGUARD | SYSTEM: INITIALIZING`n" -ForegroundColor DarkGray
 
 # --- 0. SOVEREIGN GIT & LINEAGE SYNC ---
 Write-Host "[0/7] Synchronizing Git Pulse & Remote Lineage..." -ForegroundColor Cyan
@@ -19,7 +19,6 @@ try {
     $timestamp = Get-Date -Format "yyyyMMdd-HHmm"
     $tag = "sov-pulse-$timestamp"
     
-    # Check if there are changes to commit
     $status = git status --porcelain
     if ($status) {
         git commit -m "Sovereign Swarm Pulse: $timestamp [Automated Lineage Commit]"
@@ -31,7 +30,6 @@ try {
     git tag -a $tag -m "Sovereign Intelligence Network Lifecycle Point: $tag"
     Write-Host "  -> Tagged locally as $tag" -ForegroundColor Gray
     
-    # Attempt Remote Push
     try {
         Write-Host "  -> Pushing lineage to remote..." -ForegroundColor Gray
         git push origin main --tags -q
@@ -99,7 +97,6 @@ if (-not $healthy) {
 # --- 4. UNIVERSAL TEST MATRIX ---
 Write-Host "`n[4/7] Engaging Universal Matrix Diagnostics..." -ForegroundColor Magenta
 try {
-    # Run the matrix directly on the host using Poetry
     poetry run python tests/matrix_runner.py
     if ($LASTEXITCODE -ne 0) {
         Write-Host "CRITICAL MATRIX FRACTURE DETECTED." -ForegroundColor Red

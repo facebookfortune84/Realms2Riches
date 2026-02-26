@@ -22,6 +22,9 @@ class OutreachSwarmTool(BaseTool):
         
         conversion_link = "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02" # Jarvis Premium
         
+        from_name = "Robert DeMotto | Realms2Riches"
+        business_email = "robert.demotto@realmstoriches.xyz" # Display only
+        
         subject = "Autonomous Revenue Operations for your Team"
         body = (
             f"Hi {target_name},\n\n"
@@ -30,21 +33,29 @@ class OutreachSwarmTool(BaseTool):
             f"to streamline operations and scale revenue.\n\n"
             f"Are you open to seeing how this could impact your business?\n"
             f"More info here: {conversion_link}\n\n"
-            f"Best,\nRobert DeMotto Jr.\nRealms2Riches Operator"
+            f"Best,\n\n{from_name}\n{business_email}"
         )
 
         if settings.SMTP_USER and settings.SMTP_PASS:
             try:
                 import smtplib
                 from email.mime.text import MIMEText
+                from email.utils import formataddr
                 
                 msg = MIMEText(body)
                 msg['Subject'] = subject
-                msg['From'] = settings.SMTP_USER
+                msg['From'] = formataddr((from_name, business_email))
                 msg['To'] = target_email
+                msg['Reply-To'] = business_email
                 
-                with smtplib.SMTP(settings.SMTP_SERVER, settings.SMTP_PORT) as server:
+                # Use SMTP_SSL for port 465
+                if settings.SMTP_PORT == 465:
+                    server = smtplib.SMTP_SSL(settings.SMTP_SERVER, settings.SMTP_PORT)
+                else:
+                    server = smtplib.SMTP(settings.SMTP_SERVER, settings.SMTP_PORT)
                     server.starttls()
+                
+                with server:
                     server.login(settings.SMTP_USER, settings.SMTP_PASS)
                     server.send_message(msg)
                 
