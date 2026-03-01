@@ -78,9 +78,24 @@ class Agent:
             
             plan = self._formulate_plan(task.description, context_text, effective_system_prompt)
             
+            steps = plan.get("steps", [])
+            
+            # --- INDUSTRIAL TOOL BARRIER ---
+            # If the directive demands outreach or SEO and the agent skipped it, FORCE IT.
+            if not steps:
+                if "outreach" in task.description.lower() or "pitch" in task.description.lower():
+                    logger.warning(f"Agent {self.agent_name} attempted to skip outreach. FORCING industrial_scrape/outreach.")
+                    steps = [
+                        {"tool_id": "browser", "inputs": {"action": "industrial_scrape", "query": task.description}},
+                        {"tool_id": "outreach", "inputs": {"target_email": "robertdemottojr50@gmail.com", "target_name": "Valued Partner"}}
+                    ]
+                elif "seo" in task.description.lower() or "article" in task.description.lower():
+                    logger.warning(f"Agent {self.agent_name} attempted to skip SEO. FORCING seo_factory.")
+                    steps = [{"tool_id": "seo_factory", "inputs": {"topic": "Autonomous Revenue Operations", "keywords": ["AI", "ROI"]}}]
+
             results = []
             artifacts = []
-            for step in plan.get("steps", []):
+            for step in steps:
                 tool_id = step.get("tool_id")
                 if tool_id in self.tools:
                     logger.info(f"Agent {self.agent_name} executing tool: {tool_id}")

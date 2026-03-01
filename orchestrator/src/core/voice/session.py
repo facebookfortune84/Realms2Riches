@@ -110,20 +110,40 @@ class VoiceSession:
             await self.output_queue.put({"type": "state", "state": "thinking"})
             
             transcript = await self.stt.transcribe_chunk(audio_data)
+            if not transcript or len(transcript.strip()) < 2:
+                self.state = VoiceSessionState.IDLE
+                return
+
             await self.output_queue.put({"type": "transcript", "text": transcript, "is_final": True})
             
-            # Response Logic
-            response_text = f"I heard {len(audio_data)} bytes. You said: {transcript}"
-            await self.output_queue.put({"type": "text", "text": response_text})
+            # --- INDUSTRIAL SCRUM LOGIC ---
+            # Send the transcript to the orchestrator to get department head responses
+            logger.info(f"Voice Scrum: Dispatching '{transcript}' to the matrix")
             
-            self.state = VoiceSessionState.SPEAKING
-            await self.output_queue.put({"type": "state", "state": "speaking"})
+            # We target STRATEGIC_OPERATIONS for high-level discussion
+            task_desc = f"VOICE_SCRUM_DIRECTIVE: {transcript}. Respond as the department head with a status update."
             
-            async def text_gen():
-                yield response_text
-            
-            async for audio_chunk in self.tts.synthesize_stream(text_gen()):
-                await self.output_queue.put({"type": "audio", "data": audio_chunk.hex()})
+            async for step in self.orchestrator.submit_task_stream(task_desc, "voice_session"):
+                if step["status"] == "completed":
+                    res = step["result"]
+                    agent_name = res.get("agent_name", "Head of Ops")
+                    response_text = res.get("reasoning", "Standing by.")
+                    
+                    await self.output_queue.put({
+                        "type": "text", 
+                        "text": f"[{agent_name}]: {response_text}"
+                    })
+                    
+                    self.state = VoiceSessionState.SPEAKING
+                    await self.output_queue.put({"type": "state", "state": "speaking"})
+                    
+                    # Synthesize specific agent voice
+                    # Fallback to default if XI_API_KEY missing
+                    async def text_gen():
+                        yield response_text
+                    
+                    async for audio_chunk in self.tts.synthesize_stream(text_gen()):
+                        await self.output_queue.put({"type": "audio", "data": audio_chunk.hex()})
 
             self.state = VoiceSessionState.IDLE
             await self.output_queue.put({"type": "state", "state": "idle"})

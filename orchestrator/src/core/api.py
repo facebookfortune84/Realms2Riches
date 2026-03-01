@@ -51,7 +51,7 @@ def log_activity(agent: str, action: str, result: str):
 
 # --- MIDDLEWARE & MOUNTS ---
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
-app.mount("/assets", StaticFiles(directory="data/assets"), name="assets")
+app.mount("/assets", StaticFiles(directory="orchestrator/src/core/api/static/assets"), name="assets")
 app.mount("/marketing", StaticFiles(directory="data/marketing"), name="marketing")
 
 @app.middleware("http")

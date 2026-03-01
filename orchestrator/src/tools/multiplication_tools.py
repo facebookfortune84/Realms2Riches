@@ -29,7 +29,11 @@ class OutreachSwarmTool(BaseTool):
         from google_auth_oauthlib.flow import InstalledAppFlow
         from googleapiclient.discovery import build
 
-        scopes = ['https://www.googleapis.com/auth/gmail.send']
+        # INDUSTRIAL UPGRADE: Requesting full modify access to enable the Nurturer/Closer
+        scopes = [
+            'https://www.googleapis.com/auth/gmail.send',
+            'https://www.googleapis.com/auth/gmail.modify'
+        ]
         creds = None
         
         if os.path.exists(self.token_file):
@@ -51,10 +55,14 @@ class OutreachSwarmTool(BaseTool):
     def execute(self, invocation: ToolInvocation) -> Dict[str, Any]:
         params = invocation.input_data
         target_email = params.get("target_email")
+        # FORCE VALIDATION: No placeholders allowed.
+        if not target_email or "@" not in str(target_email) or "." not in str(target_email) or len(str(target_email)) < 5:
+            logger.error(f"🛑 REJECTING INVALID EMAIL: {target_email}")
+            return {"status": "error", "reason": f"Invalid email format: {target_email}"}
+        
         target_name = params.get("target_name", "Entrepreneur")
         product_key = params.get("product_key", "jarvis_premium")
         
-        # INDUSTRIAL UPGRADE: Map product keys to high-ticket Stripe links
         product_map = {
             "jarvis_basic": {"name": "Jarvis 3.5 Basic", "link": "https://buy.stripe.com/dRm00jg25aw120i5hh8so00", "price": "$29.99/mo"},
             "jarvis_custom": {"name": "Jarvis 3.5 Custom", "link": "https://buy.stripe.com/6oUeVdcPTeMheN46ll8so01", "price": "Custom"},

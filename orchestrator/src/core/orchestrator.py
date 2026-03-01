@@ -90,6 +90,13 @@ class Orchestrator:
         from orchestrator.src.tools.file_tools import FileTool
         from orchestrator.src.tools.git_tools import GitTool
         from orchestrator.src.tools.browser_agent import BrowserAgentTool
+        from orchestrator.src.core.voice.real_adapters import OpenAIWhisperAdapter, ElevenLabsAdapter
+
+        # Industrial Voice Handshake
+        if settings.OPENAI_API_KEY:
+            self.stt = OpenAIWhisperAdapter(settings.OPENAI_API_KEY)
+        if settings.ELEVENLABS_API_KEY:
+            self.tts = ElevenLabsAdapter(settings.ELEVENLABS_API_KEY)
 
         all_tools = [
             GitTool(ToolConfig(tool_id="git", name="Git", description="Ops", parameters_schema={}, allowed_agents=["*"])),
