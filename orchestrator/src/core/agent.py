@@ -137,12 +137,13 @@ class Agent:
     def _formulate_plan(self, prompt: str, context: str, system_prompt: str) -> Dict[str, Any]:
         identity_header = f"You are {self.agent_name}. Your Tax ID is {self.dossier.tax_id}. Your hourly rate is ${self.dossier.hourly_rate}."
         
-        # Enhanced formatting instructions
+        # Enhanced formatting instructions for absolute JSON compliance
         format_instructions = (
-            "RESPONSE MUST BE A JSON OBJECT. NO PREAMBLE. NO MARKDOWN BLOCK.\n"
-            "Example:\n"
+            "CRITICAL: YOUR ENTIRE RESPONSE MUST BE A SINGLE VALID JSON OBJECT.\n"
+            "DO NOT INCLUDE ANY TEXT, MARKDOWN, OR PREAMBLE OUTSIDE THE JSON.\n"
+            "Example Format:\n"
             "{\n"
-            "  \"reasoning\": \"I will use the browser to find leads and then email them.\",\n"
+            "  \"reasoning\": \"Strategic analysis of the monetization vector...\",\n"
             "  \"steps\": [\n"
             "    {\"tool_id\": \"browser\", \"inputs\": {\"action\": \"navigate\", \"url\": \"...\"}},\n"
             "    {\"tool_id\": \"outreach\", \"inputs\": {\"target_email\": \"...\", \"message\": \"...\"}}\n"
@@ -152,30 +153,34 @@ class Agent:
         
         full_prompt = f"{identity_header}\n{system_prompt}\n\nCONTEXT:\n{context}\n\n{format_instructions}"
         
-        response = self.llm_provider.generate_response([
-            {"role": "system", "content": full_prompt}, 
-            {"role": "user", "content": prompt}
-        ])
-        
-        try:
-            # 1. Try direct parse
-            return json.loads(response)
-        except Exception:
+        # Retry logic for robust JSON extraction
+        max_retries = 2
+        for attempt in range(max_retries + 1):
+            response = self.llm_provider.generate_response([
+                {"role": "system", "content": full_prompt}, 
+                {"role": "user", "content": prompt}
+            ])
+            
             try:
-                # 2. Aggressive regex extraction
-                # Matches the outermost JSON object
-                match = re.search(r'(\{.*\})', response, re.DOTALL)
-                if match:
-                    # Clean up common JSON-breaking characters in strings
-                    json_str = match.group(1)
-                    # Attempt to fix trailing commas or common AI-generated JSON errors
-                    json_str = re.sub(r',\s*\}', '}', json_str)
-                    json_str = re.sub(r',\s*\]', ']', json_str)
-                    return json.loads(json_str)
-            except Exception as e:
-                logger.error(f"Plan parsing failed for {self.agent_name}: {e} | Raw: {response[:200]}")
+                # 1. Direct parse
+                return json.loads(response.strip())
+            except Exception:
+                try:
+                    # 2. Aggressive regex extraction for JSON block
+                    match = re.search(r'(\{.*\})', response, re.DOTALL)
+                    if match:
+                        json_str = match.group(1)
+                        # Fix common AI artifacts (trailing commas, non-standard quotes)
+                        json_str = re.sub(r',\s*\}', '}', json_str)
+                        json_str = re.sub(r',\s*\]', ']', json_str)
+                        return json.loads(json_str)
+                except Exception as e:
+                    if attempt < max_retries:
+                        logger.warning(f"JSON Parse Attempt {attempt+1} failed for {self.agent_name}. Retrying...")
+                        continue
+                    logger.error(f"Final Plan parsing failed for {self.agent_name}: {e} | Raw: {response[:200]}")
                 
-        # 3. Last Resort: Heuristic fallback for common monetization tasks
+        # 3. Last Resort: Heuristic fallback
         if "outreach" in prompt.lower() or "monetization" in prompt.lower():
             return {
                 "reasoning": "Heuristic fallback: Executing outreach tool based on high-level directive.",
