@@ -87,6 +87,7 @@ class Orchestrator:
         fleet = generate_grand_fleet()
         from orchestrator.src.tools.social_tools import SocialMediaMultiplexer
         from orchestrator.src.tools.multiplication_tools import OutreachSwarmTool, SEOContentFactoryTool
+        from orchestrator.src.tools.smtp_tools import SMTPOutreachTool
         from orchestrator.src.tools.file_tools import FileTool
         from orchestrator.src.tools.git_tools import GitTool
         from orchestrator.src.tools.browser_agent import BrowserAgentTool
@@ -104,6 +105,7 @@ class Orchestrator:
             BrowserAgentTool(ToolConfig(tool_id="browser", name="Browser", description="Web Automation", parameters_schema={}, allowed_agents=["*"])),
             SocialMediaMultiplexer(ToolConfig(tool_id="multiplexer", name="Broadcast", description="Omni", parameters_schema={}, allowed_agents=["*"])),
             OutreachSwarmTool(ToolConfig(tool_id="outreach", name="Outreach", description="Direct Sales", parameters_schema={}, allowed_agents=["*"])),
+            SMTPOutreachTool(ToolConfig(tool_id="smtp_outreach", name="SMTP Outreach", description="Direct Sales (SMTP)", parameters_schema={}, allowed_agents=["*"])),
             SEOContentFactoryTool(ToolConfig(tool_id="seo", name="SEO", description="SEO Engine", parameters_schema={}, allowed_agents=["*"]))
         ]
         all_tools.extend(self._load_oracle_tools())
