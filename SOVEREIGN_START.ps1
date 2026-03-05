@@ -138,15 +138,15 @@ try {
 Write-Host "`n[7/7] SOVEREIGN MATRIX IS LIVE." -ForegroundColor Green
 
 if ($Yolo) {
-    Write-Host "`n🔥 YOLO MODE DETECTED: Activating Income Streams..." -ForegroundColor Yellow
+    Write-Host "`n[YOLO] YOLO MODE DETECTED: Activating Income Streams..." -ForegroundColor Yellow
     docker exec docker-orchestrator-api-1 python scripts/yolo_mode_monetization.py
     Write-Host "SUCCESS: Swarm is actively monetizing." -ForegroundColor Green
 }
 
 Write-Host "`nCommand Center:"
-Write-Host "  > r2r shell" -ForegroundColor White
-Write-Host "  > r2r status" -ForegroundColor White
-Write-Host "  > poetry run python scripts/yolo_mode_monetization.py" -ForegroundColor Yellow
+Write-Host "  * r2r shell" -ForegroundColor White
+Write-Host "  * r2r status" -ForegroundColor White
+Write-Host "  * poetry run python scripts/yolo_mode_monetization.py" -ForegroundColor Yellow
 Write-Host "`nAccess URLS:"
 Write-Host "  Backend:  http://localhost:8000" -ForegroundColor Gray
 Write-Host "  Frontend: http://localhost:5173" -ForegroundColor Gray
