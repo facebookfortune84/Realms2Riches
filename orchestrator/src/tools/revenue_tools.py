@@ -1,76 +1,99 @@
 import json
 import os
 import stripe
-from typing import Dict, Any
+from typing import Dict, Any, List
 from orchestrator.src.tools.base import BaseTool, ToolConfig
+from orchestrator.src.validation.schemas import ToolInvocation
+from orchestrator.src.core.config import settings
 from orchestrator.src.logging.logger import get_logger
 
 logger = get_logger(__name__)
 
-class PaymentTool(BaseTool):
-    """Manages Stripe interactions and fiscal telemetry."""
-    def __init__(self, config: ToolConfig, stripe_key: str = None):
-        super().__init__(config)
-        self.stripe_key = stripe_key
-
-    def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        return {"status": "active", "provider": "stripe", "configured": bool(self.stripe_key)}
+class SalesFunnelTool(BaseTool):
+    """
+    Autonomously generates high-conversion landing pages.
+    Reconstructs the customer journey with dynamic CTAs and SEO hooks.
+    """
+    def execute(self, invocation: ToolInvocation) -> Dict[str, Any]:
+        params = invocation.input_data or {}
+        product_name = params.get("product_name", "Jarvis 3.5")
+        stripe_url = params.get("checkout_url", "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02")
+        theme = params.get("theme", "Sovereign Industrial")
+        
+        # UX Reconstruction: Dynamic HTML Template
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>{product_name} | Sovereign Intelligence</title>
+            <style>
+                body {{ font-family: 'Courier New', Courier, monospace; background: #0a0a0a; color: #00ff00; padding: 50px; text-align: center; }}
+                .container {{ border: 1px solid #00ff00; padding: 40px; display: inline-block; max-width: 600px; }}
+                h1 {{ letter-spacing: 5px; text-transform: uppercase; }}
+                .cta-btn {{ background: #00ff00; color: #000; padding: 15px 30px; text-decoration: none; font-weight: bold; border-radius: 5px; }}
+                .seo-text {{ color: #555; font-size: 10px; margin-top: 50px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>{product_name}</h1>
+                <p>Status: ARCHITECT INITIALIZED</p>
+                <p>You have been identified as a high-value node. Access the Sovereign Intelligence Unit now.</p>
+                <br><br>
+                <a href="{stripe_url}" class="cta-btn">INITIALIZE CONVERSION</a>
+            </div>
+            <div class="seo-text">
+                Keywords: Autonomous agents, Jarvis 3.5, Revenue Orchestration, Sovereign Tech
+            </div>
+        </body>
+        </html>
+        """
+        
+        output_dir = "projects/generated/landers"
+        os.makedirs(output_dir, exist_ok=True)
+        filename = f"{product_name.lower().replace(' ', '_')}_lander.html"
+        file_path = os.path.join(output_dir, filename)
+        
+        try:
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(html_content)
+            
+            logger.info(f"UX Reconstruction: Generated lander for {product_name} at {file_path}")
+            return {
+                "status": "success",
+                "lander_url": f"/landers/{filename}",
+                "product": product_name,
+                "conversion_point": stripe_url
+            }
+        except Exception as e:
+            return {"status": "error", "reason": str(e)}
 
 class ProductForgeTool(BaseTool):
-    """Allows agents to autonomously create new modular revenue slots."""
-    def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        product_id = params.get("id")
-        name = params.get("name")
-        price = params.get("price")
-        description = params.get("description")
-        category = params.get("category", "General")
-        stripe_price_id = params.get("stripe_price_id", "pending")
-        checkout_url = params.get("checkout_url", "#")
-
+    def execute(self, invocation: ToolInvocation) -> Dict[str, Any]:
+        params = invocation.input_data or {}
+        product_id = params.get("id", "new_slot")
+        name = params.get("name", "Titan Forge")
+        price = params.get("price", 499)
+        description = params.get("description", "Modular revenue agent.")
+        
         slot_data = {
             "id": product_id, "name": name, "price": price, 
-            "description": description, "category": category,
-            "stripe_price_id": stripe_price_id, "checkout_url": checkout_url
+            "description": description, 
+            "stripe_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02"
         }
-        file_path = f"data/store/slots/{product_id}.json"
-        with open(file_path, "w") as f:
-            json.dump(slot_data, f, indent=2)
-        return {"status": "success", "file_path": file_path}
-
-class YieldAuditorTool(BaseTool):
-    """Audits the modular registry to calculate total portfolio value and potential yield."""
-    def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        import glob
-        import json
-        products = []
-        for f in glob.glob("data/store/slots/*.json"):
-            try:
-                with open(f, "r") as pf:
-                    data = json.load(pf)
-                    if isinstance(data, list): products.extend(data)
-                    else: products.append(data)
-            except:
-                continue
         
-        total_val = sum([p.get("price", 0) for p in products])
-        if total_val == 0:
-            # Emergency Fallback for the Auditor: if registry is empty, don't return 0
-            # Check baseline file directly
-            try:
-                with open("data/store/slots/baseline.json", "r") as bf:
-                    b_data = json.load(bf)
-                    total_val = sum([p.get("price", 0) for p in b_data])
-            except: pass
+        file_path = f"data/store/slots/{product_id}.json"
+        os.makedirs("data/store/slots", exist_ok=True)
+        try:
+            with open(file_path, "w") as f:
+                json.dump(slot_data, f, indent=2)
+            return {"status": "success", "artifact": file_path}
+        except Exception as e:
+            return {"status": "error", "reason": str(e)}
 
-        # Theoretical Monthly Runrate (TMR) at 0.1% conversion across 24 daily signals
-        # 720 signals/month * 0.1% = 0.72 conversions/product/month
-        tmr = total_val * 0.72 
-
-        return {
-            "status": "success",
-            "portfolio_value": total_val,
-            "product_count": len(products),
-            "daily_signals": 24,
-            "theoretical_monthly_runrate": round(tmr, 2),
-            "integrity_level": "PLATINUM"
-        }
+def get_revenue_tools() -> List[BaseTool]:
+    base_cfg = {"type": "object", "properties": {"product_name": {"type": "string"}}}
+    return [
+        SalesFunnelTool(ToolConfig(tool_id="sales_funnel", name="Funnel Architect", description="Generates landers", parameters_schema=base_cfg, allowed_agents=["*"])),
+        ProductForgeTool(ToolConfig(tool_id="product_forge", name="Product Forge", description="Creates revenue slots", parameters_schema=base_cfg, allowed_agents=["*"]))
+    ]

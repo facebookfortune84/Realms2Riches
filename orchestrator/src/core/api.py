@@ -311,9 +311,21 @@ async def get_dispatch_status(task_id: str):
         
     return {"task_id": task_id, "status": task["status"], "result": task.get("result")}
 
-@app.get("/api/admin/audit-last-post")
-async def audit_last_post():
-    return {"status": "audited"}
+from orchestrator.src.logging.telemetry import telemetry
+from orchestrator.src.core.ticketing.governance import governance
+
+@app.get("/api/v1/swarm/transparency")
+async def get_swarm_transparency():
+    """Provides a real-time window into the swarm's conscious activity."""
+    return {
+        "telemetry": telemetry.get_aggregate_stats(),
+        "active_tickets": [t.model_dump() for t in getattr(governance, 'tickets', {}).values() if t.status != "RESOLVED"],
+        "recent_signals": telemetry.spans[-10:] if telemetry.spans else []
+    }
+
+@app.get("/api/v1/swarm/lineage")
+async def get_swarm_lineage():
+    return lineage_registry.get_full_lineage()
 
 @app.get("/api/user/opt-out")
 async def opt_out(email: str):

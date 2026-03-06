@@ -85,10 +85,12 @@ class Orchestrator:
         # Inject SQLStore into Governance
         governance.sql_store = self.sql_store
         
-        # Proactively load Oracle Assets (Personas & SOPs)
+        # 1. Proactively load Oracle Assets (Personas & SOPs)
+        # SOPs must be loaded BEFORE fleet generation so RAG is populated
         self._load_oracle_personas()
         self._load_oracle_sops()
         
+        # 2. Initialize Matrix (Fleet Generation)
         await asyncio.to_thread(self._initialize_matrix)
         self.bridge.sync_critical_assets()
         self.is_ready = True
@@ -118,18 +120,25 @@ class Orchestrator:
             logger.info(f"Orchestrator: Loaded {count} additional Oracle personas.")
 
     def _load_oracle_sops(self):
-        sop_dir = "data/oracle/sop"
+        # Use absolute path to avoid ambiguity during startup
+        sop_dir = os.path.join(os.getcwd(), "data", "oracle", "sop")
         if os.path.exists(sop_dir):
             count = 0
             for f in os.listdir(sop_dir):
-                if f.endswith(".md"):
+                if f.lower().endswith(".md"):
                     try:
-                        with open(os.path.join(sop_dir, f), 'r', encoding='utf-8') as sf:
+                        fpath = os.path.join(sop_dir, f)
+                        with open(fpath, 'r', encoding='utf-8') as sf:
                             content = sf.read()
-                            # Index SOPs into RAG memory for Agent access
-                            self.memory.add_document(f"SOP: {f}", content, metadata={"type": "SOP"})
+                            # Directly append to VectorStore documents
+                            self.memory.documents.append({
+                                "id": f"sop_{f}",
+                                "text": f"SOP: {f}\n{content}",
+                                "metadata": {"type": "SOP", "filename": f}
+                            })
                             count += 1
-                    except: pass
+                    except Exception as e:
+                        logger.error(f"Failed to load SOP {f}: {e}")
             logger.info(f"Orchestrator: Indexed {count} SOPs into Sovereign memory.")
 
     def _load_oracle_tools(self) -> List[BaseTool]:
