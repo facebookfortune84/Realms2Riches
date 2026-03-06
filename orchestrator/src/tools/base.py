@@ -20,11 +20,6 @@ class BaseTool(ABC):
 
     def run(self, invocation: ToolInvocation) -> ToolInvocation:
         logger.info(f"Running tool {self.config.tool_id} for agent {invocation.agent_id}")
-        
-        # Guard against None input
-        if invocation.input_data is None:
-            invocation.input_data = {}
-
         if not self.validate_inputs(invocation):
             invocation.status = "failure"
             invocation.error_message = "Input validation failed"

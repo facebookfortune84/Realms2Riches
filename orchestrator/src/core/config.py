@@ -51,6 +51,16 @@ class Settings(BaseSettings):
     STRIPE_API_KEY: Optional[str] = None
     STRIPE_WEBHOOK_SECRET: Optional[str] = None
 
+    # --- SOCIAL MEDIA ---
+    FACEBOOK_PAGE_TOKEN: Optional[str] = None
+    FACEBOOK_PAGE_ID: Optional[str] = None
+    LINKEDIN_ACCESS_TOKEN: Optional[str] = None
+    LINKEDIN_PROFILE_URN: Optional[str] = None
+    LINKEDIN_REFRESH_TOKEN: Optional[str] = None
+    LINKEDIN_CLIENT_ID: Optional[str] = None
+    LINKEDIN_CLIENT_SECRET: Optional[str] = None
+    X_ACCESS_TOKEN: Optional[str] = None
+
     # --- RELIABILITY & OBSERVABILITY ---
     TELEMETRY_ENABLED: bool = True
     CIRCUIT_BREAKER_THRESHOLD: int = 5
@@ -60,16 +70,11 @@ class Settings(BaseSettings):
     # --- PROPERTIES ---
     @property
     def db_config(self) -> DatabaseConfig:
-        host = self.POSTGRES_HOST
-        # Conscious Fallback for local execution vs docker
-        if host == "postgres" and os.name == "nt": 
-            host = "localhost"
-            
         return DatabaseConfig(
             POSTGRES_USER=self.POSTGRES_USER,
             POSTGRES_PASSWORD=self.POSTGRES_PASSWORD,
             POSTGRES_DB=self.POSTGRES_DB,
-            POSTGRES_HOST=host,
+            POSTGRES_HOST=self.POSTGRES_HOST,
             POSTGRES_PORT=self.POSTGRES_PORT,
             DATABASE_URL=self.DATABASE_URL
         )

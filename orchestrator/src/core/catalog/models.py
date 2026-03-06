@@ -13,8 +13,6 @@ class ProductModel(Base):
     name = Column(String, nullable=False)
     description = Column(String)
     category = Column(String)
-    image_url = Column(String)
-    checkout_url = Column(String)
     
     prices = relationship("PriceModel", back_populates="product", cascade="all, delete-orphan")
 
@@ -44,6 +42,4 @@ class ProductSchema(BaseModel):
     name: str
     description: Optional[str] = None
     category: str
-    image_url: Optional[str] = None
-    checkout_url: Optional[str] = None
     prices: List[PriceSchema] = []

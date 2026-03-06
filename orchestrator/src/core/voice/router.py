@@ -1,60 +1,25 @@
-import asyncio
-import logging
-from typing import Optional, Dict, Any
+import uuid
+from typing import Dict, Optional
+from orchestrator.src.core.voice.interfaces import STTAdapter, TTSAdapter
+from orchestrator.src.core.voice.session import VoiceSession
 from orchestrator.src.core.orchestrator import Orchestrator
-from orchestrator.src.core.voice.interfaces import STTInterface, TTSInterface
+from orchestrator.src.logging.logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class VoiceRouter:
-    """
-    Advanced Multimodal Router with Barge-In Support.
-    Allows real-time interruption of agent synthesis.
-    """
-    def __init__(self, orchestrator: Orchestrator, stt: STTInterface, tts: TTSInterface):
+    def __init__(self, orchestrator: Orchestrator, stt: STTAdapter, tts: TTSAdapter):
         self.orchestrator = orchestrator
         self.stt = stt
         self.tts = tts
-        self.active_session_id: Optional[str] = None
-        self.interrupt_flag = asyncio.Event()
+        self.sessions: Dict[str, VoiceSession] = {}
 
-    async def handle_audio_stream(self, audio_chunk: bytes, session_id: str):
-        """
-        Processes incoming audio and triggers BARGE-IN if speech is detected 
-        while an agent is speaking.
-        """
-        # 1. Trigger Barge-In Interruption
-        if self.active_session_id == session_id:
-            logger.info("🎙️ BARGE-IN DETECTED: Interrupting active synthesis...")
-            self.interrupt_flag.set()
-            
-        # 2. Transcribe
-        text = await self.stt.transcribe(audio_chunk)
-        if not text: return
+    def create_session(self) -> VoiceSession:
+        session_id = str(uuid.uuid4())
+        session = VoiceSession(session_id, self.stt, self.tts, self.orchestrator)
+        self.sessions[session_id] = session
+        logger.info(f"Created voice session: {session_id}")
+        return session
 
-        # 3. Process with Orchestrator
-        self.active_session_id = session_id
-        self.interrupt_flag.clear()
-        
-        async for step in self.orchestrator.submit_task_stream(text, f"voice_{session_id}"):
-            if step.get("status") == "completed":
-                response_text = step["result"].get("reasoning", "Directive understood.")
-                await self._synthesize_and_stream(response_text, session_id)
-
-    async def _synthesize_and_stream(self, text: str, session_id: str):
-        """Synthesizes response with interruption checks."""
-        logger.info(f"Synthesizing: {text[:50]}...")
-        
-        # In a real streaming implementation, we would check the 
-        # interrupt_flag between audio packets.
-        if self.interrupt_flag.is_set():
-            logger.warning("Synthesis aborted due to user barge-in.")
-            return
-
-        audio = await self.tts.synthesize(text)
-        # Emit audio to websocket (handled in api.py)
-        return audio
-
-    def request_interruption(self):
-        """Manually trigger a barge-in event."""
-        self.interrupt_flag.set()
+    def get_session(self, session_id: str) -> Optional[VoiceSession]:
+        return self.sessions.get(session_id)

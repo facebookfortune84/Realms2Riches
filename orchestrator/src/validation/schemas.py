@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Optional, Union, Literal
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 import uuid
-import os
 
 # --- Base Models ---
 
@@ -103,15 +102,9 @@ class DatabaseConfig(BaseModel):
 
     @property
     def connection_url(self) -> str:
-        final_url = self.url
-        if not final_url:
-            final_url = f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
-            
-        # Conscious patching for local execution vs Docker
-        if os.name == "nt" and "@postgres:" in final_url:
-            final_url = final_url.replace("@postgres:", "@localhost:")
-            
-        return final_url
+        if self.url:
+            return self.url
+        return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
 
 class ProjectSpec(BaseEntity):
     name: str

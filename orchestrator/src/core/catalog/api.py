@@ -10,26 +10,57 @@ class CatalogAPI:
         self.store = SQLStore()
     
     def get_products(self) -> List[ProductSchema]:
-        """Fetch and merge all products from modular slots and the database."""
+        """Fetch all products dynamically from the modular slots directory."""
         import json
         import glob
         import os
         
-        products_map = {}
+        all_products = []
         slot_path = "data/store/slots/*.json"
         
-        # 1. Load from Database (Primary source for seeded products)
+        try:
+            for slot_file in glob.glob(slot_path):
+                try:
+                    with open(slot_file, 'r') as f:
+                        data = json.load(f)
+                        products_in_file = data if isinstance(data, list) else [data]
+                        
+                        for p in products_in_file:
+                            # NORMALIZATION: Map flat 'price' to 'prices' list if needed
+                            if "prices" not in p and "price" in p:
+                                p["prices"] = [{
+                                    "product_id": p.get("id"),
+                                    "price": p.get("price"),
+                                    "currency": p.get("currency", "usd"),
+                                    "interval": p.get("interval", "mo"),
+                                    "stripe_price_id": p.get("stripe_price_id")
+                                }]
+                            
+                            # Ensure required 'category' exists
+                            if "category" not in p:
+                                p["category"] = "General"
+                            
+                            # Filter out null/corrupt entries
+                            if p.get("id") and p.get("price") is not None:
+                                all_products.append(ProductSchema(**p))
+                except Exception as e:
+                    logger.error(f"Skipping corrupt slot file {slot_file}: {e}")
+            
+            if all_products:
+                return all_products
+        except Exception as e:
+            logger.error(f"Catalog Expansion Error: {e}")
+
+        # Fallback to DB if directory scan fails
         session = self.store.Session()
         try:
-            db_products = session.query(ProductModel).all()
-            for p in db_products:
-                products_map[p.id] = ProductSchema(
+            products = session.query(ProductModel).all()
+            return [
+                ProductSchema(
                     id=p.id,
                     name=p.name,
                     description=p.description,
                     category=p.category,
-                    image_url=p.image_url,
-                    checkout_url=p.checkout_url,
                     prices=[
                         PriceSchema(
                             product_id=pr.product_id,
@@ -39,44 +70,10 @@ class CatalogAPI:
                             stripe_price_id=pr.stripe_price_id
                         ) for pr in p.prices
                     ]
-                )
-        except Exception as e:
-            logger.error(f"Database Catalog Fetch Error: {e}")
+                ) for p in products
+            ]
         finally:
             session.close()
-
-        # 2. Merge from Slots (JSON files)
-        try:
-            for slot_file in glob.glob(slot_path):
-                try:
-                    with open(slot_file, 'r') as f:
-                        data = json.load(f)
-                        products_in_file = data if isinstance(data, list) else [data]
-                        
-                        for p in products_in_file:
-                            pid = p.get("id")
-                            if not pid: continue
-                            
-                            # NORMALIZATION
-                            if "prices" not in p and "price" in p:
-                                p["prices"] = [{
-                                    "product_id": pid,
-                                    "price": p.get("price"),
-                                    "currency": p.get("currency", "usd"),
-                                    "interval": p.get("interval", "mo"),
-                                    "stripe_price_id": p.get("stripe_price_id")
-                                }]
-                            if "category" not in p: p["category"] = "General"
-                            
-                            # Add to map if not present (don't override DB products which have better URLs)
-                            if pid not in products_map and p.get("price") is not None:
-                                products_map[pid] = ProductSchema(**p)
-                except Exception as e:
-                    logger.error(f"Skipping corrupt slot file {slot_file}: {e}")
-        except Exception as e:
-            logger.error(f"Catalog Expansion Error: {e}")
-
-        return list(products_map.values())
 
     def get_product(self, product_id: str) -> Optional[ProductSchema]:
         session = self.store.Session()
@@ -89,8 +86,6 @@ class CatalogAPI:
                 name=p.name,
                 description=p.description,
                 category=p.category,
-                image_url=p.image_url,
-                checkout_url=p.checkout_url,
                 prices=[
                     PriceSchema(
                         product_id=pr.product_id,
