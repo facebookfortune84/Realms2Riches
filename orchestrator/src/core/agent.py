@@ -67,6 +67,16 @@ class Agent:
         if self.active_persona:
             self.dossier.persona_type = persona_id
 
+    def handoff(self, target_agent_id: str, context: str):
+        """Passes context to another agent for collaborative task processing."""
+        logger.info(f"🤝 HANDOFF: {self.agent_name} -> {target_agent_id}")
+        return {
+            "status": "handoff",
+            "source": self.config.id,
+            "destination": target_agent_id,
+            "context": context
+        }
+
     def process_task(self, task: TaskSpec) -> Dict[str, Any]:
         start_time = time.time()
         trace_id = hashlib.sha256(f"{task.id}{time.time()}".encode()).hexdigest()[:12]
@@ -77,11 +87,27 @@ class Agent:
             effective_system_prompt = f"IDENTITY: {self.active_persona['title']}\n{self.active_persona['mandates']}\n\n# BASE IDENTITY:\n{self.config.system_prompt}"
 
         try:
-            # RAG Retrieval
+            # 1. SOP RETRIEVAL (The Governance Shield)
+            sop_docs = self.memory.search(f"SOP for {task.description}", limit=1)
+            active_sop = ""
+            sop_name = "GENERIC_TASK"
+            if sop_docs and "SOP:" in sop_docs[0]['text']:
+                active_sop = f"\n### ACTIVE OPERATING PROCEDURE:\n{sop_docs[0]['text']}\n"
+                sop_name = sop_docs[0]['metadata'].get('filename', 'UNKNOWN')
+                logger.info(f"Agent {self.agent_name} retrieved SOP: {sop_name}")
+
+            # 2. RAG Context Retrieval
             context_docs = self.memory.search(task.description, limit=5)
-            context_text = "\n".join([f"- {doc['text']}" for doc in context_docs])
+            # Filter out the SOP from general context to avoid duplication
+            context_text = "\n".join([f"- {doc['text']}" for doc in context_docs if "SOP:" not in doc['text']])
             
-            plan = self._formulate_plan(task.description, context_text, effective_system_prompt)
+            # Combine for LLM
+            sop_enhanced_system_prompt = f"{effective_system_prompt}\n{active_sop}"
+            
+            # Update Telemetry Span with Lifecycle data
+            span_meta = {"sop_used": sop_name, "project_id": task.project_id}
+            
+            plan = self._formulate_plan(task.description, context_text, sop_enhanced_system_prompt)
             
             steps = plan.get("steps", [])
             
@@ -122,7 +148,8 @@ class Agent:
                 action=task.description, artifacts=artifacts, cost=self.dossier.accrued_cost
             )
             
-            telemetry.end_span(span, status="SUCCESS", metadata={"lineage_id": lineage_id, "wage": self.dossier.accrued_cost})
+            span_meta.update({"lineage_id": lineage_id, "wage": self.dossier.accrued_cost, "tool_count": len(results)})
+            telemetry.end_span(span, status="SUCCESS", metadata=span_meta)
             
             return {
                 "status": "completed", 
