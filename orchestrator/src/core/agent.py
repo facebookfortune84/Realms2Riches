@@ -47,6 +47,11 @@ class Agent:
         elif "fallback" in cid: self.adopt_persona("ROO_MAINTAINER")
         elif "strategic" in cid: self.adopt_persona("GPT_5_MASTER")
         elif "visual" in cid: self.adopt_persona("DESIGN_ORCHESTRATOR")
+        else:
+            # Randomly resonate with any available persona if no dept match
+            available = list(PERSONA_LIBRARY.keys())
+            if available:
+                self.adopt_persona(random.choice(available))
 
     def adopt_persona(self, persona_id: str):
         if persona_id in PERSONA_LIBRARY:

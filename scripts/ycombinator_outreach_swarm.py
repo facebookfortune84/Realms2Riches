@@ -2,6 +2,7 @@ import asyncio
 import os
 import sys
 import json
+import random
 
 sys.path.append(os.getcwd())
 
@@ -80,7 +81,11 @@ async def run_yc_outreach_swarm():
         
         logger.info(f"🚀 Dispatching pitch to {name} (via {target_email})")
         
-        task_desc = f"Use smtp_outreach to send a Jarvis 3.5 pitch to {target_email} for {name}. Description: {desc}. HTML Body: {get_pitch(name, desc)}"
+        # Load available personas to inject variety
+        from orchestrator.src.agents.persona_library import PERSONA_LIBRARY
+        persona_id = random.choice(list(PERSONA_LIBRARY.keys()))
+        
+        task_desc = f"As {persona_id}, use smtp_outreach to send a Jarvis 3.5 pitch to {target_email} for {name}. Description: {desc}. HTML Body: {get_pitch(name, desc)}"
         
         async for step in orchestrator.submit_task_stream(task_desc, "yc_outreach"):
             if step["status"] == "completed":

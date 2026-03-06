@@ -18,6 +18,7 @@ import json
 import os
 import time
 import requests
+import stripe
 from datetime import datetime, timedelta
 from contextlib import asynccontextmanager
 
@@ -27,6 +28,12 @@ logger = get_logger(__name__)
 orchestrator = Orchestrator()
 boot_time = datetime.utcnow()
 dispatch_tasks = {}
+
+# Set Stripe Key Globally
+if settings.STRIPE_API_KEY:
+    stripe.api_key = settings.STRIPE_API_KEY
+else:
+    logger.warning("STRIPE_API_KEY missing. Payment processing will be simulated.")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -311,3 +318,43 @@ async def audit_last_post():
 @app.get("/api/user/opt-out")
 async def opt_out(email: str):
     return {"message": "unsubscribed successfully", "email": email}
+
+@app.post("/api/webhooks/stripe")
+async def stripe_webhook(request: Request):
+    payload = await request.body()
+    sig_header = request.headers.get("Stripe-Signature")
+    event = None
+
+    try:
+        # In production, verify signature. Locally, we might skip or use a test secret.
+        if settings.STRIPE_WEBHOOK_SECRET and sig_header:
+            event = stripe.Webhook.construct_event(payload, sig_header, settings.STRIPE_WEBHOOK_SECRET)
+        else:
+            # Fallback for local simulation without signature (Dev Mode)
+            data = json.loads(payload)
+            event = stripe.Event.construct_from(data, stripe.api_key)
+            
+    except ValueError as e:
+        logger.error(f"Webhook Error: {e}")
+        raise HTTPException(status_code=400, detail="Invalid payload")
+    except stripe.error.SignatureVerificationError as e:
+        logger.error(f"Webhook Signature Error: {e}")
+        raise HTTPException(status_code=400, detail="Invalid signature")
+    except Exception as e:
+        logger.error(f"Webhook Unexpected Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        customer_email = session.get("customer_details", {}).get("email")
+        amount = session.get("amount_total", 0) / 100
+        currency = session.get("currency", "usd").upper()
+        
+        msg = f"💰 PAYMENT CAPTURED: {amount} {currency} from {customer_email}"
+        logger.info(msg)
+        log_activity("STRIPE_WEBHOOK", "REVENUE_CAPTURE", msg)
+        
+        # Update Telemetry
+        telemetry_data["revenue"] += amount
+        
+    return {"status": "success"}

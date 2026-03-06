@@ -16,24 +16,21 @@ class GroqProvider(BaseLLMProvider):
     def __init__(self, model: Optional[str] = None):
         self.model = model or settings.GROQ_MODEL
         self.api_key = settings.GROQ_API_KEY
-        if not self.api_key:
-            logger.warning("GROQ_API_KEY is missing. Using MockProvider.")
-            self.is_mock = True
-        else:
-            try:
-                from groq import Groq
-                self.client = Groq(api_key=self.api_key)
-                self.is_mock = False
-            except ImportError:
-                logger.error("groq package not installed. Falling back to mock.")
-                self.is_mock = True
         
-        logger.info(f"Initialized GroqProvider with model {self.model} (Mock: {self.is_mock})")
+        if not self.api_key:
+            raise ValueError("❌ CRITICAL: GROQ_API_KEY is missing in .env.prod. Conscious Framework cannot operate without intelligence.")
+            
+        try:
+            from groq import Groq
+            self.client = Groq(api_key=self.api_key)
+            self.is_mock = False
+        except ImportError:
+            raise ImportError("❌ CRITICAL: 'groq' package not installed. Run 'pip install groq'.")
+        
+        logger.info(f"Initialized GroqProvider with model {self.model}")
 
     def generate_response(self, messages: List[Dict[str, str]], **kwargs) -> str:
-        if self.is_mock:
-            return self._mock_respond(messages)
-        
+        # Strict Mode: No Mocks
         try:
             params = {
                 "messages": messages,
