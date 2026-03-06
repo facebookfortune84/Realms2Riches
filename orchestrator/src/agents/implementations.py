@@ -13,11 +13,3 @@ class DeveloperAgent(Agent):
 
 class DevOpsAgent(Agent):
     pass
-
-class SEOAgent(Agent):
-    """Specialized agent for generating organic traffic and blog content."""
-    pass
-
-class OutreachAgent(Agent):
-    """Specialized agent for cold email and DM campaigns."""
-    pass

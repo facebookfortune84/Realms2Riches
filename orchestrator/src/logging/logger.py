@@ -1,7 +1,6 @@
 import logging
 import json
 import sys
-import os
 from datetime import datetime
 from typing import Any, Dict
 
@@ -24,15 +23,8 @@ def get_logger(name: str, level: str = "INFO") -> logging.Logger:
     logger.setLevel(level)
     
     if not logger.handlers:
-        # Standard stdout handler
-        stdout_handler = logging.StreamHandler(sys.stdout)
-        stdout_handler.setFormatter(JsonFormatter())
-        logger.addHandler(stdout_handler)
-        
-        # Persistent file handler for deep auditing
-        os.makedirs("data/logs", exist_ok=True)
-        file_handler = logging.FileHandler(f"data/logs/swarm_activity.log")
-        file_handler.setFormatter(JsonFormatter())
-        logger.addHandler(file_handler)
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(JsonFormatter())
+        logger.addHandler(handler)
         
     return logger

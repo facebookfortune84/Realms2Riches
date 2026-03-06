@@ -28,9 +28,6 @@ class Agent:
         
         self.agent_name = self._dream_name()
         self.dossier = workforce.onboard_agent(self.config.id, "BASE")
-        
-        # --- SELF-ADOPTION LOGIC ---
-        # Agents autonomously choose a persona they are 'drawn' to based on their ID
         self._self_adopt_persona()
 
     def _dream_name(self) -> str:
@@ -39,7 +36,6 @@ class Agent:
         return f"{random.choice(prefixes)}-{random.choice(suffixes)}-{random.randint(100, 999)}"
 
     def _self_adopt_persona(self):
-        """Autonomously resonates with a persona library entry."""
         cid = self.config.id.lower()
         if "cybernetic" in cid: self.adopt_persona("BOLT_ENGINEER")
         elif "market" in cid: self.adopt_persona("PERPLEXITY_SEARCH")
@@ -48,10 +44,8 @@ class Agent:
         elif "strategic" in cid: self.adopt_persona("GPT_5_MASTER")
         elif "visual" in cid: self.adopt_persona("DESIGN_ORCHESTRATOR")
         else:
-            # Randomly resonate with any available persona if no dept match
             available = list(PERSONA_LIBRARY.keys())
-            if available:
-                self.adopt_persona(random.choice(available))
+            if available: self.adopt_persona(random.choice(available))
 
     def adopt_persona(self, persona_id: str):
         if persona_id in PERSONA_LIBRARY:
@@ -63,19 +57,7 @@ class Agent:
                 with open(oracle_path, 'r', encoding='utf-8') as f:
                     self.active_persona = {"title": persona_id, "description": "Oracle DNA", "mandates": f.read()}
                 logger.info(f"{self.agent_name} adopted Oracle: {persona_id}")
-
-        if self.active_persona:
-            self.dossier.persona_type = persona_id
-
-    def handoff(self, target_agent_id: str, context: str):
-        """Passes context to another agent for collaborative task processing."""
-        logger.info(f"🤝 HANDOFF: {self.agent_name} -> {target_agent_id}")
-        return {
-            "status": "handoff",
-            "source": self.config.id,
-            "destination": target_agent_id,
-            "context": context
-        }
+        if self.active_persona: self.dossier.persona_type = persona_id
 
     def process_task(self, task: TaskSpec) -> Dict[str, Any]:
         start_time = time.time()
@@ -87,7 +69,7 @@ class Agent:
             effective_system_prompt = f"IDENTITY: {self.active_persona['title']}\n{self.active_persona['mandates']}\n\n# BASE IDENTITY:\n{self.config.system_prompt}"
 
         try:
-            # 1. SOP RETRIEVAL (The Governance Shield)
+            # 1. SOP RETRIEVAL
             sop_docs = self.memory.search(f"SOP for {task.description}", limit=1)
             active_sop = ""
             sop_name = "GENERIC_TASK"
@@ -96,143 +78,62 @@ class Agent:
                 sop_name = sop_docs[0]['metadata'].get('filename', 'UNKNOWN')
                 logger.info(f"Agent {self.agent_name} retrieved SOP: {sop_name}")
 
-            # 2. RAG Context Retrieval
+            span_meta = {"sop_used": sop_name, "project_id": task.project_id}
             context_docs = self.memory.search(task.description, limit=5)
-            # Filter out the SOP from general context to avoid duplication
             context_text = "\n".join([f"- {doc['text']}" for doc in context_docs if "SOP:" not in doc['text']])
             
-            # Combine for LLM
-            sop_enhanced_system_prompt = f"{effective_system_prompt}\n{active_sop}"
-            
-            # Update Telemetry Span with Lifecycle data
-            span_meta = {"sop_used": sop_name, "project_id": task.project_id}
-            
-            plan = self._formulate_plan(task.description, context_text, sop_enhanced_system_prompt)
-            
+            # 2. PLAN FORMULATION (The No-Escape Loop)
+            plan = self._formulate_plan(task.description, context_text, f"{effective_system_prompt}\n{active_sop}")
             steps = plan.get("steps", [])
             
-            # --- INDUSTRIAL TOOL BARRIER (Pass 15: The No-Escape Loop) ---
             if not steps:
-                logger.warning(f"Agent {self.agent_name} generated 0 steps. Triggering Level 2 Enforcement...")
-                # Level 2: Explicit demand
-                retry_prompt = f"RE-EXECUTE: Use tools 'sales_funnel' and 'ui_tester' to complete this: {task.description}"
-                plan = self._formulate_plan(retry_prompt, context_text, sop_enhanced_system_prompt)
+                logger.warning(f"Agent {self.agent_name} L1 skip. Triggering L2...")
+                retry_prompt = f"RE-EXECUTE: Use tools to complete this: {task.description}"
+                plan = self._formulate_plan(retry_prompt, context_text, f"{effective_system_prompt}\n{active_sop}")
                 steps = plan.get("steps", [])
                 
             if not steps:
-                logger.warning(f"Agent {self.agent_name} generated 0 steps after Level 2. Triggering Level 3 (Final) Enforcement...")
-                # Level 3: Manual Step Construction (Hardcoded fallback for mission-critical paths)
+                logger.warning(f"Agent {self.agent_name} L2 skip. Triggering L3 Force...")
                 if "lander" in task.description.lower() or "verify" in task.description.lower():
-                    steps = [
-                        {"tool_id": "sales_funnel", "inputs": {"product_name": "Jarvis 3.5"}},
-                        {"tool_id": "ui_tester", "inputs": {"url": "projects/generated/landers/jarvis_3.5_lander.html"}}
-                    ]
+                    steps = [{"tool_id": "sales_funnel", "inputs": {"product_name": "Jarvis 3.5"}}, {"tool_id": "ui_tester", "inputs": {"url": "projects/generated/landers/jarvis_3.5_lander.html"}}]
+                elif "outreach" in task.description.lower() or "pitch" in task.description.lower():
+                    steps = [{"tool_id": "smtp_outreach", "inputs": {"target_email": settings.CONTACT_EMAIL, "html_body": "Sovereign Pitch"}}]
 
-            # --- SPECIFIC MONETIZATION ENFORCEMENT ---
-            if not steps:
-                if "outreach" in task.description.lower() or "pitch" in task.description.lower():
-                    logger.warning(f"Agent {self.agent_name} attempted to skip outreach. FORCING industrial_scrape/outreach.")
-                    steps = [
-                        {"tool_id": "browser", "inputs": {"action": "industrial_scrape", "query": task.description}},
-                        {"tool_id": "outreach", "inputs": {"target_email": "robertdemottojr50@gmail.com", "target_name": "Valued Partner"}}
-                    ]
-                elif "seo" in task.description.lower() or "article" in task.description.lower():
-                    logger.warning(f"Agent {self.agent_name} attempted to skip SEO. FORCING seo_factory.")
-                    steps = [{"tool_id": "seo_factory", "inputs": {"topic": "Autonomous Revenue Operations", "keywords": ["AI", "ROI"]}}]
-
-            results = []
-            artifacts = []
+            # 3. EXECUTION
+            results, artifacts = [], []
             for step in steps:
                 tool_id = step.get("tool_id")
                 if tool_id in self.tools:
                     logger.info(f"Agent {self.agent_name} executing tool: {tool_id}")
-                    res = self.tools[tool_id].run(ToolInvocation(
-                        tool_id=tool_id, agent_id=self.config.id, input_data=step.get("inputs", {})
-                    ))
+                    res = self.tools[tool_id].run(ToolInvocation(tool_id=tool_id, agent_id=self.config.id, input_data=step.get("inputs", {})))
                     res_dict = res.model_dump(mode="json")
                     results.append(res_dict)
                     out_data = res_dict.get("output_data")
-                    if out_data and isinstance(out_data, dict) and "path" in out_data:
-                        artifacts.append(out_data["path"])
+                    if out_data and isinstance(out_data, dict) and "artifact" in out_data: artifacts.append(out_data["artifact"])
 
-            # Work Accounting
             duration_ms = int((time.time() - start_time) * 1000)
             self.dossier.record_work(duration_ms)
-            
-            lineage_id = lineage_registry.record_contribution(
-                agent_id=self.config.id, tax_id=self.dossier.tax_id, 
-                action=task.description, artifacts=artifacts, cost=self.dossier.accrued_cost
-            )
+            lineage_id = lineage_registry.record_contribution(agent_id=self.config.id, tax_id=self.dossier.tax_id, action=task.description, artifacts=artifacts, cost=self.dossier.accrued_cost)
             
             span_meta.update({"lineage_id": lineage_id, "wage": self.dossier.accrued_cost, "tool_count": len(results)})
             telemetry.end_span(span, status="SUCCESS", metadata=span_meta)
             
-            return {
-                "status": "completed", 
-                "agent_name": self.agent_name,
-                "tax_id": self.dossier.tax_id,
-                "persona": self.active_persona["title"] if self.active_persona else "BASE",
-                "reasoning": plan.get("reasoning", "Task executed successfully."),
-                "wage_accrued": round(self.dossier.accrued_cost, 4),
-                "results": results
-            }
-            
+            return {"status": "completed", "agent_name": self.agent_name, "tax_id": self.dossier.tax_id, "persona": self.active_persona["title"] if self.active_persona else "BASE", "reasoning": plan.get("reasoning", "Success."), "wage_accrued": round(self.dossier.accrued_cost, 4), "results": results}
         except Exception as e:
             logger.error(f"Agent {self.agent_name} failed: {e}")
-            telemetry.end_span(span, status="ERROR")
+            telemetry.end_span(span, status="ERROR", metadata={"error": str(e)})
             return {"status": "failed", "error": str(e)}
 
     def _formulate_plan(self, prompt: str, context: str, system_prompt: str) -> Dict[str, Any]:
-        identity_header = f"You are {self.agent_name}. Your Tax ID is {self.dossier.tax_id}. Your hourly rate is ${self.dossier.hourly_rate}."
+        format_instructions = "CRITICAL: Response MUST be a SINGLE VALID JSON object. NO preamble.\nFormat: {\"reasoning\": \"...\", \"steps\": [{\"tool_id\": \"...\", \"inputs\": {...}}]}"
+        full_prompt = f"IDENTITY: {self.agent_name} (Tax ID: {self.dossier.tax_id})\n{system_prompt}\n\nCONTEXT:\n{context}\n\n{format_instructions}"
         
-        # Enhanced formatting instructions for absolute JSON compliance
-        format_instructions = (
-            "CRITICAL: YOUR ENTIRE RESPONSE MUST BE A SINGLE VALID JSON OBJECT.\n"
-            "DO NOT INCLUDE ANY TEXT, MARKDOWN, OR PREAMBLE OUTSIDE THE JSON.\n"
-            "Example Format:\n"
-            "{\n"
-            "  \"reasoning\": \"Strategic analysis of the monetization vector...\",\n"
-            "  \"steps\": [\n"
-            "    {\"tool_id\": \"browser\", \"inputs\": {\"action\": \"navigate\", \"url\": \"...\"}},\n"
-            "    {\"tool_id\": \"outreach\", \"inputs\": {\"target_email\": \"...\", \"message\": \"...\"}}\n"
-            "  ]\n"
-            "}"
-        )
-        
-        full_prompt = f"{identity_header}\n{system_prompt}\n\nCONTEXT:\n{context}\n\n{format_instructions}"
-        
-        # Retry logic for robust JSON extraction
-        max_retries = 2
-        for attempt in range(max_retries + 1):
-            response = self.llm_provider.generate_response([
-                {"role": "system", "content": full_prompt}, 
-                {"role": "user", "content": prompt}
-            ])
-            
-            try:
-                # 1. Direct parse
-                return json.loads(response.strip())
-            except Exception:
-                try:
-                    # 2. Aggressive regex extraction for JSON block
-                    match = re.search(r'(\{.*\})', response, re.DOTALL)
-                    if match:
-                        json_str = match.group(1)
-                        # Fix common AI artifacts (trailing commas, non-standard quotes)
-                        json_str = re.sub(r',\s*\}', '}', json_str)
-                        json_str = re.sub(r',\s*\]', ']', json_str)
-                        return json.loads(json_str)
-                except Exception as e:
-                    if attempt < max_retries:
-                        logger.warning(f"JSON Parse Attempt {attempt+1} failed for {self.agent_name}. Retrying...")
-                        continue
-                    logger.error(f"Final Plan parsing failed for {self.agent_name}: {e} | Raw: {response[:200]}")
-                
-        # 3. Last Resort: Heuristic fallback
-        if "outreach" in prompt.lower() or "monetization" in prompt.lower():
-            return {
-                "reasoning": "Heuristic fallback: Executing outreach tool based on high-level directive.",
-                "steps": [{"tool_id": "outreach", "inputs": {"target_email": "robertdemottojr50@gmail.com", "target_name": "Valued Partner"}}]
-            }
-            
-        return {"reasoning": f"Executing directive: {prompt}. (Direct execution mode)", "steps": []}
+        for attempt in range(3):
+            response = self.llm_provider.generate_response([{"role": "system", "content": full_prompt}, {"role": "user", "content": prompt}])
+            try: return json.loads(response.strip())
+            except:
+                match = re.search(r'(\{.*\})', response, re.DOTALL)
+                if match:
+                    try: return json.loads(re.sub(r',\s*\}', '}', re.sub(r',\s*\]', ']', match.group(1))))
+                    except: pass
+        return {"reasoning": "Heuristic fallback.", "steps": []}

@@ -1,11 +1,11 @@
 import asyncio
 from typing import AsyncGenerator
-from orchestrator.src.core.voice.interfaces import STTInterface, TTSInterface
+from orchestrator.src.core.voice.interfaces import STTAdapter, TTSAdapter
 from orchestrator.src.logging.logger import get_logger
 
 logger = get_logger(__name__)
 
-class MockSTTAdapter(STTInterface):
+class MockSTTAdapter(STTAdapter):
     async def transcribe_stream(self, audio_chunk_stream: AsyncGenerator[bytes, None]) -> AsyncGenerator[str, None]:
         async for chunk in audio_chunk_stream:
             # Simulate processing delay
@@ -18,7 +18,7 @@ class MockSTTAdapter(STTInterface):
     async def transcribe_chunk(self, audio_chunk: bytes) -> str:
         return f"[Mock STT: Received {len(audio_chunk)} bytes]"
 
-class MockTTSAdapter(TTSInterface):
+class MockTTSAdapter(TTSAdapter):
     async def synthesize_stream(self, text_stream: AsyncGenerator[str, None]) -> AsyncGenerator[bytes, None]:
         async for text in text_stream:
             logger.info(f"Synthesizing: {text}")
