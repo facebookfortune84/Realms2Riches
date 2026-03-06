@@ -79,6 +79,8 @@ class Orchestrator:
 
     async def startup(self):
         logger.info("Orchestrator: Initializing high-density matrix...")
+        logger.info(f"  -> Environment: {settings.ENV_MODE.upper()}")
+        logger.info(f"  -> Public Gateway: {settings.BACKEND_URL}")
         governance.sql_store = self.sql_store
         
         # 1. Proactively load Oracle Assets

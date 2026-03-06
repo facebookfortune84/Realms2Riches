@@ -2,11 +2,12 @@ import requests
 import json
 import time
 import os
+from orchestrator.src.core.config import settings
 
 def simulate_payment():
     print("💳 SIMULATING LIVE STRIPE PAYMENT...")
     
-    webhook_url = "http://localhost:8000/api/webhooks/stripe"
+    webhook_url = f"{settings.BACKEND_URL}/api/webhooks/stripe"
     
     # Mock Event Payload
     payload = {

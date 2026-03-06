@@ -13,6 +13,7 @@ class Settings(BaseSettings):
 
     # --- CORE ---
     DATABASE_URL: Optional[str] = None
+    BACKEND_URL: str = "http://localhost:8000"
     FRONTEND_URL: str = "http://localhost:5173"
     REALM_MASTER_KEY: str = "placeholder_key"
     ENV_MODE: str = "dev"

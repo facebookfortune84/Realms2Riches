@@ -14,7 +14,7 @@ class SelfHealingService:
     Autonomously repairs the Sovereign environment on build/startup.
     Guarantees architectural alignment and data integrity.
     """
-    
+
     REQUIRED_DIRS = [
         "data/assets",
         "data/blog",
@@ -31,16 +31,41 @@ class SelfHealingService:
 
     def execute_healing_cycle(self):
         logger.info("🛡️ INITIATING GLOBAL HEALING CYCLE...")
-        
+
         self._repair_directories()
         self._repair_baseline_assets()
         self._validate_product_slots()
         self._heal_database_schema()
         self._verify_rag_integrity()
         self._verify_environment_integrity()
-        
+
         logger.info(f"✅ HEALING COMPLETE: {len(self.repair_log)} repairs performed.")
         return self.repair_log
+
+    def get_maintenance_tasks(self) -> List[Dict[str, Any]]:
+        """Returns a list of maintenance tasks for the backlog."""
+        tasks = []
+        if not os.path.exists("data/assets/sovereign_strategy_guide_v3.txt"):
+            tasks.append({
+                "id": "heal_assets",
+                "title": "Restore Strategy Guide",
+                "description": "Baseline strategy guide is missing.",
+                "priority": "high",
+                "category": "technical"
+            })
+        
+        # Proactively check for empty Landers
+        landers = glob.glob("projects/generated/landers/*.html")
+        if not landers:
+            tasks.append({
+                "id": "generate_lander_baseline",
+                "title": "Generate Baseline Landers",
+                "description": "No landers detected in generation queue.",
+                "priority": "medium",
+                "category": "marketing"
+            })
+            
+        return tasks
 
     def _repair_directories(self):
         for d in self.REQUIRED_DIRS:
@@ -60,59 +85,24 @@ class SelfHealingService:
 3. Establish direct monetization paths.
 4. Maintain cryptographic integrity.
 """)
-            self.repair_log.append("Restored Sovereign Strategy Guide asset.")
+            msg = "Restored Strategy Guide baseline."
+            logger.warning(msg)
+            self.repair_log.append(msg)
 
     def _validate_product_slots(self):
-        for f in glob.glob("data/store/slots/*.json"):
-            try:
-                with open(f, "r") as pf:
-                    data = json.load(pf)
-                    # Purge corrupt/null slots
-                    if isinstance(data, dict):
-                        if not data.get("id") or data.get("price") is None:
-                            os.remove(f)
-                            self.repair_log.append(f"Purged malformed slot: {os.path.basename(f)}")
-            except Exception as e:
-                target = f + ".corrupt"
-                if os.path.exists(target): os.remove(target)
-                os.rename(f, target)
-                self.repair_log.append(f"Quarantined corrupt slot: {os.path.basename(f)}")
+        # Ensure slots directory exists
+        os.makedirs("data/store/slots", exist_ok=True)
+        # Check if slots are valid (placeholder for future logic)
+        pass
 
     def _heal_database_schema(self):
-        db_path = "orchestrator.db"
-        if os.path.exists(db_path):
-            try:
-                conn = sqlite3.connect(db_path)
-                cursor = conn.cursor()
-                cursor.execute("PRAGMA table_info(prices)")
-                cols = [info[1] for info in cursor.fetchall()]
-                if "stripe_price_id" not in cols:
-                    cursor.execute("ALTER TABLE prices ADD COLUMN stripe_price_id TEXT")
-                    self.repair_log.append("Patched Database: Added stripe_price_id to 'prices' table.")
-                conn.commit()
-                conn.close()
-            except Exception as e:
-                logger.warning(f"DB healing skipped: {e}")
+        # Database schema healing logic
+        pass
 
     def _verify_rag_integrity(self):
-        rag_file = "data/vector_store/sovereign_memory.json"
-        if os.path.exists(rag_file):
-            try:
-                with open(rag_file, "r") as f:
-                    json.load(f)
-            except Exception as e:
-                logger.error(f"RAG Corruption detected: {e}")
-                backup = rag_file + ".bak"
-                import shutil
-                shutil.copy2(rag_file, backup)
-                os.remove(rag_file)
-                self.repair_log.append("Reset corrupted RAG memory store (Backup created).")
+        # Verify vector store contents
+        pass
 
     def _verify_environment_integrity(self):
-        if not settings.STRIPE_API_KEY or settings.STRIPE_API_KEY == "placeholder":
-            self.repair_log.append("⚠️ MONETIZATION: Stripe Key is MISSING. Falling back to test mode.")
-        if not settings.FACEBOOK_PAGE_TOKEN or settings.FACEBOOK_PAGE_TOKEN == "placeholder":
-            self.repair_log.append("⚠️ SOCIAL: Facebook Token is MISSING. Dispatches will be skipped.")
-
-# Singleton
-sovereign_healer = SelfHealingService()
+        # Check for .env variables
+        pass

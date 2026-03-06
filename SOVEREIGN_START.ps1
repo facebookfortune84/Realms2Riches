@@ -10,6 +10,16 @@ param (
 $ErrorActionPreference = "Stop"
 $env:PYTHONPATH = "."
 
+# --- -1. CLEANUP ORPHANED PROCESSES ---
+Write-Host "Cleaning up orphaned API processes..." -ForegroundColor Gray
+Get-Process -Name "uvicorn", "python" -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -eq "" } | Stop-Process -Force -ErrorAction SilentlyContinue
+# Specific port cleanup
+$port8000 = Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue
+if ($port8000) {
+    Write-Host "  -> Killing process on port 8000..." -ForegroundColor Yellow
+    Stop-Process -Id $port8000.OwningProcess -Force -ErrorAction SilentlyContinue
+}
+
 Write-Host "`n  R E A L M S   2   R I C H E S" -ForegroundColor Magenta
 Write-Host "  S O V E R E I G N   M A T R I X" -ForegroundColor Green
 Write-Host "  v5.5.0-VANGUARD | INDUSTRIAL LAUNCH SEQUENCE`n" -ForegroundColor DarkGray
@@ -68,8 +78,16 @@ Write-Host "  -> API Server PID: $($apiProcess.Id)" -ForegroundColor Gray
 # --- 6. TUNNELING & CONNECTIVITY ---
 Write-Host "[6/8] Opening Global Gateway (Ngrok)..." -ForegroundColor Cyan
 if (Test-Path "infra/tools/ngrok/ngrok.exe") {
-    Start-Process "./infra/tools/ngrok/ngrok.exe" -ArgumentList "http 8000" -NoNewWindow
-    Write-Host "  -> Public Tunnel Established." -ForegroundColor Green
+    # Extract domain from .env.prod if possible
+    $backendUrl = (Get-Content .env.prod | Select-String "BACKEND_URL=").ToString().Split("=")[1].Trim()
+    if ($backendUrl -like "*ngrok-free.dev*") {
+        $domain = $backendUrl -replace "https://", "" -replace "http://", ""
+        Write-Host "  -> Using custom domain: $domain" -ForegroundColor Gray
+        Start-Process "./infra/tools/ngrok/ngrok.exe" -ArgumentList "http --domain=$domain 8000" -NoNewWindow
+    } else {
+        Start-Process "./infra/tools/ngrok/ngrok.exe" -ArgumentList "http 8000" -NoNewWindow
+    }
+    Write-Host "  -> Public Gateway Activated." -ForegroundColor Green
 } else {
     Write-Host "  -> WARNING: Ngrok binary not found. Webhooks will be local-only." -ForegroundColor Yellow
 }

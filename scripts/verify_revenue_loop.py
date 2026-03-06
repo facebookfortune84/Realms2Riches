@@ -41,9 +41,7 @@ async def verify_loop():
             print("\n[2/3] Simulating Stripe Webhook Conversion...")
             # We use our own simulation script logic
             from scripts.simulate_live_event import simulate_payment
-            # Note: Requires API to be running for real request, or we mock the handler call
-            # For this test, we'll assume the simulate_payment script covers the network part.
-            # Here we just verify the state change if possible.
+            simulate_payment()
             
             print("\n[3/3] Final System Mood Audit...")
             # After 'revenue', system should reflect in conscious state
