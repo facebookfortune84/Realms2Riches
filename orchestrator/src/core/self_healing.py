@@ -173,5 +173,24 @@ class SelfHealingService:
         if not settings.GROQ_API_KEY:
             self.repair_log.append("⚠️ INTELLIGENCE: Groq Key is MISSING. LLM will be in mock mode.")
 
+    def get_maintenance_tasks(self) -> List[str]:
+        """Provides a list of upkeep tasks for the autonomous backlog."""
+        tasks = []
+        # Check for directory drift
+        for d in self.REQUIRED_DIRS:
+            if not os.path.exists(d):
+                tasks.append(f"Repair missing directory: {d}")
+        
+        # Check for log size
+        log_file = "data/logs/swarm_activity.log"
+        if os.path.exists(log_file) and os.path.getsize(log_file) > 10 * 1024 * 1024: # 10MB
+            tasks.append("Prune and rotate large system logs.")
+            
+        # Standard maintenance
+        tasks.append("Audit SQLStore for orphaned task records.")
+        tasks.append("Sync Oracle assets with Sovereign Secondary Core.")
+        
+        return tasks
+
 # Singleton
 sovereign_healer = SelfHealingService()

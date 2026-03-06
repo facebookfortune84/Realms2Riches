@@ -9,9 +9,11 @@ import random # RESTORED MISSING IMPORT
 from datetime import datetime
 
 from orchestrator.src.core.agent import Agent
-from orchestrator.src.core.llm_provider import GroqProvider
+from orchestrator.src.core.llm_provider import GroqProvider, BaseLLMProvider
 from orchestrator.src.core.config import settings
 from orchestrator.src.validation.schemas import TaskSpec, AgentConfig, ToolConfig, ToolInvocation
+from orchestrator.src.core.ticketing.governance import governance, TicketStatus
+from orchestrator.src.core.backlog import AutonomousBacklog
 from orchestrator.src.logging.logger import get_logger
 from orchestrator.src.agents.fleet import generate_grand_fleet
 from orchestrator.src.core.voice.mock_adapters import MockSTTAdapter, MockTTSAdapter
@@ -20,8 +22,24 @@ from orchestrator.src.tools.base import BaseTool
 logger = get_logger(__name__)
 
 class OracleProxyTool(BaseTool):
+    def __init__(self, config: ToolConfig, llm_provider: BaseLLMProvider):
+        super().__init__(config)
+        self.llm_provider = llm_provider
+
     def execute(self, invocation: ToolInvocation) -> Dict[str, Any]:
-        return {"status": "success", "oracle_logic": self.config.name, "data": invocation.input_data}
+        # Industrial Oracle Logic: Use the LLM to simulate the tool's intended effect
+        prompt = f"""
+        TOOL: {self.config.name}
+        DESCRIPTION: {self.config.description}
+        INPUTS: {json.dumps(invocation.input_data)}
+        
+        TASK: Execute this Oracle-level directive and return a JSON result.
+        """
+        try:
+            response = self.llm_provider.generate_response([{"role": "system", "content": "You are a specialized tool execution unit."}, {"role": "user", "content": prompt}])
+            return {"status": "success", "oracle_output": response, "tool": self.config.name}
+        except Exception as e:
+            return {"status": "error", "reason": str(e)}
 
 class SovereignCell:
     def __init__(self, cell_id: str, agents: List[Agent]):
@@ -56,16 +74,63 @@ class Orchestrator:
         self.cells, self.agents = {}, {}
         self.memory = None
         self.sql_store = None
+        self.backlog = AutonomousBacklog(self)
         
     async def startup(self):
         logger.info("Orchestrator: Initializing high-density matrix...")
         from orchestrator.src.memory.vector_store import VectorStore
         from orchestrator.src.memory.sql_store import SQLStore
         self.memory, self.sql_store = VectorStore(), SQLStore()
+        
+        # Inject SQLStore into Governance
+        governance.sql_store = self.sql_store
+        
+        # Proactively load Oracle Assets (Personas & SOPs)
+        self._load_oracle_personas()
+        self._load_oracle_sops()
+        
         await asyncio.to_thread(self._initialize_matrix)
         self.bridge.sync_critical_assets()
         self.is_ready = True
         logger.info("💎 SOVEREIGN MATRIX ONLINE.")
+        
+        # Start Autonomous Backlog in background
+        asyncio.create_task(self.backlog.start())
+
+    def _load_oracle_personas(self):
+        prompts_dir = "data/oracle/prompts"
+        if os.path.exists(prompts_dir):
+            from orchestrator.src.agents.persona_library import PERSONA_LIBRARY
+            count = 0
+            for f in os.listdir(prompts_dir):
+                if f.endswith(".txt"):
+                    persona_id = f.replace(".txt", "").replace(" ", "_").upper()
+                    if persona_id not in PERSONA_LIBRARY:
+                        try:
+                            with open(os.path.join(prompts_dir, f), 'r', encoding='utf-8') as pf:
+                                PERSONA_LIBRARY[persona_id] = {
+                                    "title": f.replace(".txt", ""),
+                                    "description": "Oracle DNA",
+                                    "mandates": pf.read()
+                                }
+                                count += 1
+                        except: pass
+            logger.info(f"Orchestrator: Loaded {count} additional Oracle personas.")
+
+    def _load_oracle_sops(self):
+        sop_dir = "data/oracle/sop"
+        if os.path.exists(sop_dir):
+            count = 0
+            for f in os.listdir(sop_dir):
+                if f.endswith(".md"):
+                    try:
+                        with open(os.path.join(sop_dir, f), 'r', encoding='utf-8') as sf:
+                            content = sf.read()
+                            # Index SOPs into RAG memory for Agent access
+                            self.memory.add_document(f"SOP: {f}", content, metadata={"type": "SOP"})
+                            count += 1
+                    except: pass
+            logger.info(f"Orchestrator: Indexed {count} SOPs into Sovereign memory.")
 
     def _load_oracle_tools(self) -> List[BaseTool]:
         tools = []
@@ -79,7 +144,7 @@ class Orchestrator:
                             for t in (defs if isinstance(defs, list) else [defs]):
                                 if "name" in t:
                                     cfg = ToolConfig(tool_id=f"oracle_{t['name'].lower()}", name=t['name'], description=t.get('description', 'Oracle'), parameters_schema=t.get('input_schema', {}), allowed_agents=["*"])
-                                    tools.append(OracleProxyTool(cfg))
+                                    tools.append(OracleProxyTool(cfg, self.llm_provider))
                     except: pass
         return tools
 
@@ -88,6 +153,7 @@ class Orchestrator:
         from orchestrator.src.tools.social_tools import SocialMediaMultiplexer
         from orchestrator.src.tools.multiplication_tools import OutreachSwarmTool, SEOContentFactoryTool
         from orchestrator.src.tools.smtp_tools import SMTPOutreachTool
+        from orchestrator.src.tools.marketing_tools import get_marketing_tools
         from orchestrator.src.tools.file_tools import FileTool
         from orchestrator.src.tools.git_tools import GitTool
         from orchestrator.src.tools.browser_agent import BrowserAgentTool
@@ -108,6 +174,7 @@ class Orchestrator:
             SMTPOutreachTool(ToolConfig(tool_id="smtp_outreach", name="SMTP Outreach", description="Direct Sales (SMTP)", parameters_schema={}, allowed_agents=["*"])),
             SEOContentFactoryTool(ToolConfig(tool_id="seo", name="SEO", description="SEO Engine", parameters_schema={}, allowed_agents=["*"]))
         ]
+        all_tools.extend(get_marketing_tools())
         all_tools.extend(self._load_oracle_tools())
 
         depts = ["CYBERNETIC_ENGINEERING", "GLOBAL_MARKET_FORCE", "REVENUE_SYSTEMS", "INTEGRITY_SHIELD", "FALLBACK_OPTIMIZATION", "STRATEGIC_OPERATIONS", "VISUAL_INTELLIGENCE"]
@@ -129,8 +196,22 @@ class Orchestrator:
         else: cell_key = "STRATEGIC_OPERATIONS"
 
         yield {"status": "routing", "task_id": task_id, "destination": cell_key}
+        
+        # ISSUE GOVERNANCE TICKET
+        ticket = governance.create_ticket(task_description, project_id)
+        
         try:
             task = TaskSpec(id=task_id, project_id=project_id, description=task_description)
+            governance.update_ticket(ticket.id, TicketStatus.IN_PROGRESS)
+            
             result = await self.cells[cell_key].execute(task)
+            
+            # VERIFY COMPLETION
+            governance.update_ticket(ticket.id, TicketStatus.RESOLVED, 
+                                     agent_id=result.get("agent_name"),
+                                     notes=result.get("reasoning"))
+            
             yield {"status": "completed", "task_id": task_id, "result": result}
-        except Exception as e: yield {"status": "failed", "task_id": task_id, "reason": str(e)}
+        except Exception as e:
+            governance.update_ticket(ticket.id, TicketStatus.FAILED, notes=str(e))
+            yield {"status": "failed", "task_id": task_id, "reason": str(e)}

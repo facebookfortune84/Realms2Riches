@@ -37,10 +37,16 @@ class SMTPOutreachTool(BaseTool):
             part = MIMEText(html_body, "html")
             msg.attach(part)
 
-            logger.info(f"📧 DISPATCHING SMTP OUTREACH TO {target_email} via {settings.SMTP_SERVER}")
+            logger.info(f"📧 DISPATCHING SMTP OUTREACH TO {target_email} via {settings.SMTP_SERVER}:{settings.SMTP_PORT}")
             
-            with smtplib.SMTP(settings.SMTP_SERVER, settings.SMTP_PORT) as server:
+            # Use SMTP_SSL for Port 465 (Gmail Preferred) or SMTP + STARTTLS for 587
+            if settings.SMTP_PORT == 465:
+                server = smtplib.SMTP_SSL(settings.SMTP_SERVER, settings.SMTP_PORT)
+            else:
+                server = smtplib.SMTP(settings.SMTP_SERVER, settings.SMTP_PORT)
                 server.starttls()
+                
+            with server:
                 server.login(settings.SMTP_USER, settings.SMTP_PASS)
                 server.sendmail(settings.SMTP_USER, target_email, msg.as_string())
             

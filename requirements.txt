@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+stripe
+groq
+openai
+google-auth-oauthlib
+google-api-python-client
+requests
+python-dotenv
+psycopg2-binary
+sqlalchemy
+apscheduler
+pydantic-settings
+pydantic
+tenacity
+watchfiles
+httpx

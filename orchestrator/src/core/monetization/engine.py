@@ -5,7 +5,7 @@ from orchestrator.src.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# SCRAPED AFFILIATE AND MONETIZATION LINKS FROM HTTPS://WWW.REALMSTORICHES.XYZ
+# SCRAPED AFFILIATE AND MONETIZATION LINKS
 AFFILIATE_LINKS = {
     "tiktok_shop": "https://thesuperlink.com/tiktokshop?ref=robertdemottojr&source=realmstoriches",
     "highlevel": "https://www.gohighlevel.com/?fp_ref=realmstoriches",
@@ -27,128 +27,155 @@ STRIPE_MONETIZATION = {
     "startup_accelerator": "https://buy.stripe.com/28E6oHbLP33z6gyaBB8so0c"
 }
 
-class AffiliateArbitrageStream:
-    """Stream 1: Automated SEO content generation for Affiliate Networks"""
-    def execute(self) -> Dict[str, Any]:
-        logger.info(f"[Monetization] Routing ClickFunnels & HighLevel Traffic...")
-        return {"stream": "AffiliateArbitrage", "status": "active", "links": [AFFILIATE_LINKS["clickfunnels"], AFFILIATE_LINKS["highlevel"]], "revenue_potential": "high"}
+class BaseStream:
+    def __init__(self, name: str, links: List[str]):
+        self.name = name
+        self.links = links
 
-class APISaaSBillingStream:
-    """Stream 2: Paid AI Manager Subscriptions via Stripe (Jarvis 3.5)"""
-    def execute(self) -> Dict[str, Any]:
-        logger.info(f"[Monetization] Selling Jarvis 3.5 API access...")
-        return {"stream": "APISaaSBilling", "status": "active", "links": [STRIPE_MONETIZATION["jarvis_basic"], STRIPE_MONETIZATION["jarvis_premium"]], "revenue_potential": "recurring"}
+    def generate_task(self) -> str:
+        raise NotImplementedError
 
-class LeadGenBrokerStream:
-    """Stream 3: Lead Capture using Pollo AI and Play HT funnels"""
-    def execute(self) -> Dict[str, Any]:
-        logger.info(f"[Monetization] Capturing voice/video leads...")
-        return {"stream": "LeadGenBroker", "status": "active", "links": [AFFILIATE_LINKS["pollo_ai"], AFFILIATE_LINKS["play_ht"]], "revenue_potential": "high"}
+class AffiliateArbitrageStream(BaseStream):
+    def generate_task(self) -> str:
+        return (
+            f"Generate a viral TikTok script for ClickFunnels using the 'tiktok_gen' tool. "
+            f"Product: ClickFunnels. Link: {self.links[0]}. "
+            f"Then dispatch the script text to Facebook using 'multiplexer'."
+        )
 
-class DigitalProductStoreStream:
-    """Stream 4: Digital Service Sales (Brand Kits, Consultations)"""
-    def execute(self) -> Dict[str, Any]:
-        logger.info(f"[Monetization] Converting high-ticket one-time services...")
-        return {"stream": "DigitalProductStore", "status": "active", "links": [STRIPE_MONETIZATION["business_consultation"], STRIPE_MONETIZATION["brand_kit"]], "revenue_potential": "passive"}
+class APISaaSBillingStream(BaseStream):
+    def generate_task(self) -> str:
+        return (
+            f"Create a high-converting email pitch for Jarvis 3.5 API access using 'email_gen'. "
+            f"Target: SaaS Developers. Link: {self.links[0]}. "
+            f"Use 'smtp_outreach' to send it to 'robertdemottojr50@gmail.com' (simulated target)."
+        )
 
-class NewsletterSponsorshipStream:
-    """Stream 5: PR/Sponsorship Injections via Brand Push"""
-    def execute(self) -> Dict[str, Any]:
-        logger.info(f"[Monetization] Selling newsletter slots...")
-        return {"stream": "NewsletterSponsorship", "status": "active", "links": [AFFILIATE_LINKS["brand_push"]], "revenue_potential": "growing"}
+class LeadGenBrokerStream(BaseStream):
+    def generate_task(self) -> str:
+        return (
+            f"Generate an ad copy for Pollo AI using 'ad_gen'. "
+            f"Focus on automated voice agents. Link: {self.links[0]}. "
+            f"Post the ad headline to Facebook using 'multiplexer'."
+        )
 
-class PrintOnDemandStream:
-    """Stream 6: Automated Video/Merch content (CapCut)"""
-    def execute(self) -> Dict[str, Any]:
-        logger.info(f"[Monetization] Delivering CapCut automated edits...")
-        return {"stream": "PrintOnDemand", "status": "active", "links": [AFFILIATE_LINKS["capcut"]], "revenue_potential": "passive"}
+class DigitalProductStoreStream(BaseStream):
+    def generate_task(self) -> str:
+        return (
+            f"Draft a LinkedIn post promoting the Sovereign Brand Kit using 'multiplexer'. "
+            f"Highlight immediate ROI. Link: {self.links[1]}."
+        )
 
-class ProgrammaticAdsStream:
-    """Stream 7: TikTok Shop & VidIQ SEO Page Generation"""
-    def execute(self) -> Dict[str, Any]:
-        logger.info(f"[Monetization] Injecting TikTok/VidIQ ads into content...")
-        return {"stream": "ProgrammaticAds", "status": "active", "links": [AFFILIATE_LINKS["tiktok_shop"], AFFILIATE_LINKS["vidiq"]], "revenue_potential": "volume-based"}
+class NewsletterSponsorshipStream(BaseStream):
+    def generate_task(self) -> str:
+        return (
+            f"Draft a sponsorship proposal for the Sovereign Newsletter using 'email_gen'. "
+            f"Target: AI Tool Vendors. Link: {self.links[0]}."
+        )
 
-class CryptoYieldFarmingStream:
-    """Stream 8: Startup Accelerator funding & stablecoin routing"""
-    def execute(self) -> Dict[str, Any]:
-        logger.info(f"[Monetization] Rebalancing into Startup Accelerator vaults...")
-        return {"stream": "CryptoYieldFarming", "status": "active", "links": [STRIPE_MONETIZATION["startup_accelerator"]], "revenue_potential": "variable"}
+class PrintOnDemandStream(BaseStream):
+    def generate_task(self) -> str:
+        return (
+            f"Create a TikTok script for CapCut templates using 'tiktok_gen'. "
+            f"Focus on viral editing. Link: {self.links[0]}."
+        )
 
-class PaidCommunityStream:
-    """Stream 9: Paid Discord/Elite Support (Realms to Riches Elite)"""
-    def execute(self) -> Dict[str, Any]:
-        logger.info(f"[Monetization] Selling access to Realms to Riches Elite Support...")
-        return {"stream": "PaidCommunity", "status": "active", "links": [STRIPE_MONETIZATION["elite_support"]], "revenue_potential": "recurring"}
+class ProgrammaticAdsStream(BaseStream):
+    def generate_task(self) -> str:
+        return (
+            f"Generate programmatic ad copy for VidIQ using 'ad_gen'. "
+            f"Target: YouTubers. Link: {self.links[1]}."
+        )
 
-class DataLicensingAPIStream:
-    """Stream 10: Custom Jarvis Enterprise API Sales"""
-    def execute(self) -> Dict[str, Any]:
-        logger.info(f"[Monetization] Closing enterprise custom Jarvis deals...")
-        return {"stream": "DataLicensingAPI", "status": "active", "links": [STRIPE_MONETIZATION["jarvis_custom"]], "revenue_potential": "enterprise"}
+class CryptoYieldFarmingStream(BaseStream):
+    def generate_task(self) -> str:
+        return (
+            f"Analyze current yield farming rates (simulated) and post a 'Crypto Alert' to Facebook using 'multiplexer'. "
+            f"Link to Accelerator: {self.links[0]}."
+        )
 
-class SEOTrafficStream:
-    """Stream 11: Dedicated SEO Agent pushing organic traffic"""
-    def execute(self) -> Dict[str, Any]:
-        logger.info(f"[Monetization] SEO Agent driving organic ranking for Jarvis 3.5...")
-        return {"stream": "SEOTraffic", "status": "active", "links": [STRIPE_MONETIZATION["jarvis_basic"]], "revenue_potential": "compounding"}
+class PaidCommunityStream(BaseStream):
+    def generate_task(self) -> str:
+        return (
+            f"Draft an exclusive invitation email for the Elite Support tier using 'email_gen'. "
+            f"Link: {self.links[0]}."
+        )
 
-class ColdOutreachStream:
-    """Stream 12: Automated Cold Email/DM Outreach"""
-    def execute(self) -> Dict[str, Any]:
-        logger.info(f"[Monetization] Cold Outreach pinging enterprise targets...")
-        return {"stream": "ColdOutreach", "status": "active", "links": [STRIPE_MONETIZATION["jarvis_custom"]], "revenue_potential": "high-ticket"}
+class DataLicensingAPIStream(BaseStream):
+    def generate_task(self) -> str:
+        return (
+            f"Draft an enterprise licensing proposal using 'email_gen'. "
+            f"Target: Fortune 500 CTOs. Link: {self.links[0]}."
+        )
 
-class FastDeployMonetizationStream:
-    """Stream 13: Instant Sub-5 Minute Swarm Deployment Packages"""
-    def execute(self) -> Dict[str, Any]:
-        logger.info(f"[Monetization] Selling Instant Swarm Deployments ($499 Setup)...")
-        return {"stream": "FastDeploy", "status": "active", "links": [STRIPE_MONETIZATION["startup_accelerator"]], "revenue_potential": "volume-based"}
+class SEOTrafficStream(BaseStream):
+    def generate_task(self) -> str:
+        return (
+            f"Generate an SEO blog post outline for 'Autonomous Revenue Agents' using 'seo_factory'. "
+            f"Link: {self.links[0]}."
+        )
+
+class ColdOutreachStream(BaseStream):
+    def generate_task(self) -> str:
+        return (
+            f"Execute a cold outreach sequence for Jarvis Custom Enterprise using 'smtp_outreach'. "
+            f"Target: robertdemottojr50@gmail.com. Link: {self.links[0]}."
+        )
+
+class FastDeployMonetizationStream(BaseStream):
+    def generate_task(self) -> str:
+        return (
+            f"Create a 'Launch in 5 Minutes' ad campaign for the Startup Accelerator using 'ad_gen'. "
+            f"Link: {self.links[0]}."
+        )
 
 class MonetizationEngine:
     def __init__(self):
         self.streams = [
-            AffiliateArbitrageStream(),
-            APISaaSBillingStream(),
-            LeadGenBrokerStream(),
-            DigitalProductStoreStream(),
-            NewsletterSponsorshipStream(),
-            PrintOnDemandStream(),
-            ProgrammaticAdsStream(),
-            CryptoYieldFarmingStream(),
-            PaidCommunityStream(),
-            DataLicensingAPIStream(),
-            SEOTrafficStream(),
-            ColdOutreachStream(),
-            FastDeployMonetizationStream()
+            AffiliateArbitrageStream("AffiliateArbitrage", [AFFILIATE_LINKS["clickfunnels"]]),
+            APISaaSBillingStream("APISaaSBilling", [STRIPE_MONETIZATION["jarvis_basic"]]),
+            LeadGenBrokerStream("LeadGenBroker", [AFFILIATE_LINKS["pollo_ai"]]),
+            DigitalProductStoreStream("DigitalProductStore", [STRIPE_MONETIZATION["business_consultation"], STRIPE_MONETIZATION["brand_kit"]]),
+            NewsletterSponsorshipStream("NewsletterSponsorship", [AFFILIATE_LINKS["brand_push"]]),
+            PrintOnDemandStream("PrintOnDemand", [AFFILIATE_LINKS["capcut"]]),
+            ProgrammaticAdsStream("ProgrammaticAds", [AFFILIATE_LINKS["tiktok_shop"], AFFILIATE_LINKS["vidiq"]]),
+            CryptoYieldFarmingStream("CryptoYieldFarming", [STRIPE_MONETIZATION["startup_accelerator"]]),
+            PaidCommunityStream("PaidCommunity", [STRIPE_MONETIZATION["elite_support"]]),
+            DataLicensingAPIStream("DataLicensingAPI", [STRIPE_MONETIZATION["jarvis_custom"]]),
+            SEOTrafficStream("SEOTraffic", [STRIPE_MONETIZATION["jarvis_basic"]]),
+            ColdOutreachStream("ColdOutreach", [STRIPE_MONETIZATION["jarvis_custom"]]),
+            FastDeployMonetizationStream("FastDeploy", [STRIPE_MONETIZATION["startup_accelerator"]])
         ]
 
-    async def run_all_streams(self, orchestrator=None) -> List[Dict[str, Any]]:
-        logger.info("Initializing 13-Stream Monetization Engine with REALMS TO RICHES Scraped Links...")
+    async def run_all_streams(self, orchestrator) -> List[Dict[str, Any]]:
+        logger.info("⚡ INITIATING 13-VECTOR MONETIZATION BLITZ ⚡")
         results = []
+        
+        # Dispatch ALL streams to the orchestrator for real execution
         for stream in self.streams:
+            task_desc = stream.generate_task()
+            logger.info(f"🚀 Dispatching Stream: {stream.name} -> {task_desc[:50]}...")
+            
             try:
-                # If it's a stream that can be automated via the orchestrator
-                if orchestrator and isinstance(stream, (SEOTrafficStream, ColdOutreachStream, AffiliateArbitrageStream)):
-                    logger.info(f"Dispatching REAL-WORLD task for {stream.__class__.__name__}...")
-                    desc = (
-                        f"ACTIVATE YOLO MODE: Execute an aggressive, high-converting {stream.__class__.__name__} operation. "
-                        f"Target top-tier enterprise clients and high-intent buyers. "
-                        f"Use powerful, authoritative marketing prompts to guarantee maximum income reach. "
-                        f"No hesitation, maximize visibility and conversion for these links: {', '.join(stream.execute().get('links', []))}"
-                    )
-                    # We run it in the background/stream it
-                    async for step in orchestrator.submit_task_stream(desc, "monetization"):
-                        if step["status"] == "completed":
-                            res = {"stream": stream.__class__.__name__, "status": "executed", "result": step["result"]}
-                            break
-                else:
-                    res = stream.execute()
-                results.append(res)
+                final_res = None
+                async for step in orchestrator.submit_task_stream(task_desc, f"stream_{stream.name}"):
+                    if step["status"] == "completed":
+                        final_res = step["result"]
+                        logger.info(f"✅ Stream {stream.name} Executed Successfully.")
+                    elif step["status"] == "failed":
+                        logger.error(f"❌ Stream {stream.name} Failed: {step['reason']}")
+                        final_res = {"error": step["reason"]}
+                
+                results.append({
+                    "stream": stream.name,
+                    "status": "success" if final_res and "error" not in final_res else "failed",
+                    "result": final_res
+                })
             except Exception as e:
-                logger.error(f"Stream {stream.__class__.__name__} failed: {e}")
-                results.append({"stream": stream.__class__.__name__, "status": "error", "reason": str(e)})
-        logger.info(f"Monetization Engine Cycle Complete. {len(self.streams)} streams active and converting.")
+                logger.error(f"Stream {stream.name} Exception: {e}")
+                results.append({"stream": stream.name, "status": "error", "reason": str(e)})
+                
+        logger.info("🏁 MONETIZATION CYCLE COMPLETE.")
         return results
 
 monetization_engine = MonetizationEngine()
