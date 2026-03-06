@@ -75,6 +75,29 @@ Write-Host "[5/8] Launching Sovereign API..." -ForegroundColor Cyan
 $apiProcess = Start-Process uvicorn -ArgumentList "orchestrator.src.core.api:app --host 0.0.0.0 --port 8000" -NoNewWindow -PassThru
 Write-Host "  -> API Server PID: $($apiProcess.Id)" -ForegroundColor Gray
 
+# Wait for API to be healthy
+Write-Host "  -> Waiting for API heartbeat..." -ForegroundColor Gray
+$maxRetries = 10
+$retryCount = 0
+$healthy = $false
+while ($retryCount -lt $maxRetries -and -not $healthy) {
+    try {
+        $response = Invoke-RestMethod -Uri "http://localhost:8000/health" -Method Get -ErrorAction SilentlyContinue
+        if ($response.status -eq "healthy") {
+            $healthy = $true
+            Write-Host "  -> API is ONLINE." -ForegroundColor Green
+        }
+    } catch {
+        $retryCount++
+        Start-Sleep -Seconds 2
+    }
+}
+
+if (-not $healthy) {
+    Write-Host "❌ CRITICAL: API failed to start in time." -ForegroundColor Red
+    exit 1
+}
+
 # --- 6. TUNNELING & CONNECTIVITY ---
 Write-Host "[6/8] Opening Global Gateway (Ngrok)..." -ForegroundColor Cyan
 $ngrokPath = if (Get-Command ngrok -ErrorAction SilentlyContinue) { "ngrok" } elseif (Test-Path "infra/tools/ngrok/ngrok.exe") { "./infra/tools/ngrok/ngrok.exe" } else { $null }
