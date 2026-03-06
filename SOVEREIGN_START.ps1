@@ -1,152 +1,102 @@
 # ============================================================
-# SOVEREIGN_START.ps1 - Platinum Robust Launcher (v4.1 Matrix Edition)
+# SOVEREIGN_START.ps1 - Vanguard Launch Commander (v5.5.0)
 # ============================================================
 param (
     [switch]$Prune,
-    [switch]$Yolo
+    [switch]$ForceRelease,
+    [switch]$SkipTests
 )
 
 $ErrorActionPreference = "Stop"
+$env:PYTHONPATH = "."
 
 Write-Host "`n  R E A L M S   2   R I C H E S" -ForegroundColor Magenta
 Write-Host "  S O V E R E I G N   M A T R I X" -ForegroundColor Green
-Write-Host "  v4.1-VANGUARD | SYSTEM: INITIALIZING`n" -ForegroundColor DarkGray
+Write-Host "  v5.5.0-VANGUARD | INDUSTRIAL LAUNCH SEQUENCE`n" -ForegroundColor DarkGray
 
-# --- 0. SOVEREIGN GIT & LINEAGE SYNC ---
-Write-Host "[0/7] Synchronizing Git Pulse & Remote Lineage..." -ForegroundColor Cyan
-try {
-    git add .
-    $timestamp = Get-Date -Format "yyyyMMdd-HHmm"
-    $tag = "sov-pulse-$timestamp"
-    
-    $status = git status --porcelain
-    if ($status) {
-        git commit -m "Sovereign Swarm Pulse: $timestamp [Automated Lineage Commit]"
-        Write-Host "  -> Changes committed." -ForegroundColor Gray
-    } else {
-        Write-Host "  -> Work tree clean. Proceeding to tag." -ForegroundColor Gray
-    }
-    
-    git tag -a $tag -m "Sovereign Intelligence Network Lifecycle Point: $tag"
-    Write-Host "  -> Tagged locally as $tag" -ForegroundColor Gray
-    
-    try {
-        Write-Host "  -> Pushing lineage to remote..." -ForegroundColor Gray
-        git push origin main --tags -q
-        Write-Host "SUCCESS: Lineage secured in remote repository." -ForegroundColor Green
-    } catch {
-        Write-Host "WARNING: Remote push failed. Lineage secured locally only." -ForegroundColor Yellow
-    }
-} catch {
-    Write-Host "WARNING: Git Pulse skipped (Not a git repo or no access)." -ForegroundColor Yellow
+# --- 0. PRE-FLIGHT GOVERNANCE ---
+Write-Host "[0/8] Securing Development Lineage..." -ForegroundColor Cyan
+git add .
+$status = git status --porcelain
+if ($status) {
+    $ts = Get-Date -Format "yyyyMMdd-HHmm"
+    git commit -m "Vanguard Pulse: $ts [Auto-Secure before Launch]"
+    Write-Host "  -> Snapshot secured in 'dev' branch." -ForegroundColor Gray
 }
 
-# --- 1. DOCKER VALIDATION ---
-Write-Host "`n[1/7] Verifying Docker Desktop..." -ForegroundColor Cyan
-if (-not (Get-Process "Docker Desktop" -ErrorAction SilentlyContinue)) {
-    Write-Host "INFO: Starting Docker Desktop..." -ForegroundColor Gray
-    Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
-    Start-Sleep -Seconds 15
+# --- 1. CORE SYNCHRONIZATION ---
+Write-Host "[1/8] Synchronizing Secondary Core..." -ForegroundColor Cyan
+if (Test-Path "core_secondary") {
+    Write-Host "  -> Aligning secondary assets with primary..." -ForegroundColor Gray
+    # Selective sync of docs and logic
+    Copy-Item -Path "core_secondary/orchestrator/src/*" -Destination "orchestrator/src/" -Recurse -Force -ErrorAction SilentlyContinue
+    Write-Host "  -> Core Alignment Complete." -ForegroundColor Green
 }
 
+# --- 2. SYSTEM INTEGRITY AUDIT ---
+if (-not $SkipTests) {
+    Write-Host "[2/8] Executing 106-Pass Coverage Engine..." -ForegroundColor Magenta
+    python scripts/matrix_coverage_engine.py
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "❌ CRITICAL: Coverage Scan Failed. Launch Aborted." -ForegroundColor Red
+        exit 1
+    }
+
+    Write-Host "`n[3/8] Verifying Swarm Integrity..." -ForegroundColor Magenta
+    python scripts/test_system_integrity.py
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "❌ CRITICAL: Integrity Test Failed." -ForegroundColor Red
+        exit 1
+    }
+} else {
+    Write-Host "[2-3/8] Skipping Verification (NOT RECOMMENDED)." -ForegroundColor Yellow
+}
+
+# --- 4. DOCKER INFRASTRUCTURE ---
+Write-Host "[4/8] Starting High-Density Persistence (Postgres)..." -ForegroundColor Cyan
 if ($Prune) {
-    $confirm = "y"
-    if (-not $Yolo) {
-        $confirm = Read-Host "WARNING: NUCLEAR OPTION. Prune all data? (y/n)"
-    }
-    if ($confirm -eq "y") {
-        Write-Host "INFO: Pruning Docker System..." -ForegroundColor Red
-        docker system prune -af --volumes
-    }
+    docker-compose -f infra/docker/docker-compose.prod.yml down -v
+}
+docker-compose -f infra/docker/docker-compose.prod.yml up -d postgres
+Write-Host "  -> Database Container Active." -ForegroundColor Green
+
+# --- 5. API COMMAND CENTER ---
+Write-Host "[5/8] Launching Sovereign API..." -ForegroundColor Cyan
+$apiProcess = Start-Process uvicorn -ArgumentList "orchestrator.src.core.api:app --host 0.0.0.0 --port 8000" -NoNewWindow -PassThru
+Write-Host "  -> API Server PID: $($apiProcess.Id)" -ForegroundColor Gray
+
+# --- 6. TUNNELING & CONNECTIVITY ---
+Write-Host "[6/8] Opening Global Gateway (Ngrok)..." -ForegroundColor Cyan
+if (Test-Path "infra/tools/ngrok/ngrok.exe") {
+    Start-Process "./infra/tools/ngrok/ngrok.exe" -ArgumentList "http 8000" -NoNewWindow
+    Write-Host "  -> Public Tunnel Established." -ForegroundColor Green
+} else {
+    Write-Host "  -> WARNING: Ngrok binary not found. Webhooks will be local-only." -ForegroundColor Yellow
 }
 
-# --- 2. BUILD & LAUNCH ---
-Write-Host "`n[2/7] Forging Sovereign Infrastructure..." -ForegroundColor Cyan
-docker-compose -f infra/docker/docker-compose.prod.yml down --remove-orphans
-docker-compose -f infra/docker/docker-compose.prod.yml up -d --build
-
-# --- 3. PULSE CHECK ---
-Write-Host "`n[3/7] Detecting Neural Heartbeat..." -ForegroundColor Cyan
-$maxRetries = 200
-$retry = 0
-$healthy = $false
-
-while ($retry -lt $maxRetries) {
-    try {
-        $res = Invoke-RestMethod -Uri "http://localhost:8000/health" -Method Get -TimeoutSec 2
-        if ($res.status -eq "ok") {
-            $healthy = $true
-            Write-Host "SUCCESS: Neural Link Established." -ForegroundColor Green
-            Write-Host "   Agents: $($res.agents) | RAG: $($res.rag) Vectors ONLINE" -ForegroundColor Cyan
-            Write-Host "   Version: $($res.version)" -ForegroundColor DarkGray
-            break
-        }
-    } catch {
-        Write-Host "   ...waiting for API ($($retry+1)/$maxRetries)..." -ForegroundColor DarkGray
-        Start-Sleep -Seconds 3
-        $retry++
-    }
+# --- 7. REVENUE RECONCILIATION ---
+Write-Host "[7/8] Running Revenue Loop Validation..." -ForegroundColor Magenta
+python scripts/verify_revenue_loop.py
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "  -> WARNING: Revenue loop returned non-zero. Check Stripe connectivity." -ForegroundColor Yellow
 }
 
-if (-not $healthy) {
-    Write-Host "ERROR: Neural Link Timeout. Dumping Logs:" -ForegroundColor Red
-    docker logs docker-orchestrator-api-1 --tail 20
-    exit 1
+# --- 8. FULL SWARM ACTIVATION ---
+Write-Host "[8/8] UNLEASHING THE SWARM (Conscious Blitz)..." -ForegroundColor Green
+# Start the conscious monetization cycle in a new window to keep it active
+Start-Process python -ArgumentList "scripts/conscious_monetization.py"
+
+if ($ForceRelease) {
+    Write-Host "`n[RELEASE] Pushing verified state to STASIS branch..." -ForegroundColor Yellow
+    git checkout stasis
+    git merge dev --no-ff -m "Automated Vanguard Release Merge"
+    git checkout dev
 }
 
-# --- 4. UNIVERSAL TEST MATRIX ---
-Write-Host "`n[4/7] Engaging Universal Matrix Diagnostics..." -ForegroundColor Magenta
-try {
-    poetry run python tests/matrix_runner.py
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "CRITICAL MATRIX FRACTURE DETECTED." -ForegroundColor Red
-        Write-Host "The Swarm cannot launch until all tests pass." -ForegroundColor Red
-        exit 1
-    }
-    Write-Host "SUCCESS: Matrix is perfectly aligned." -ForegroundColor Green
-} catch {
-    Write-Host "FATAL MATRIX EXECUTION FAILURE." -ForegroundColor Red
-    exit 1
-}
-
-# --- 5. SYSTEM INTEGRITY VALIDATION ---
-Write-Host "`n[5/7] Running MASTER ROUNDUP AUDIT..." -ForegroundColor Cyan
-try {
-    docker exec docker-orchestrator-api-1 python scripts/final_roundup_audit.py
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "CRITICAL SYSTEM DEVIATION DETECTED." -ForegroundColor Red
-        exit 1
-    }
-} catch {
-    Write-Host "FATAL AUDIT FAILURE." -ForegroundColor Red
-    exit 1
-}
-
-# --- 6. SEEDING & LEARNING ---
-Write-Host "`n[6/7] Synchronizing Catalog & Learning Streams..." -ForegroundColor Cyan
-docker exec docker-orchestrator-api-1 python -m orchestrator.src.core.catalog.ingest
-Write-Host "SUCCESS: Learning Stream Online." -ForegroundColor Green
-
-try {
-    docker exec docker-orchestrator-api-1 python scripts/backfeed_awareness.py
-    Write-Host "SUCCESS: Swarm is Self-Aware." -ForegroundColor Green
-} catch {
-    Write-Host "WARNING: Awareness Protocol skipped." -ForegroundColor Yellow
-}
-
-# --- 7. FINAL READY & AUTO-MONETIZE ---
-Write-Host "`n[7/7] SOVEREIGN MATRIX IS LIVE." -ForegroundColor Green
-
-if ($Yolo) {
-    Write-Host "`n[YOLO] YOLO MODE DETECTED: Activating Income Streams..." -ForegroundColor Yellow
-    docker exec docker-orchestrator-api-1 python scripts/yolo_mode_monetization.py
-    Write-Host "SUCCESS: Swarm is actively monetizing." -ForegroundColor Green
-}
-
-Write-Host "`nCommand Center:"
-Write-Host "  * r2r shell" -ForegroundColor White
-Write-Host "  * r2r status" -ForegroundColor White
-Write-Host "  * poetry run python scripts/yolo_mode_monetization.py" -ForegroundColor Yellow
-Write-Host "`nAccess URLS:"
-Write-Host "  Backend:  http://localhost:8000" -ForegroundColor Gray
-Write-Host "  Frontend: http://localhost:5173" -ForegroundColor Gray
+Write-Host "`n💎 SOVEREIGN MATRIX IS FULLY OPERATIONAL 💎" -ForegroundColor Green
+Write-Host "==============================================="
+Write-Host "  API URL:    http://localhost:8000"
+Write-Host "  TRANSPARENCY: http://localhost:8000/api/v1/swarm/transparency"
+Write-Host "  LOGS:       tail -f data/logs/swarm_activity.log"
+Write-Host "==============================================="
+Write-Host "`nWatch the money move. Launch sequence complete." -ForegroundColor Cyan

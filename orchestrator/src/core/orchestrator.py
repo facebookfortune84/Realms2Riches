@@ -163,6 +163,8 @@ class Orchestrator:
         from orchestrator.src.tools.multiplication_tools import OutreachSwarmTool, SEOContentFactoryTool
         from orchestrator.src.tools.smtp_tools import SMTPOutreachTool
         from orchestrator.src.tools.marketing_tools import get_marketing_tools
+        from orchestrator.src.tools.web_tools import get_web_tools
+        from orchestrator.src.tools.revenue_tools import get_revenue_tools
         from orchestrator.src.tools.file_tools import FileTool
         from orchestrator.src.tools.git_tools import GitTool
         from orchestrator.src.tools.browser_agent import BrowserAgentTool
@@ -184,6 +186,8 @@ class Orchestrator:
             SEOContentFactoryTool(ToolConfig(tool_id="seo", name="SEO", description="SEO Engine", parameters_schema={}, allowed_agents=["*"]))
         ]
         all_tools.extend(get_marketing_tools())
+        all_tools.extend(get_web_tools())
+        all_tools.extend(get_revenue_tools())
         all_tools.extend(self._load_oracle_tools())
 
         depts = ["CYBERNETIC_ENGINEERING", "GLOBAL_MARKET_FORCE", "REVENUE_SYSTEMS", "INTEGRITY_SHIELD", "FALLBACK_OPTIMIZATION", "STRATEGIC_OPERATIONS", "VISUAL_INTELLIGENCE"]

@@ -1,6 +1,7 @@
 import json
 import os
 import stripe
+import random
 from typing import Dict, Any, List
 from orchestrator.src.tools.base import BaseTool, ToolConfig
 from orchestrator.src.validation.schemas import ToolInvocation
@@ -12,38 +13,43 @@ logger = get_logger(__name__)
 class SalesFunnelTool(BaseTool):
     """
     Autonomously generates high-conversion landing pages.
-    Reconstructs the customer journey with dynamic CTAs and SEO hooks.
+    Pass 15: A/B Testing, Pixel Tracking, and SEO Hardening.
     """
     def execute(self, invocation: ToolInvocation) -> Dict[str, Any]:
         params = invocation.input_data or {}
         product_name = params.get("product_name", "Jarvis 3.5")
         stripe_url = params.get("checkout_url", "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02")
-        theme = params.get("theme", "Sovereign Industrial")
+        variant = random.choice(["Control", "Aggressive", "Scarcity"])
         
-        # UX Reconstruction: Dynamic HTML Template
+        # UX Reconstruction: Dynamic HTML Template with Tracking
         html_content = f"""
         <!DOCTYPE html>
         <html>
         <head>
-            <title>{product_name} | Sovereign Intelligence</title>
+            <title>{product_name} | Sovereign Intelligence (Variant: {variant})</title>
+            <script>
+                function trackClick(e) {{
+                    fetch('/api/v1/telemetry/click', {{
+                        method: 'POST',
+                        body: JSON.stringify({{ variant: '{variant}', product: '{product_name}' }})
+                    }});
+                }}
+            </script>
             <style>
-                body {{ font-family: 'Courier New', Courier, monospace; background: #0a0a0a; color: #00ff00; padding: 50px; text-align: center; }}
-                .container {{ border: 1px solid #00ff00; padding: 40px; display: inline-block; max-width: 600px; }}
-                h1 {{ letter-spacing: 5px; text-transform: uppercase; }}
-                .cta-btn {{ background: #00ff00; color: #000; padding: 15px 30px; text-decoration: none; font-weight: bold; border-radius: 5px; }}
-                .seo-text {{ color: #555; font-size: 10px; margin-top: 50px; }}
+                body {{ font-family: 'Inter', sans-serif; background: #050505; color: #fff; padding: 100px; text-align: center; }}
+                .glass-card {{ border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); padding: 60px; border-radius: 20px; backdrop-filter: blur(10px); }}
+                h1 {{ font-size: 48px; background: linear-gradient(90deg, #00ff00, #008000); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
+                .cta-btn {{ background: #00ff00; color: #000; padding: 20px 40px; text-decoration: none; font-weight: 900; border-radius: 50px; font-size: 20px; transition: 0.3s; }}
+                .cta-btn:hover {{ box-shadow: 0 0 30px #00ff00; transform: scale(1.05); }}
             </style>
         </head>
         <body>
-            <div class="container">
+            <div class="glass-card">
+                <p style="color: #00ff00;">>>> SOVEREIGN NODE INITIALIZED <<<</p>
                 <h1>{product_name}</h1>
-                <p>Status: ARCHITECT INITIALIZED</p>
-                <p>You have been identified as a high-value node. Access the Sovereign Intelligence Unit now.</p>
+                <p>Variant: {variant} | Conversion Protocol Active.</p>
                 <br><br>
-                <a href="{stripe_url}" class="cta-btn">INITIALIZE CONVERSION</a>
-            </div>
-            <div class="seo-text">
-                Keywords: Autonomous agents, Jarvis 3.5, Revenue Orchestration, Sovereign Tech
+                <a href="{stripe_url}" class="cta-btn" onclick="trackClick()">CLAIM YOUR SOVEREIGN LICENSE</a>
             </div>
         </body>
         </html>

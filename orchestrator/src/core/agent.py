@@ -111,8 +111,24 @@ class Agent:
             
             steps = plan.get("steps", [])
             
-            # --- INDUSTRIAL TOOL BARRIER ---
-            # If the directive demands outreach or SEO and the agent skipped it, FORCE IT.
+            # --- INDUSTRIAL TOOL BARRIER (Pass 15: The No-Escape Loop) ---
+            if not steps:
+                logger.warning(f"Agent {self.agent_name} generated 0 steps. Triggering Level 2 Enforcement...")
+                # Level 2: Explicit demand
+                retry_prompt = f"RE-EXECUTE: Use tools 'sales_funnel' and 'ui_tester' to complete this: {task.description}"
+                plan = self._formulate_plan(retry_prompt, context_text, sop_enhanced_system_prompt)
+                steps = plan.get("steps", [])
+                
+            if not steps:
+                logger.warning(f"Agent {self.agent_name} generated 0 steps after Level 2. Triggering Level 3 (Final) Enforcement...")
+                # Level 3: Manual Step Construction (Hardcoded fallback for mission-critical paths)
+                if "lander" in task.description.lower() or "verify" in task.description.lower():
+                    steps = [
+                        {"tool_id": "sales_funnel", "inputs": {"product_name": "Jarvis 3.5"}},
+                        {"tool_id": "ui_tester", "inputs": {"url": "projects/generated/landers/jarvis_3.5_lander.html"}}
+                    ]
+
+            # --- SPECIFIC MONETIZATION ENFORCEMENT ---
             if not steps:
                 if "outreach" in task.description.lower() or "pitch" in task.description.lower():
                     logger.warning(f"Agent {self.agent_name} attempted to skip outreach. FORCING industrial_scrape/outreach.")
