@@ -10,50 +10,109 @@ logger = logging.getLogger(__name__)
 
 class SelfHealingService:
     """
-    Vanguard Self-Healing Service.
-    Autonomously maintains system integrity and directory alignment.
+    Platinum Self-Healing Service.
+    Autonomously repairs the Sovereign environment on build/startup.
+    Guarantees architectural alignment and data integrity.
     """
+    
     REQUIRED_DIRS = [
-        "data/logs", "data/vector_store", "data/customers", 
-        "data/oracle/sop", "data/oracle/tools", "projects/generated/landers"
+        "data/assets",
+        "data/blog",
+        "data/store/slots",
+        "data/marketing/images",
+        "data/marketing/videos",
+        "data/lineage",
+        "data/customers",
+        "data/vector_store"
     ]
 
     def __init__(self):
         self.repair_log = []
-        self._initialize_environment()
 
-    def _initialize_environment(self):
+    def execute_healing_cycle(self):
+        logger.info("🛡️ INITIATING GLOBAL HEALING CYCLE...")
+        
+        self._repair_directories()
+        self._repair_baseline_assets()
+        self._validate_product_slots()
+        self._heal_database_schema()
+        self._verify_rag_integrity()
+        self._verify_environment_integrity()
+        
+        logger.info(f"✅ HEALING COMPLETE: {len(self.repair_log)} repairs performed.")
+        return self.repair_log
+
+    def _repair_directories(self):
         for d in self.REQUIRED_DIRS:
             if not os.path.exists(d):
                 os.makedirs(d, exist_ok=True)
-                self.repair_log.append(f"🛠️ REPAIR: Created missing directory {d}")
-        
-        self._verify_environment_integrity()
+                msg = f"Restored missing directory: {d}"
+                logger.warning(msg)
+                self.repair_log.append(msg)
+
+    def _repair_baseline_assets(self):
+        guide_path = "data/assets/sovereign_strategy_guide_v3.txt"
+        if not os.path.exists(guide_path):
+            with open(guide_path, "w", encoding="utf-8") as f:
+                f.write("""🦅 SOVEREIGN STRATEGY GUIDE v3
+1. Automate EVERYTHING.
+2. Scale agents horizontally.
+3. Establish direct monetization paths.
+4. Maintain cryptographic integrity.
+""")
+            self.repair_log.append("Restored Sovereign Strategy Guide asset.")
+
+    def _validate_product_slots(self):
+        for f in glob.glob("data/store/slots/*.json"):
+            try:
+                with open(f, "r") as pf:
+                    data = json.load(pf)
+                    # Purge corrupt/null slots
+                    if isinstance(data, dict):
+                        if not data.get("id") or data.get("price") is None:
+                            os.remove(f)
+                            self.repair_log.append(f"Purged malformed slot: {os.path.basename(f)}")
+            except Exception as e:
+                target = f + ".corrupt"
+                if os.path.exists(target): os.remove(target)
+                os.rename(f, target)
+                self.repair_log.append(f"Quarantined corrupt slot: {os.path.basename(f)}")
+
+    def _heal_database_schema(self):
+        db_path = "orchestrator.db"
+        if os.path.exists(db_path):
+            try:
+                conn = sqlite3.connect(db_path)
+                cursor = conn.cursor()
+                cursor.execute("PRAGMA table_info(prices)")
+                cols = [info[1] for info in cursor.fetchall()]
+                if "stripe_price_id" not in cols:
+                    cursor.execute("ALTER TABLE prices ADD COLUMN stripe_price_id TEXT")
+                    self.repair_log.append("Patched Database: Added stripe_price_id to 'prices' table.")
+                conn.commit()
+                conn.close()
+            except Exception as e:
+                logger.warning(f"DB healing skipped: {e}")
+
+    def _verify_rag_integrity(self):
+        rag_file = "data/vector_store/sovereign_memory.json"
+        if os.path.exists(rag_file):
+            try:
+                with open(rag_file, "r") as f:
+                    json.load(f)
+            except Exception as e:
+                logger.error(f"RAG Corruption detected: {e}")
+                backup = rag_file + ".bak"
+                import shutil
+                shutil.copy2(rag_file, backup)
+                os.remove(rag_file)
+                self.repair_log.append("Reset corrupted RAG memory store (Backup created).")
 
     def _verify_environment_integrity(self):
-        if not settings.STRIPE_API_KEY:
-            self.repair_log.append("⚠️ MONETIZATION: Stripe Key is MISSING.")
-        if not settings.GROQ_API_KEY:
-            self.repair_log.append("⚠️ INTELLIGENCE: Groq Key is MISSING.")
-
-    def get_maintenance_tasks(self) -> List[str]:
-        """Provides upkeep tasks for the autonomous backlog."""
-        tasks = []
-        # Directory Drift Check
-        for d in self.REQUIRED_DIRS:
-            if not os.path.exists(d):
-                tasks.append(f"Repair missing directory: {d}")
-        
-        # Log Pruning Check
-        log_file = "data/logs/swarm_activity.log"
-        if os.path.exists(log_file) and os.path.getsize(log_file) > 10 * 1024 * 1024:
-            tasks.append("Prune and rotate large system logs.")
-            
-        # Standard Industrial Maintenance
-        tasks.append("Audit SQLStore for orphaned task records.")
-        tasks.append("Sync Oracle assets with Sovereign Secondary Core.")
-        
-        return tasks
+        if not settings.STRIPE_API_KEY or settings.STRIPE_API_KEY == "placeholder":
+            self.repair_log.append("⚠️ MONETIZATION: Stripe Key is MISSING. Falling back to test mode.")
+        if not settings.FACEBOOK_PAGE_TOKEN or settings.FACEBOOK_PAGE_TOKEN == "placeholder":
+            self.repair_log.append("⚠️ SOCIAL: Facebook Token is MISSING. Dispatches will be skipped.")
 
 # Singleton
 sovereign_healer = SelfHealingService()

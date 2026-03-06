@@ -70,11 +70,16 @@ class Settings(BaseSettings):
     # --- PROPERTIES ---
     @property
     def db_config(self) -> DatabaseConfig:
+        host = self.POSTGRES_HOST
+        # Conscious Fallback for local execution vs docker
+        if host == "postgres" and os.name == "nt": 
+            host = "localhost"
+            
         return DatabaseConfig(
             POSTGRES_USER=self.POSTGRES_USER,
             POSTGRES_PASSWORD=self.POSTGRES_PASSWORD,
             POSTGRES_DB=self.POSTGRES_DB,
-            POSTGRES_HOST=self.POSTGRES_HOST,
+            POSTGRES_HOST=host,
             POSTGRES_PORT=self.POSTGRES_PORT,
             DATABASE_URL=self.DATABASE_URL
         )
