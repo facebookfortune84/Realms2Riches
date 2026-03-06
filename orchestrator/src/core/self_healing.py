@@ -106,3 +106,5 @@ class SelfHealingService:
     def _verify_environment_integrity(self):
         # Check for .env variables
         pass
+
+sovereign_healer = SelfHealingService()

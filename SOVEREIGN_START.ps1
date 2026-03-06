@@ -39,7 +39,7 @@ Write-Host "[1/8] Synchronizing Secondary Core..." -ForegroundColor Cyan
 if (Test-Path "core_secondary") {
     Write-Host "  -> Aligning secondary assets with primary..." -ForegroundColor Gray
     # Selective sync of docs and logic
-    Copy-Item -Path "core_secondary/orchestrator/src/*" -Destination "orchestrator/src/" -Recurse -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path "core_secondary/orchestrator/src" -Destination "orchestrator/" -Recurse -Force -ErrorAction SilentlyContinue
     Write-Host "  -> Core Alignment Complete." -ForegroundColor Green
 }
 
@@ -77,19 +77,30 @@ Write-Host "  -> API Server PID: $($apiProcess.Id)" -ForegroundColor Gray
 
 # --- 6. TUNNELING & CONNECTIVITY ---
 Write-Host "[6/8] Opening Global Gateway (Ngrok)..." -ForegroundColor Cyan
-if (Test-Path "infra/tools/ngrok/ngrok.exe") {
-    # Extract domain from .env.prod if possible
-    $backendUrl = (Get-Content .env.prod | Select-String "BACKEND_URL=").ToString().Split("=")[1].Trim()
-    if ($backendUrl -like "*ngrok-free.dev*") {
-        $domain = $backendUrl -replace "https://", "" -replace "http://", ""
-        Write-Host "  -> Using custom domain: $domain" -ForegroundColor Gray
-        Start-Process "./infra/tools/ngrok/ngrok.exe" -ArgumentList "http --domain=$domain 8000" -NoNewWindow
+$ngrokPath = if (Get-Command ngrok -ErrorAction SilentlyContinue) { "ngrok" } elseif (Test-Path "infra/tools/ngrok/ngrok.exe") { "./infra/tools/ngrok/ngrok.exe" } else { $null }
+
+if ($ngrokPath) {
+    # Check if ngrok is already running
+    $existingNgrok = Get-Process -Name "ngrok" -ErrorAction SilentlyContinue
+    if ($existingNgrok) {
+        Write-Host "  -> Ngrok is already running. Skipping startup." -ForegroundColor Yellow
     } else {
-        Start-Process "./infra/tools/ngrok/ngrok.exe" -ArgumentList "http 8000" -NoNewWindow
+        # Extract domain from .env.prod if possible
+        $backendUrlLine = Get-Content .env.prod | Select-String "BACKEND_URL="
+        if ($backendUrlLine) {
+            $backendUrl = $backendUrlLine.ToString().Split("=")[1].Trim()
+            if ($backendUrl -like "*ngrok-free.dev*") {
+                $domain = $backendUrl -replace "https://", "" -replace "http://", ""
+                Write-Host "  -> Using custom domain: $domain" -ForegroundColor Gray
+                Start-Process $ngrokPath -ArgumentList "http --domain=$domain 8000" -NoNewWindow
+            } else {
+                Start-Process $ngrokPath -ArgumentList "http 8000" -NoNewWindow
+            }
+            Write-Host "  -> Public Gateway Activated." -ForegroundColor Green
+        }
     }
-    Write-Host "  -> Public Gateway Activated." -ForegroundColor Green
 } else {
-    Write-Host "  -> WARNING: Ngrok binary not found. Webhooks will be local-only." -ForegroundColor Yellow
+    Write-Host "  -> WARNING: Ngrok not found. Webhooks will be local-only." -ForegroundColor Yellow
 }
 
 # --- 7. REVENUE RECONCILIATION ---
