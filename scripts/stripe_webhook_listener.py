@@ -1,6 +1,12 @@
 import stripe
 import uvicorn
+import os
+import sys
 from fastapi import FastAPI, Request, HTTPException
+
+# Ensure project root is in path
+sys.path.append(os.getcwd())
+
 from orchestrator.src.core.config import settings
 from orchestrator.src.logging.logger import get_logger
 

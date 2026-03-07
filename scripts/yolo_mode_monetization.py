@@ -26,7 +26,7 @@ async def activate_yolo_mode():
     for res in results:
         stream_name = res.get("stream", "Unknown")
         status = res.get("status", "Unknown")
-        if status == "executed" or status == "active":
+        if status == "success" or status == "executed" or status == "active":
             logger.info(f"✅ [SUCCESS] {stream_name}: {status.upper()}")
             if "links" in res:
                 for link in res["links"]:

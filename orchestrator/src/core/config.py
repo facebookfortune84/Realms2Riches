@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: Optional[str] = None
     
     # --- COMMUNICATION ---
-    SMTP_USER: Optional[str] = "robertdemottojr83@gmail.com"
+    SMTP_USER: Optional[str] = None
     SMTP_PASS: Optional[str] = None
     SMTP_SERVER: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
