@@ -39,7 +39,7 @@ def simulate_payment():
     
     headers = {
         "Content-Type": "application/json",
-        # In a real scenario, we'd sign this, but our local dev handler accepts unsigned for testing
+        "X-Sovereign-Internal": "true",
         "Stripe-Signature": "t=123,v1=simulated_signature" 
     }
     
