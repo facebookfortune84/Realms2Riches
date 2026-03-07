@@ -143,17 +143,15 @@ class Orchestrator:
 
     def _initialize_matrix(self):
         fleet = generate_grand_fleet()
-        from orchestrator.src.tools.smtp_tools import get_smtp_tools
-        
         all_tools = [
             GitTool(ToolConfig(tool_id="git", name="Git", description="Ops", parameters_schema={}, allowed_agents=["*"])),
             FileTool(ToolConfig(tool_id="file", name="File", description="I/O", parameters_schema={}, allowed_agents=["*"])),
             FacebookPostTool(ToolConfig(tool_id="fb", name="FB", description="Social", parameters_schema={}, allowed_agents=["*"])),
             LinkedInPostTool(ToolConfig(tool_id="li", name="LI", description="Social", parameters_schema={}, allowed_agents=["*"])),
             SocialMediaMultiplexer(ToolConfig(tool_id="multiplexer", name="Broadcast", description="Omni", parameters_schema={}, allowed_agents=["*"])),
+            SMTPOutreachTool(ToolConfig(tool_id="smtp_outreach", name="SMTP", description="Direct Sales", parameters_schema={}, allowed_agents=["*"])),
             SystemAuditTool(ToolConfig(tool_id="sys_audit", name="Integrity", description="Security", parameters_schema={}, allowed_agents=["*"]))
         ]
-        all_tools.extend(get_smtp_tools())
         all_tools.extend(get_marketing_tools())
         all_tools.extend(get_web_tools())
         all_tools.extend(get_revenue_tools())
