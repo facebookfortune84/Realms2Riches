@@ -19,7 +19,7 @@ async def run_yc_outreach_swarm():
     await orchestrator.startup()
     
     # Load targets
-    targets_path = "data/customers/yc_targets.json"
+    targets_path = "data/customers/leads.json"
     if not os.path.exists(targets_path):
         logger.error(f"❌ Targets file missing: {targets_path}")
         return
@@ -27,7 +27,7 @@ async def run_yc_outreach_swarm():
     with open(targets_path, 'r', encoding='utf-8') as f:
         targets = json.load(f)
 
-    logger.info(f"Step 1: Loaded {len(targets)} high-value targets.")
+    logger.info(f"Step 1: Loaded {len(targets)} high-value targets from extraction.")
     
     # Pitch Template (Jarvis 3.5)
     def get_pitch(target_name, description):
@@ -67,31 +67,41 @@ async def run_yc_outreach_swarm():
         </html>
         """
 
-    # We'll process a small batch first to verify the pipeline
+    # Process a batch to verify the pipeline
     test_batch = targets[:5]
     
     for target in test_batch:
         name = target.get("name")
-        desc = target.get("description")
+        desc = target.get("description", "Innovation")
+        target_email = target.get("email")
         
-        # In a real scenario, we'd find the email. For now, we use the fallback or a placeholder.
-        # The user mentioned robertdemottojr83@gmail.com is the sender.
-        # We'll send a test to robertdemottojr50@gmail.com (the contact email in settings)
-        target_email = settings.CONTACT_EMAIL 
-        
-        logger.info(f"🚀 Dispatching pitch to {name} (via {target_email})")
+        if not target_email:
+            logger.warning(f"⚠️ No email for {name}, skipping.")
+            continue
+            
+        logger.info(f"🚀 Dispatching pitch to {name} ({target_email})")
         
         # Load available personas to inject variety
         from orchestrator.src.agents.persona_library import PERSONA_LIBRARY
         persona_id = random.choice(list(PERSONA_LIBRARY.keys()))
         
+        # Note: orchestrator.submit_task_stream requires the tool to be available to the agent.
+        # We assume the default agent or specific persona has 'smtp_outreach' tool.
+        # If not, we might need to invoke the tool directly or ensure the agent has it.
+        # But per the script structure, we use the orchestrator.
+        
         task_desc = f"As {persona_id}, use smtp_outreach to send a Jarvis 3.5 pitch to {target_email} for {name}. Description: {desc}. HTML Body: {get_pitch(name, desc)}"
         
-        async for step in orchestrator.submit_task_stream(task_desc, "yc_outreach"):
-            if step["status"] == "completed":
-                logger.info(f"✅ Pitch sent to {name}")
-            elif step["status"] == "failed":
-                logger.error(f"❌ Failed for {name}: {step['reason']}")
+        try:
+            async for step in orchestrator.submit_task_stream(task_desc, "yc_outreach"):
+                if step["status"] == "completed":
+                    logger.info(f"✅ Pitch sent to {name}")
+                elif step["status"] == "failed":
+                    logger.error(f"❌ Failed for {name}: {step['reason']}")
+        except Exception as e:
+             logger.error(f"Orchestrator error for {name}: {e}")
+
+    logger.info("🏁 SWARM EXECUTION COMPLETE.")
 
     logger.info("🏁 SWARM EXECUTION COMPLETE.")
 
