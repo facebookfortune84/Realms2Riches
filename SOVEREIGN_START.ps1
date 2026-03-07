@@ -71,7 +71,7 @@ Write-Host "  -> Database Container Active." -ForegroundColor Green
 
 # --- 5. API COMMAND CENTER ---
 Write-Host "[5/8] Launching Sovereign API..." -ForegroundColor Cyan
-$apiProcess = Start-Process uvicorn -ArgumentList "orchestrator.src.core.api:app --host 0.0.0.0 --port 8000" -NoNewWindow -PassThru
+$apiProcess = Start-Process python -ArgumentList "-m uvicorn orchestrator.src.core.api:app --host 0.0.0.0 --port 8000" -NoNewWindow -PassThru
 Write-Host "  -> API Server PID: $($apiProcess.Id)" -ForegroundColor Gray
 
 # Wait for API to be healthy
@@ -82,7 +82,7 @@ $healthy = $false
 while ($retryCount -lt $maxRetries -and -not $healthy) {
     try {
         $response = Invoke-RestMethod -Uri "http://localhost:8000/health" -Method Get -ErrorAction SilentlyContinue
-        if ($response.status -eq "healthy") {
+        if ($response.status -eq "ok") {
             $healthy = $true
             Write-Host "  -> API is ONLINE." -ForegroundColor Green
         }

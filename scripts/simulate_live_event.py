@@ -7,9 +7,14 @@ from orchestrator.src.core.config import settings
 def simulate_payment():
     print("💳 SIMULATING LIVE STRIPE PAYMENT...")
     
-    webhook_url = f"{settings.BACKEND_URL}/api/webhooks/stripe"
+    # Try localhost first during local verification
+    webhook_url = "http://localhost:8000/api/webhooks/stripe"
     
-    # Mock Event Payload
+    # Check if a custom URL was passed or if we should use ngrok
+    if os.getenv("ENV") == "prod":
+        webhook_url = f"{settings.BACKEND_URL}/api/webhooks/stripe"
+    
+    print(f"   Targeting: {webhook_url}")
     payload = {
         "id": f"evt_sim_{int(time.time())}",
         "object": "event",
