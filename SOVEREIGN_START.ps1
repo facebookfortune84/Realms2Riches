@@ -37,10 +37,9 @@ if ($status) {
 # --- 1. CORE SYNCHRONIZATION ---
 Write-Host "[1/8] Synchronizing Secondary Core..." -ForegroundColor Cyan
 if (Test-Path "core_secondary") {
-    Write-Host "  -> Aligning secondary assets with primary..." -ForegroundColor Gray
-    # Selective sync of docs and logic
-    Copy-Item -Path "core_secondary/orchestrator/src" -Destination "orchestrator/" -Recurse -Force -ErrorAction SilentlyContinue
-    Write-Host "  -> Core Alignment Complete." -ForegroundColor Green
+    Write-Host "  -> Skipping destructive sync to protect primary core logic." -ForegroundColor Yellow
+    # Copy-Item -Path "core_secondary/orchestrator/src" -Destination "orchestrator/" -Recurse -Force -ErrorAction SilentlyContinue
+    Write-Host "  -> Core Alignment Skipped." -ForegroundColor Green
 }
 
 # --- 2. SYSTEM INTEGRITY AUDIT ---

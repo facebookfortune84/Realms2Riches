@@ -156,6 +156,7 @@ async def startup_event():
     from orchestrator.src.core.self_healing import sovereign_healer
     from orchestrator.src.core.scheduler import social_scheduler
     logger.info("Orchestrator starting up...")
+    await orchestrator.startup()
     sovereign_healer.execute_healing_cycle()
     seed_rag()
     social_scheduler.start()

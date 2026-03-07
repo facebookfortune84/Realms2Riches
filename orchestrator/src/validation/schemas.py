@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional, Union, Literal
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 import uuid
+import os
 
 # --- Base Models ---
 
@@ -102,8 +103,13 @@ class DatabaseConfig(BaseModel):
 
     @property
     def connection_url(self) -> str:
-        if self.url:
-            return self.url
+        # If URL is provided, check if it needs host adjustment
+        url = self.url
+        if url:
+            # If we are on Windows and the URL uses 'postgres' as host, swap to 'localhost'
+            if "://postgres:postgres@postgres:" in url and "nt" in os.name:
+                url = url.replace("@postgres:", "@localhost:")
+            return url
         return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
 
 class ProjectSpec(BaseEntity):
