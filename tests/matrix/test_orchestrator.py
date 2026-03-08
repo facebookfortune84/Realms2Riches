@@ -2,7 +2,7 @@ import pytest
 import asyncio
 from orchestrator.src.core.orchestrator import Orchestrator
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_orchestrator_initialization():
     """Verify that the orchestrator can start up correctly."""
     orchestrator = Orchestrator()
@@ -12,7 +12,7 @@ async def test_orchestrator_initialization():
     assert orchestrator.bridge is not None
     assert orchestrator.is_ready is False
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_orchestrator_task_routing():
     """Verify that the orchestrator routes tasks to correct cells."""
     orchestrator = Orchestrator()

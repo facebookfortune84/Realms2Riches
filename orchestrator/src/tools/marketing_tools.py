@@ -12,9 +12,12 @@ class TikTokContentGenerator(BaseTool):
         product_name = invocation.input_data.get("product_name", "Jarvis 3.5")
         
         prompt = (
-            f"Generate a viral, 30-second TikTok script for {product_name}. "
-            "Focus on high engagement, hook the audience in the first 3 seconds, "
-            "and include a clear Call To Action (CTA). Return ONLY the script."
+            f"Generate a VIRAL, AGGRESSIVE TikTok script for {product_name}. "
+            "Use Neuro-Linguistic Programming (NLP) techniques. "
+            "trigger: Fear of Missing Out (FOMO). "
+            "Hook: 'Stop scrolling if you want to retire this year.' "
+            "Call To Action: 'Link in bio or stay poor.' "
+            "Format: Visual cues and dialogue."
         )
         
         try:
@@ -30,9 +33,11 @@ class EmailCampaignManager(BaseTool):
         target = invocation.input_data.get("target_audience", "B2B SaaS Founders")
         
         prompt = (
-            f"Write a high-converting cold email for {product} targeting {target}. "
-            "Use the AIDA framework (Attention, Interest, Desire, Action). "
-            "Keep it under 200 words. Subject line included."
+            f"Write a HIGH-STAKES cold email for {product} targeting {target}. "
+            "Use the 'Challenger Sale' methodology. "
+            "Subject Line: Must be clickbait-worthy but professional. "
+            "Body: Challenge their current broken process. Position {product} as the ONLY survival mechanism. "
+            "Closing: 'I have 2 spots left.' (Scarcity). "
         )
         
         try:
@@ -45,10 +50,14 @@ class AdCopyGenerator(BaseTool):
     def execute(self, invocation: ToolInvocation) -> Dict[str, Any]:
         product = invocation.input_data.get("product_name", "Jarvis 3.5")
         platform = invocation.input_data.get("platform", "Facebook")
+        target = invocation.input_data.get("target_audience", "General")
         
         prompt = (
-            f"Write 3 variations of ad copy for {product} to be run on {platform}. "
-            "Focus on pain points and immediate solutions. Include emojis."
+            f"Write 3 variations of DIRECT RESPONSE ad copy for {product} on {platform}. "
+            f"Targeting: {target}. "
+            "Psychological Triggers: Greed, Status, Speed. "
+            "Structure: Pattern Interrupt -> Agitate Pain -> Solved by Product. "
+            "Use Emojis conservatively but effectively."
         )
         
         try:

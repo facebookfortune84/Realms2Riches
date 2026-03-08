@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     ENV_MODE: str = "dev"
     BRAND_NAME: str = "Realms 2 Riches"
     PRODUCT_NAME: str = "Sovereign Swarm"
-    MARKETING_SITE_URL: str = "https://www.realmstoriches.xyz"
+    MARKETING_SITE_URL: str = "https://frontend-two-xi-gal9lkptfi.vercel.app/"
     CONTACT_EMAIL: str = "robertdemottojr83@gmail.com"
 
     # --- DATABASE ---

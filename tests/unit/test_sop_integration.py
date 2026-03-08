@@ -9,7 +9,7 @@ sys.path.append(os.getcwd())
 from orchestrator.src.core.orchestrator import Orchestrator
 from orchestrator.src.validation.schemas import TaskSpec
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_sop_loading_and_retrieval():
     """Verify that SOPs are indexed into memory and retrieved by agents."""
     orchestrator = Orchestrator()
@@ -45,6 +45,3 @@ async def test_sop_loading_and_retrieval():
 
     # Restore
     agent._formulate_plan = original_formulate
-
-if __name__ == "__main__":
-    asyncio.run(test_sop_loading_and_retrieval())

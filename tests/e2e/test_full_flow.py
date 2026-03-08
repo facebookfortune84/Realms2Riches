@@ -6,12 +6,14 @@ from orchestrator.src.core.llm_provider import BaseLLMProvider
 class MockProvider(BaseLLMProvider):
     def generate_response(self, messages, **kwargs):
         # Return a valid JSON string for the agent to parse
-        return '{"steps": [{"tool_id": "git_tool", "inputs": {"command": "status"}}]}'
+        return '{"steps": [{"tool_id": "git", "inputs": {"command": "status"}}], "reasoning": "Checking git status"}'
 
-def test_full_flow():
+@pytest.mark.anyio
+async def test_full_flow():
     # Arrange
     with patch("orchestrator.src.core.orchestrator.GroqProvider", return_value=MockProvider()):
         orchestrator = Orchestrator()
+        await orchestrator.startup()
     
     # Act
     # We patch subprocess to avoid actual side effects during CI
@@ -19,11 +21,14 @@ def test_full_flow():
         mock_run.return_value.stdout = "On branch main\nnothing to commit, working tree clean"
         mock_run.return_value.returncode = 0
         
-        result = orchestrator.submit_task("Check git status and report back", "test-project-001")
+        results = []
+        async for step in orchestrator.submit_task_stream("Check git status and report back", "test-project-001"):
+            results.append(step)
         
     # Assert
-    assert result["status"] == "completed"
-    assert len(result["results"]) > 0
-    # Since we mocked the LLM to call git status if "git" is in prompt:
-    # Check if git tool was invoked
-    assert result["results"][0]["status"] == "success"
+    final_result = results[-1]
+    assert final_result["status"] == "completed"
+    assert "result" in final_result
+    # The agent result from SovereignCell.execute
+    agent_result = final_result["result"]
+    assert agent_result["status"] == "completed"

@@ -11,6 +11,7 @@ from pydantic import ValidationError
 from orchestrator.src.core.agent import Agent
 from orchestrator.src.core.llm_provider import GroqProvider, BaseLLMProvider
 from orchestrator.src.core.config import settings
+from orchestrator.src.core.self_healing import sovereign_healer
 from orchestrator.src.validation.schemas import TaskSpec, AgentConfig, ToolConfig, ToolInvocation
 from orchestrator.src.tools.base import BaseTool
 from orchestrator.src.logging.logger import get_logger
@@ -83,6 +84,9 @@ class Orchestrator:
         logger.info(f"  -> Public Gateway: {settings.BACKEND_URL}")
         governance.sql_store = self.sql_store
         
+        # 0. Execute Baseline Healing
+        sovereign_healer.execute_healing_cycle()
+
         # 1. Proactively load Oracle Assets
         self._load_oracle_personas()
         self._load_oracle_sops()
@@ -181,5 +185,10 @@ class Orchestrator:
             governance.update_ticket(ticket.id, TicketStatus.RESOLVED, agent_id=result.get("agent_name"), notes=result.get("reasoning"))
             yield {"status": "completed", "task_id": task_id, "result": result}
         except Exception as e:
+            logger.error(f"⚠️ Task {task_id} FAILED. Triggering Self-Healing...")
             governance.update_ticket(ticket.id, TicketStatus.FAILED, notes=str(e))
-            yield {"status": "failed", "task_id": task_id, "reason": str(e)}
+            
+            # TRIGGER HEALING CYCLE
+            healing_results = sovereign_healer.execute_healing_cycle()
+            
+            yield {"status": "failed", "task_id": task_id, "reason": str(e), "healing": healing_results}

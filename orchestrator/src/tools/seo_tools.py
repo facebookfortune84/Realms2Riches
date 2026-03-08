@@ -27,25 +27,30 @@ class SEOTool(BaseTool):
         else:
             return {"error": f"Unknown SEO action: {action}"}
 
-    def _generate_and_publish_post(self, keywords: List[str]) -> Dict[str, Any]:
+    def _generate_and_publish_post(self, keywords: List[str], content: str = None) -> Dict[str, Any]:
         main_keyword = keywords[0]
         logger.info(f"SEO Factory: Generating content for '{main_keyword}'...")
         
-        # 1. Generate Content via LLM
-        prompt = (
-            f"Write a high-ranking SEO blog post about '{main_keyword}'. "
-            f"Include secondary keywords: {', '.join(keywords[1:])}. "
-            "Structure: H1 Title, Introduction, H2 Headers, Conclusion. "
-            "Output valid Markdown."
-        )
-        try:
-            content = llm_provider.generate_text(prompt)
-        except Exception as e:
-            logger.error(f"SEO Generation Failed: {e}")
-            return {"status": "error", "reason": str(e)}
+        # 1. Generate Content via LLM (if not provided)
+        if not content:
+            prompt = (
+                f"Write a high-ranking SEO blog post about '{main_keyword}'. "
+                f"Include secondary keywords: {', '.join(keywords[1:])}. "
+                "Structure: H1 Title, Introduction, H2 Headers, Conclusion. "
+                "Output valid Markdown."
+            )
+            try:
+                content = llm_provider.generate_text(prompt)
+            except Exception as e:
+                logger.error(f"SEO Generation Failed: {e}")
+                return {"status": "error", "reason": str(e)}
 
-        # 2. Generate Metadata
-        slug = main_keyword.lower().replace(" ", "-")
+        # 2. Generate Metadata & Filename
+        # Robust Slugify: Lowercase, strip non-alphanumeric, replace spaces with hyphens
+        import re
+        slug = re.sub(r'[^a-z0-9\s-]', '', main_keyword.lower())
+        slug = re.sub(r'[\s-]+', '-', slug).strip('-')
+        
         filename = f"{datetime.date.today()}-{slug}.md"
         filepath = os.path.join(BLOG_DIR, filename)
         
@@ -62,16 +67,19 @@ class SEOTool(BaseTool):
             f"{content}"
         )
         
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(full_post)
-            
-        logger.info(f"✅ SEO Content Published: {filepath}")
-        return {
-            "status": "published",
-            "url": f"https://realmstoriches.xyz/blog/{slug}", # Simulated URL
-            "local_path": filepath,
-            "seo_score": 98
-        }
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(full_post)
+            logger.info(f"✅ SEO Content Published: {filepath}")
+            return {
+                "status": "published",
+                "url": f"https://realmstoriches.xyz/blog/{slug}",
+                "local_path": filepath,
+                "seo_score": 98
+            }
+        except Exception as e:
+            logger.error(f"File Write Error for {filepath}: {e}")
+            return {"status": "error", "reason": str(e)}
 
     def _generate_meta_tags(self, content: str, keywords: List[str]) -> Dict[str, Any]:
         title = f"{keywords[0].title()} Strategy: Sovereign Intelligence Report" if keywords else "Sovereign Intelligence Report"
