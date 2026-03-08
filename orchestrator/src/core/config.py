@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     BRAND_NAME: str = "Realms 2 Riches"
     PRODUCT_NAME: str = "Sovereign Swarm"
     MARKETING_SITE_URL: str = "https://www.realmstoriches.xyz"
-    CONTACT_EMAIL: str = "robertdemottojr50@gmail.com"
+    CONTACT_EMAIL: str = "robertdemottojr83@gmail.com"
 
     # --- DATABASE ---
     POSTGRES_USER: str = "postgres"

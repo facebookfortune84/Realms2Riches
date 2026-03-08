@@ -1,5 +1,6 @@
 from typing import Dict, Any, List
 from orchestrator.src.tools.base import BaseTool, ToolConfig
+from orchestrator.src.core.llm_provider import llm_provider
 
 class ContentTool(BaseTool):
     def __init__(self, config: ToolConfig):
@@ -7,15 +8,12 @@ class ContentTool(BaseTool):
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Generates structured content for various channels.
+        Generates structured content for various channels using LLM.
         Input: { "channel": "blog|linkedin|twitter", "topic": "...", "tone": "..." }
         """
         channel = input_data.get("channel", "blog")
         topic = input_data.get("topic", "AI")
         tone = input_data.get("tone", "professional")
-        
-        # In a real system, this would call an LLM directly or via a service.
-        # For now, we simulate the high-quality generation logic.
         
         if channel == "blog":
             return self._generate_blog_post(topic, tone)
@@ -25,15 +23,32 @@ class ContentTool(BaseTool):
             return {"error": f"Unsupported channel: {channel}"}
 
     def _generate_blog_post(self, topic: str, tone: str) -> Dict[str, Any]:
-        return {
-            "title": f"The Future of {topic}: A {tone} Perspective",
-            "body": f"In this rapidly evolving landscape, {topic} stands at the forefront of innovation...",
-            "tags": [topic, "tech", "future"],
-            "seo_score": 95
-        }
+        prompt = (
+            f"Write a comprehensive, SEO-optimized blog post about '{topic}'. "
+            f"Tone: {tone}. Include a catchy title, introduction, 3 main sections with headers, "
+            "and a conclusion. Format as Markdown."
+        )
+        try:
+            content = llm_provider.generate_text(prompt)
+            return {
+                "title": f"The Future of {topic}", # Ideally extracted from content
+                "body": content,
+                "tags": [topic, "tech", "future"],
+                "seo_score": 95
+            }
+        except Exception as e:
+            return {"error": str(e)}
 
     def _generate_linkedin_post(self, topic: str, tone: str) -> Dict[str, Any]:
-        return {
-            "text": f"🚀 Just exploring {topic}! The potential is limitless. #{topic} #Innovation",
-            "hashtags": ["#Tech", "#Growth"]
-        }
+        prompt = (
+            f"Write a viral LinkedIn post about '{topic}'. "
+            f"Tone: {tone}. Use emojis, short paragraphs, and relevant hashtags."
+        )
+        try:
+            content = llm_provider.generate_text(prompt)
+            return {
+                "text": content,
+                "hashtags": ["#Tech", "#Growth"]
+            }
+        except Exception as e:
+            return {"error": str(e)}

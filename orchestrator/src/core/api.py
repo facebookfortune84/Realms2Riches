@@ -53,6 +53,7 @@ for d in REQUIRED_DATA_DIRS:
 
 app.mount("/assets", StaticFiles(directory="data/assets"), name="assets")
 app.mount("/marketing", StaticFiles(directory="data/marketing"), name="marketing")
+app.mount("/blog-content", StaticFiles(directory="data/blog"), name="blog-content")
 
 app.add_middleware(
     CORSMiddleware,
@@ -90,12 +91,16 @@ def provision_license(email: str, product_id: str):
     telemetry_data["revenue"] += 2999.0
     
     # RECORD CUSTOMER
-    customer_file = "data/customers/active_roster.json"
+    customer_file = os.path.join("data", "customers", "active_roster.json")
     customers = []
     if os.path.exists(customer_file):
         try:
-            with open(customer_file, "r") as f: customers = json.load(f)
-        except: customers = []
+            with open(customer_file, "r", encoding="utf-8") as f: 
+                content = f.read()
+                if content: customers = json.loads(content)
+        except Exception as e: 
+            logger.warning(f"Error reading roster: {e}")
+            customers = []
     
     customers.append({
         "email": email,
@@ -104,8 +109,12 @@ def provision_license(email: str, product_id: str):
         "status": "active"
     })
     
-    with open(customer_file, "w") as f: json.dump(customers, f, indent=2)
-    log_activity("SYSTEM_INTEGRITY", "CUSTOMER_RECORDED", f"Customer {email} added to roster.")
+    try:
+        with open(customer_file, "w", encoding="utf-8") as f: 
+            json.dump(customers, f, indent=2)
+        log_activity("SYSTEM_INTEGRITY", "CUSTOMER_RECORDED", f"Customer {email} added to roster.")
+    except Exception as e:
+        logger.error(f"Failed to write roster: {e}")
 
 # --- BACKGROUND ---
 async def log_heartbeat():
@@ -114,27 +123,21 @@ async def log_heartbeat():
         await asyncio.sleep(15)
 
 async def autonomous_loop():
-    topics = ["AI Swarms", "MPC Protocol", "Autonomous Scaling", "Edge Intelligence", "Quantum Encryption", "Neural Lace"]
+    topics = ["AI Swarms", "MPC Protocol", "Autonomous Scaling", "Edge Intelligence", "Quantum Encryption", "Neural Lace", "Agentic SEO", "Realms2Riches Matrix", "Jarvis 3.5 Conversion"]
     while True:
         if swarm_active and len(orchestrator.agents) > 0:
             topic = random.choice(topics)
             try:
-                if random.random() < 0.05:
-                    task_desc = f"Analyze the strategic implications of {topic} for the Sovereign Network."
-                    final_result = {}
-                    async for step in orchestrator.submit_task_stream(task_desc, "autonomous_daily"):
-                        if step.get("status") == "completed": final_result = step.get("result", {})
-                    if final_result:
-                        img_task = f"Generate futuristic art for {topic}."
-                        img_url = None
-                        async for step in orchestrator.submit_task_stream(img_task, "creative_studio"):
-                            if step.get("status") == "completed":
-                                res = step.get("result", {}).get("results", [])
-                                if res: img_url = res[0].get("output_data", {}).get("url")
-                        slug = generate_autonomous_blog_post(final_result, image_url=img_url) 
-                        log_activity("TITAN_ORCHESTRATOR", "CONTENT_GEN", f"Published Blog: {slug}")
-            except Exception as e: logger.error(f"Autonomous Loop Error: {e}")
-            await asyncio.sleep(5) 
+                # High-Density execution: Every iteration creates content
+                task_desc = f"Generate a high-converting technical blog post about {topic} for the Realms2Riches platform. Focus on SEO keywords and Jarvis 3.5 monetization."
+                final_result = {}
+                async for step in orchestrator.submit_task_stream(task_desc, "autonomous_daily"):
+                    if step.get("status") == "completed": final_result = step.get("result", {})
+                if final_result:
+                    slug = generate_autonomous_blog_post(final_result) 
+                    log_activity("TITAN_ORCHESTRATOR", "CONTENT_GEN", f"Published SEO Optimized Blog: {slug}")
+            except Exception as e: logger.error(f"HDRB Loop Error: {e}")
+            await asyncio.sleep(15) # Boosted frequency
         else: await asyncio.sleep(5)
 
 def seed_rag():

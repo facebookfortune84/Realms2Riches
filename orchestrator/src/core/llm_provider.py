@@ -12,6 +12,11 @@ class BaseLLMProvider(ABC):
     def generate_response(self, messages: List[Dict[str, str]], **kwargs) -> str:
         pass
 
+    def generate_text(self, prompt: str, **kwargs) -> str:
+        """Convenience method for single-prompt generation."""
+        messages = [{"role": "user", "content": prompt}]
+        return self.generate_response(messages, **kwargs)
+
 class GroqProvider(BaseLLMProvider):
     def __init__(self, model: Optional[str] = None):
         self.model = model or settings.GROQ_MODEL
@@ -111,3 +116,6 @@ def get_llm_provider(provider_type: Optional[str] = None) -> BaseLLMProvider:
     if provider_type == "openai":
         return OpenAIProvider()
     return GroqProvider()
+
+# Singleton instance for easy import
+llm_provider = get_llm_provider()

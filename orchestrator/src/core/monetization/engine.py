@@ -1,5 +1,8 @@
 import logging
 import asyncio
+import json
+import random
+import os
 from typing import Dict, Any, List
 from orchestrator.src.core.config import settings
 
@@ -18,19 +21,29 @@ AFFILIATE_LINKS = {
 }
 
 STRIPE_MONETIZATION = {
-    "jarvis_basic": "https://buy.stripe.com/dRm00jg25aw120i5hh8so00",
-    "jarvis_custom": "https://buy.stripe.com/6oUeVdcPTeMheN46ll8so01",
-    "jarvis_premium": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
-    "business_consultation": "https://buy.stripe.com/00w8wP7vzcE97kC3998so03",
-    "brand_kit": "https://buy.stripe.com/fZu4gz9DH8nT5cugZZ8so04",
-    "elite_support": "https://buy.stripe.com/eVqbJ13fj5bH48q9xx8so0b",
-    "startup_accelerator": "https://buy.stripe.com/28E6oHbLP33z6gyaBB8so0c"
+    "jarvis_basic": "https://buy.stripe.com/7sY7sLeY1aw1cEWcJJ8so0e",
+    "jarvis_custom": "https://buy.stripe.com/eVqeVd17b5bHfR87pp8so0d",
+    "jarvis_premium": "https://buy.stripe.com/28E6oHbLP33z6gyaBB8so0c",
+    "business_consultation": "https://buy.stripe.com/eVqbJ13fj5bH48q9xx8so0b",
+    "brand_kit": "https://buy.stripe.com/28E00jaHLgUp20i5hh8so0a",
+    "elite_support": "https://buy.stripe.com/5kQ4gzcPTbA57kCcJJ8so09",
+    "startup_accelerator": "https://buy.stripe.com/bJe4gz9DH33z5cu2558so08"
 }
 
 class BaseStream:
     def __init__(self, name: str, links: List[str]):
         self.name = name
         self.links = links
+
+    def get_real_lead(self):
+        try:
+            lead_path = os.path.join("data", "customers", "leads.json")
+            if os.path.exists(lead_path):
+                with open(lead_path, "r", encoding="utf-8") as f:
+                    leads = json.load(f)
+                    if leads: return random.choice(leads)
+        except: pass
+        return {"email": "robertdemottojr83@gmail.com", "name": "Innovation Team"}
 
     def generate_task(self) -> str:
         raise NotImplementedError
@@ -45,10 +58,11 @@ class AffiliateArbitrageStream(BaseStream):
 
 class APISaaSBillingStream(BaseStream):
     def generate_task(self) -> str:
+        lead = self.get_real_lead()
         return (
             f"Create a high-converting email pitch for Jarvis 3.5 API access using 'email_gen'. "
             f"Target: SaaS Developers. Link: {self.links[0]}. "
-            f"Use 'smtp_outreach' to send it to 'robertdemottojr50@gmail.com' (simulated target)."
+            f"Use 'smtp_outreach' to send it to '{lead['email']}'."
         )
 
 class LeadGenBrokerStream(BaseStream):
@@ -117,9 +131,10 @@ class SEOTrafficStream(BaseStream):
 
 class ColdOutreachStream(BaseStream):
     def generate_task(self) -> str:
+        lead = self.get_real_lead()
         return (
             f"Execute a cold outreach sequence for Jarvis Custom Enterprise using 'smtp_outreach'. "
-            f"Target: robertdemottojr50@gmail.com. Link: {self.links[0]}."
+            f"Target: {lead['email']} ({lead['name']}). Link: {self.links[0]}."
         )
 
 class FastDeployMonetizationStream(BaseStream):
