@@ -61,6 +61,10 @@ class Settings(BaseSettings):
     LINKEDIN_CLIENT_ID: Optional[str] = None
     LINKEDIN_CLIENT_SECRET: Optional[str] = None
     X_ACCESS_TOKEN: Optional[str] = None
+    SOCIAL_TWITTER_HANDLE: str = "@Realms2Riches"
+    SOCIAL_LINKEDIN_URL: str = "https://linkedin.com/company/realms2riches"
+    SOCIAL_YOUTUBE_URL: str = "https://youtube.com/c/realms2riches"
+    SOCIAL_GITHUB_URL: str = "https://github.com/realms2riches"
 
     # --- RELIABILITY & OBSERVABILITY ---
     TELEMETRY_ENABLED: bool = True
@@ -91,7 +95,11 @@ class Settings(BaseSettings):
             BRAND_NAME=self.BRAND_NAME,
             PRODUCT_NAME=self.PRODUCT_NAME,
             MARKETING_SITE_URL=self.MARKETING_SITE_URL,
-            CONTACT_EMAIL=self.CONTACT_EMAIL
+            CONTACT_EMAIL=self.CONTACT_EMAIL,
+            SOCIAL_TWITTER_HANDLE=self.SOCIAL_TWITTER_HANDLE,
+            SOCIAL_LINKEDIN_URL=self.SOCIAL_LINKEDIN_URL,
+            SOCIAL_YOUTUBE_URL=self.SOCIAL_YOUTUBE_URL,
+            SOCIAL_GITHUB_URL=self.SOCIAL_GITHUB_URL
         )
 
 settings = Settings()

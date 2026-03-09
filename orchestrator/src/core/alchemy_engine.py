@@ -86,8 +86,16 @@ Bypass the waitlist. Secure your Sovereign assets immediately:
         for p in products:
             # Handle both ProductSchema and dict types
             p_data = p.model_dump() if hasattr(p, "model_dump") else p
+            
+            # Safely get first price
+            price_val = 0
+            if p_data.get("prices"):
+                price_val = p_data["prices"][0].get("price", 0)
+            elif p_data.get("price"):
+                price_val = p_data["price"]
+                
             link = p_data.get("checkout_url", f"/api/checkout/session?priceId={p_data.get('id')}")
-            content += f"- **[{p_data['name']} (${p_data['price']})]({link})**: {p_data['description']}\n"
+            content += f"- **[{p_data['name']} (${price_val})]({link})**: {p_data['description']}\n"
     except Exception as e:
         content += "\n*Market uplink temporarily unavailable.*\n"
 

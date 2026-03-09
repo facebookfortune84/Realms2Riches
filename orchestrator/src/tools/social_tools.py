@@ -2,6 +2,7 @@ import os
 import requests
 from typing import Dict, Any, List, Optional
 from orchestrator.src.tools.base import BaseTool, ToolConfig
+from orchestrator.src.validation.schemas import ToolInvocation
 from orchestrator.src.core.config import settings
 from orchestrator.src.logging.logger import get_logger
 
@@ -13,7 +14,8 @@ class FacebookPostTool(BaseTool):
         self.access_token = settings.FACEBOOK_PAGE_TOKEN
         self.page_id = settings.FACEBOOK_PAGE_ID or "me"
 
-    def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, invocation: Any) -> Dict[str, Any]:
+        params = invocation if isinstance(invocation, dict) else (invocation.input_data or {})
         message, link, media_url = params.get("message"), params.get("link"), params.get("media_url")
         if not self.access_token or self.access_token == "placeholder":
             logger.warning("Facebook Dispatch: Missing Token.")
@@ -45,7 +47,8 @@ class FacebookPostTool(BaseTool):
             payload = {
                 "message": message,
                 "link": link,
-                "access_token": self.access_token
+                "access_token": self.access_token,
+                "call_to_action": {"type": "SHOP_NOW", "value": {"link": link}}
             }
 
         try:
@@ -93,7 +96,8 @@ class LinkedInPostTool(BaseTool):
             logger.error(f"LinkedIn Refresh Fail: {e}")
             return False
 
-    def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, invocation: Any) -> Dict[str, Any]:
+        params = invocation if isinstance(invocation, dict) else (invocation.input_data or {})
         text, link, media_url = params.get("message"), params.get("link"), params.get("media_url")
         token = self.access_token
         if not token or token == "placeholder": return {"status": "skipped"}
@@ -120,8 +124,8 @@ class LinkedInPostTool(BaseTool):
             payload["content"] = {
                 "article": {
                     "source": link, 
-                    "title": "🚀 SECURE YOUR SOVEREIGN LICENSE", 
-                    "description": "Initialize your 1000-agent swarm today."
+                    "title": "🚀 INITIALIZE YOUR SOVEREIGN Swarm", 
+                    "description": "Scale to 1000 agents immediately."
                 }
             }
             if media_url and ".svg" not in media_url.lower():
@@ -146,14 +150,66 @@ class LinkedInPostTool(BaseTool):
             logger.error(f"LinkedIn Exception: {e}")
             return {"status": "error", "reason": str(e)}
 
+class TwitterPostTool(BaseTool):
+    def __init__(self, config: ToolConfig):
+        super().__init__(config)
+        self.access_token = settings.X_ACCESS_TOKEN
+
+    def execute(self, invocation: Any) -> Dict[str, Any]:
+        params = invocation if isinstance(invocation, dict) else (invocation.input_data or {})
+        message, link = params.get("message"), params.get("link")
+        if not self.access_token or self.access_token == "placeholder":
+            return {"status": "skipped", "reason": "No valid X token"}
+
+        url = "https://api.twitter.com/2/tweets"
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+        full_text = f"{message}\n\nACQUIRE: {link}" if link else message
+        payload = {"text": full_text[:280]}
+
+        try:
+            logger.info("X (Twitter) Dispatching...")
+            response = requests.post(url, json=payload, headers=headers, timeout=15)
+            if response.status_code not in [200, 201]:
+                err = f"X API Error: {response.status_code} - {response.text}"
+                logger.error(err)
+                return {"status": "error", "reason": err[:200]}
+            
+            return {"status": "success", "platform": "x", "id": response.json().get("data", {}).get("id")}
+        except Exception as e:
+            logger.error(f"X Exception: {e}")
+            return {"status": "error", "reason": str(e)}
+
+class DiscordPostTool(BaseTool):
+    def execute(self, invocation: Any) -> Dict[str, Any]:
+        params = invocation if isinstance(invocation, dict) else (invocation.input_data or {})
+        message, link = params.get("message"), params.get("link")
+        # Standard Webhook implementation for Discord
+        webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
+        if not webhook_url:
+            return {"status": "skipped", "reason": "No Discord Webhook"}
+            
+        payload = {"content": f"{message}\n\nACQUIRE: {link}" if link else message}
+        try:
+            logger.info("Discord Dispatching...")
+            res = requests.post(webhook_url, json=payload, timeout=10)
+            return {"status": "success", "platform": "discord"}
+        except Exception as e:
+            return {"status": "error", "reason": str(e)}
+
 class SocialMediaMultiplexer(BaseTool):
     def __init__(self, config: ToolConfig):
         super().__init__(config)
         self.fb_tool = FacebookPostTool(ToolConfig(tool_id="fb", name="fb", description="fb", parameters_schema={}, allowed_agents=["*"]))
         self.li_tool = LinkedInPostTool(ToolConfig(tool_id="li", name="li", description="li", parameters_schema={}, allowed_agents=["*"]))
+        self.tw_tool = TwitterPostTool(ToolConfig(tool_id="tw", name="tw", description="tw", parameters_schema={}, allowed_agents=["*"]))
+        self.dc_tool = DiscordPostTool(ToolConfig(tool_id="dc", name="dc", description="dc", parameters_schema={}, allowed_agents=["*"]))
 
-    def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, invocation: Any) -> Dict[str, Any]:
         from orchestrator.src.validation.social_validator import SocialPostValidator
+        params = invocation if isinstance(invocation, dict) else (invocation.input_data or {})
         message, link, media_url = params.get("message"), params.get("link"), params.get("media_url")
         
         # 1. PRE-FLIGHT VALIDATION
@@ -163,16 +219,19 @@ class SocialMediaMultiplexer(BaseTool):
             return {"status": "error", "error_type": "validation_fail", "reason": reason}
         
         # 2. DISPATCH
+        # Since tools now handle both, we can pass invocation or params.
+        # But tools expect 'invocation' to be the object if not dict.
         results = {
-            "facebook": self.fb_tool.execute({"message": message, "link": link, "media_url": media_url}),
-            "linkedin": self.li_tool.execute({"message": message, "link": link, "media_url": media_url})
+            "facebook": self.fb_tool.execute(invocation),
+            "linkedin": self.li_tool.execute(invocation),
+            "twitter": self.tw_tool.execute(invocation),
+            "discord": self.dc_tool.execute(invocation)
         }
         
         # 3. SELF-HEALING FALLBACK (Detailed Audit)
         failed_channels = [c for c, r in results.items() if r.get("status") == "error"]
         if failed_channels:
             logger.error(f"🛡️ CHANNEL DEVIATION: {failed_channels}. Retrying with optimization track...")
-            # Results are processed by the recursive loop in scheduler.py
             
         return results
 
@@ -181,5 +240,6 @@ def get_social_tools() -> List[BaseTool]:
     return [
         FacebookPostTool(ToolConfig(tool_id="facebook_post", name="FB", description="FB", parameters_schema=cfg, allowed_agents=["*"])),
         LinkedInPostTool(ToolConfig(tool_id="linkedin_post", name="LI", description="LI", parameters_schema=cfg, allowed_agents=["*"])),
+        DiscordPostTool(ToolConfig(tool_id="discord_post", name="DC", description="DC", parameters_schema=cfg, allowed_agents=["*"])),
         SocialMediaMultiplexer(ToolConfig(tool_id="social_multiplexer", name="Multiplexer", description="All channels", parameters_schema=cfg, allowed_agents=["*"]))
     ]

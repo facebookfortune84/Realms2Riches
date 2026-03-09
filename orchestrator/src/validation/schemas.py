@@ -83,14 +83,14 @@ class LineageRecord(BaseEntity):
 
 class MarketingConfig(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
-    brand_name: str = Field(default="My Brand", alias="BRAND_NAME")
-    product_name: str = Field(default="My Product", alias="PRODUCT_NAME")
-    website_url: str = Field(default="https://example.com", alias="MARKETING_SITE_URL")
-    contact_email: str = Field(default="hello@example.com", alias="CONTACT_EMAIL")
-    twitter_handle: str = Field(default="mybrand", alias="SOCIAL_TWITTER_HANDLE")
-    linkedin_url: str = Field(default="https://linkedin.com/company/mybrand", alias="SOCIAL_LINKEDIN_URL")
-    youtube_url: str = Field(default="https://youtube.com/c/mybrand", alias="SOCIAL_YOUTUBE_URL")
-    github_url: str = Field(default="https://github.com/mybrand", alias="SOCIAL_GITHUB_URL")
+    brand_name: str = Field(default="Realms2Riches", alias="BRAND_NAME")
+    product_name: str = Field(default="Sovereign Swarm", alias="PRODUCT_NAME")
+    website_url: str = Field(default="https://frontend-two-xi-gal9lkptfi.vercel.app/", alias="MARKETING_SITE_URL")
+    contact_email: str = Field(default="robertdemottojr83@gmail.com", alias="CONTACT_EMAIL")
+    twitter_handle: str = Field(default="@Realms2Riches", alias="SOCIAL_TWITTER_HANDLE")
+    linkedin_url: str = Field(default="https://linkedin.com/company/realms2riches", alias="SOCIAL_LINKEDIN_URL")
+    youtube_url: str = Field(default="https://youtube.com/c/realms2riches", alias="SOCIAL_YOUTUBE_URL")
+    github_url: str = Field(default="https://github.com/realms2riches", alias="SOCIAL_GITHUB_URL")
 
 class DatabaseConfig(BaseModel):
     model_config = ConfigDict(populate_by_name=True)

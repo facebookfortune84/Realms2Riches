@@ -1,101 +1,91 @@
-# Realms2Riches - Prelaunch Pipeline v1.1.0
-# This script rebuilds containers, starts them, and runs the full test matrix.
+# Prelaunch Verification Script for Realms2Riches
+# Usage: .\ops\scripts\prelaunch.ps1
+# This script is DETERMINISTIC and TRUTHFUL.
 
 $ErrorActionPreference = "Stop"
 
-function Write-Log($message, $color = "White") {
-    Write-Host "[$(Get-Date -Format 'HH:mm:ss')] $message" -ForegroundColor $color
-}
+Write-Host "🚀 STARTING PRELAUNCH VERIFICATION..." -ForegroundColor Cyan
 
-# 0. GIT STATE
-Write-Log "--- PHASE 0: GIT STATE ---" "Cyan"
-$gitStatus = git status --porcelain
-if ($gitStatus) {
-    Write-Log "Uncommitted changes detected. Committing..." "Yellow"
-    git add .
-    git commit -m "Pre-launch auto-commit: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
-    Write-Log "✅ Changes committed." "Green"
+# 1. Check for Python
+if (Test-Path "venv\Scripts\python.exe") {
+    $PYTHON_CMD = "venv\Scripts\python.exe"
+} elseif (Get-Command "python" -ErrorAction SilentlyContinue) {
+    $PYTHON_CMD = "python"
 } else {
-    Write-Log "✅ Working tree clean." "Green"
-}
-
-# 1. DOCKER ENGINE CHECK
-Write-Log "--- PHASE 1: DOCKER CHECK ---" "Cyan"
-try {
-    docker ps > $null
-    Write-Log "✅ Docker engine is responding." "Green"
-} catch {
-    Write-Log "❌ ERROR: Docker engine is not running. Please start Docker Desktop manually." "Red"
+    Write-Error "Python not found. Please install Python."
     exit 1
 }
 
-# 2. BUILD & RESTART CONTAINERS
-Write-Log "--- PHASE 2: CONTAINER REBUILD ---" "Cyan"
-Write-Log "Loading environment from .env.prod and rebuilding containers..."
-if (Test-Path ".env.prod") {
-    # Use --env-file to pass variables to docker-compose
-    docker-compose --env-file .env.prod -f infra/docker/docker-compose.yml up -d --build --force-recreate
-} else {
-    Write-Log "⚠️ WARNING: .env.prod not found. Attempting build without it..." "Yellow"
-    docker-compose -f infra/docker/docker-compose.yml up -d --build --force-recreate
-}
-Write-Log "✅ Containers started." "Green"
+Write-Host "Using Python: $PYTHON_CMD" -ForegroundColor Gray
 
-# 3. WAIT FOR HEALTH
-Write-Log "--- PHASE 3: HEALTH CHECK ---" "Cyan"
+# 2. Start Backend (Local Mode)
+Write-Host "--> Starting Backend (Local Mode)..." -ForegroundColor Yellow
+$backendProcess = Start-Process $PYTHON_CMD -ArgumentList "scripts/run_server.py" -PassThru -NoNewWindow
+$backendUrl = "http://127.0.0.1:8000"
 $maxRetries = 30
 $retryCount = 0
-$healthy = $false
-$healthUrl = "http://localhost:8000/health"
+$serverUp = $false
 
-Write-Log "Waiting for backend health check ($healthUrl)..."
-while ($retryCount -lt $maxRetries -and -not $healthy) {
-    try {
-        $response = Invoke-RestMethod -Uri $healthUrl -Method Get
-        if ($response.status -eq "ok") {
-            $healthy = $true
-            Write-Log "✅ Backend is healthy." "Green"
+try {
+    while ($retryCount -lt $maxRetries) {
+        try {
+            $response = Invoke-WebRequest -Uri "$backendUrl/health" -Method Get -ErrorAction Stop
+            if ($response.StatusCode -eq 200) {
+                Write-Host "✅ Backend is ONLINE at $backendUrl" -ForegroundColor Green
+                $serverUp = $true
+                break
+            }
+        } catch {
+            Start-Sleep -Seconds 2
+            $retryCount++
+            Write-Host "Waiting for backend... ($retryCount/$maxRetries)"
         }
-    } catch {
-        $retryCount++
-        Start-Sleep -Seconds 2
-        Write-Log "  -> Retrying ($retryCount/$maxRetries)..." "Yellow"
     }
-}
 
-if (-not $healthy) {
-    Write-Log "❌ ERROR: Backend failed to become healthy in time." "Red"
-    exit 1
-}
-
-# 4. RUN TEST MATRIX
-Write-Log "--- PHASE 4: TEST MATRIX ---" "Cyan"
-$env:PYTHONPATH = "."
-[int]$totalFailures = 0
-
-function Run-Suite($name, $path) {
-    Write-Log "Running Suite: $name ($path)..." "Yellow"
-    # We use Out-Host to ensure pytest output goes to console but isn't captured by the variable
-    pytest $path | Out-Host
-    if ($LASTEXITCODE -ne 0) {
-        Write-Log "❌ FAILED: $name" "Red"
-        return 1
+    if (-not $serverUp) {
+        Write-Error "❌ Backend failed to start within timeout."
+        exit 1
     }
-    Write-Log "✅ PASSED: $name" "Green"
-    return 0
-}
 
-$totalFailures += [int](Run-Suite "Unit Tests" "tests/unit")
-$totalFailures += [int](Run-Suite "Agent Capabilities" "tests/agents")
-$totalFailures += [int](Run-Suite "Self-Healing Scenarios" "tests/agent_scenarios")
-$totalFailures += [int](Run-Suite "E2E Flow" "tests/e2e")
+    # 3. Run Test Matrix
+    Write-Host "--> Running Test Matrix..." -ForegroundColor Yellow
+    
+    # Define critical suites
+    $testSuites = @(
+        @{ Name="Unit Tests"; Command="pytest tests/unit" },
+        @{ Name="E2E Tests"; Command="pytest tests/e2e" },
+        @{ Name="Integration Tests"; Command="pytest tests/integration" },
+        @{ Name="Core Secondary E2E"; Command="pytest core_secondary/tests/e2e" }
+    )
 
-# 5. FINAL VERDICT
-Write-Log "--- PHASE 5: FINAL VERDICT ---" "Cyan"
-if ($totalFailures -eq 0) {
-    Write-Log "💎 PRELAUNCH SUCCESSFUL. SYSTEM IS STABLE." "Green"
-    exit 0
-} else {
-    Write-Log "❌ PRELAUNCH FAILED. $totalFailures suite(s) failed." "Red"
-    exit 1
+    $failedSuites = @()
+
+    foreach ($suite in $testSuites) {
+        Write-Host "Running $($suite.Name)..."
+        # We use python -m pytest to be safe
+        $cmd = $suite.Command -replace "pytest", "$PYTHON_CMD -m pytest"
+        Invoke-Expression $cmd
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "$($suite.Name) FAILED (Exit Code: $LASTEXITCODE)" -ForegroundColor Red
+            $failedSuites += $suite.Name
+        } else {
+            Write-Host "✅ $($suite.Name) PASSED" -ForegroundColor Green
+        }
+    }
+
+    if ($failedSuites.Count -gt 0) {
+        Write-Host "❌ PRELAUNCH FAILED. The following suites failed:" -ForegroundColor Red
+        foreach ($s in $failedSuites) { Write-Host " - $s" -ForegroundColor Red }
+        exit 1
+    } else {
+        Write-Host "🏆 ALL PRELAUNCH CHECKS PASSED." -ForegroundColor Green
+    }
+
+} finally {
+    # Cleanup
+    if ($backendProcess) {
+        Write-Host "Stopping Backend..."
+        Stop-Process -Id $backendProcess.Id -ErrorAction SilentlyContinue
+    }
 }

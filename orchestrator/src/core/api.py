@@ -13,6 +13,7 @@ from orchestrator.src.core.voice.mock_adapters import MockSTTAdapter, MockTTSAda
 from orchestrator.src.core.licensing import license_manager
 from orchestrator.src.logging.logger import get_logger
 from orchestrator.src.validation.schemas import TaskSpec
+from typing import Dict, Any, List, Optional
 import asyncio
 import json
 import random
@@ -28,6 +29,14 @@ from contextlib import asynccontextmanager
 logger = get_logger(__name__)
 
 orchestrator = Orchestrator()
+
+telemetry_data = {"clicks": 0, "conversions": 0, "revenue": 0.0}
+activity_log = []
+voice_router = VoiceRouter(
+    orchestrator=orchestrator,
+    stt=MockSTTAdapter(),
+    tts=MockTTSAdapter()
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -158,6 +167,34 @@ async def get_activity():
 @app.get("/api/blog/posts")
 async def get_blog_posts():
     return get_all_posts()
+
+@app.post("/api/leads")
+async def capture_lead(lead: Dict[str, Any]):
+    """Captures a new lead and appends to leads.json."""
+    lead_path = "data/customers/leads.json"
+    leads = []
+    if os.path.exists(lead_path):
+        try:
+            with open(lead_path, "r", encoding="utf-8") as f:
+                leads = json.load(f)
+        except: leads = []
+    
+    # Check for duplicates
+    if not any(l.get("email") == lead.get("email") for l in leads):
+        leads.append({
+            "email": lead.get("email"),
+            "name": lead.get("name", "Unknown"),
+            "source": lead.get("source", "api"),
+            "timestamp": datetime.utcnow().isoformat()
+        })
+        with open(lead_path, "w", encoding="utf-8") as f:
+            json.dump(leads, f, indent=2)
+            
+    return {
+        "status": "success", 
+        "count": len(leads),
+        "guide_url": "https://glowfly-sizeable-lazaro.ngrok-free.dev/assets/sovereign_strategy_guide_v3.txt"
+    }
 
 @app.websocket("/ws/voice")
 async def voice_socket(websocket: WebSocket):

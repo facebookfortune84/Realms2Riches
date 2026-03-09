@@ -49,10 +49,10 @@ class TestSovereignTracks(unittest.TestCase):
             # We just verify routing labels in the stream
             r1 = await t1.__anext__()
             r2 = await t2.__anext__()
-            
-            self.assertIn("CELL_ALPHA", r1["message"])
-            self.assertIn("CELL_BETA", r2["message"])
-            
+
+            self.assertEqual(r1["destination"], "CYBERNETIC_ENGINEERING")
+            self.assertEqual(r2["destination"], "GLOBAL_MARKET_FORCE")
+
         asyncio.run(run_parallel())
         print("✅ Track 3 Passed: Multi-track routing (Build & Social) verified.")
 

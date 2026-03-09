@@ -86,7 +86,11 @@ async def run_yc_outreach_swarm():
         # Select persona with highest authority
         persona_id = "VANGUARD_ARCHITECT" 
         
-        task_desc = f"Use smtp_outreach to deliver a Jarvis 3.5 Revenue Matrix pitch to {target_email} for the company {name}. Target Context: {desc}. Use the high-converting HTML template provided in the Sovereign RAG."
+        # Generate the exact HTML pitch
+        pitch_html = get_pitch(name, desc)
+        
+        # We explicitly pass the HTML content to avoid hallucination
+        task_desc = f"Use smtp_outreach to send the following HTML email to {target_email} with subject 'Sovereign Intelligence for {name}':\n\n{pitch_html}"
         
         try:
             # We run sequentially to maintain SMTP reputation but keep it fast

@@ -90,10 +90,37 @@ class SelfHealingService:
             self.repair_log.append(msg)
 
     def _validate_product_slots(self):
-        # Ensure slots directory exists
-        os.makedirs("data/store/slots", exist_ok=True)
-        # Check if slots are valid (placeholder for future logic)
-        pass
+        """Audit and repair the dynamic product slot directory."""
+        slot_dir = "data/store/slots"
+        os.makedirs(slot_dir, exist_ok=True)
+        
+        # 1. Purge corrupt/null slots
+        for f in os.listdir(slot_dir):
+            if f.endswith(".json"):
+                path = os.path.join(slot_dir, f)
+                try:
+                    with open(path, "r") as jf:
+                        data = json.load(jf)
+                        if data.get("id") is None or data.get("price") is None:
+                            os.remove(path)
+                            self.repair_log.append(f"Purged null slot: {f}")
+                except:
+                    os.remove(path)
+                    self.repair_log.append(f"Purged corrupt slot: {f}")
+
+        # 2. Restore Baseline Products
+        platinum_path = os.path.join(slot_dir, "sovereign_platinum.json")
+        if not os.path.exists(platinum_path):
+            platinum_data = {
+                "id": "sovereign_platinum",
+                "name": "Sovereign Platinum Matrix",
+                "description": "Full autonomous swarm with 1000 agents.",
+                "price": 2999,
+                "category": "Elite"
+            }
+            with open(platinum_path, "w") as f:
+                json.dump(platinum_data, f, indent=2)
+            self.repair_log.append("Restored Sovereign Platinum baseline.")
 
     def _heal_database_schema(self):
         # Database schema healing logic
