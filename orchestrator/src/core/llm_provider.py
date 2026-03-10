@@ -130,11 +130,33 @@ class OpenAIProvider(BaseLLMProvider):
             logger.error(f"OpenAI API Error: {e}")
             return GroqProvider()._mock_respond(messages)
 
+class RouterProvider(BaseLLMProvider):
+    """
+    Intelligent Model Router.
+    Routes tasks to specific models based on complexity.
+    """
+    def __init__(self, groq: GroqProvider, openai: Optional[OpenAIProvider] = None):
+        self.groq = groq
+        self.openai = openai
+
+    def generate_response(self, messages: List[Dict[str, str]], **kwargs) -> str:
+        full_text = " ".join([m["content"] for m in messages])
+        if len(full_text) > 4000 and self.openai and not self.openai.is_mock:
+            logger.info("🧠 ROUTER: Complex task detected. Routing to OpenAI.")
+            return self.openai.generate_response(messages, **kwargs)
+        return self.groq.generate_response(messages, **kwargs)
+
 def get_llm_provider(provider_type: Optional[str] = None) -> BaseLLMProvider:
-    provider_type = provider_type or os.getenv("LLM_PROVIDER", "groq").lower()
-    if provider_type == "openai":
-        return OpenAIProvider()
-    return GroqProvider()
+    provider_type = provider_type or os.getenv("LLM_PROVIDER", "router").lower()
+    
+    groq = GroqProvider()
+    openai = OpenAIProvider()
+    
+    if provider_type == "router":
+        return RouterProvider(groq, openai)
+    elif provider_type == "openai":
+        return openai
+    return groq
 
 # Singleton instance for easy import
 llm_provider = get_llm_provider()

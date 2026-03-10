@@ -109,6 +109,17 @@ class Orchestrator:
         
         # 4. INITIALIZE INDUSTRIAL MONITORING
         asyncio.create_task(self._monitor_burn_cycle())
+        
+        # 5. FOUNDING NODE INITIALIZATION
+        self._init_founding_node()
+
+    def _init_founding_node(self):
+        """Grants initial credits to the primary node if not set."""
+        sql = SQLStore()
+        balance = sql.get_user_balance("primary_node")
+        if balance["credits"] == 0:
+            logger.info("💎 FOUNDING NODE: Initializing initial credit block.")
+            sql.update_user_balance("primary_node", 5000.0, 1000)
 
     async def _monitor_burn_cycle(self):
         """Proactively checks user health/burn every 30 minutes."""

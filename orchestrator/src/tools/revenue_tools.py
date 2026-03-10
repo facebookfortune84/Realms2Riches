@@ -186,8 +186,39 @@ class TieredBillingTool(BaseTool):
             "upsell_available": "Matrix-Speed-Boost-v1"
         }
 
+class ProfitCalculatorTool(BaseTool):
+    """
+    Interactive ROI/Profit Calculator.
+    Predicts revenue based on Industry benchmarks.
+    """
+    INDUSTRY_MULTIPLIERS = {
+        "Dental": 1.5, "Legal": 2.0, "SaaS": 1.2, "Real Estate": 1.8, "Crypto": 2.5
+    }
+
+    def execute(self, invocation: Any) -> Dict[str, Any]:
+        params = invocation if isinstance(invocation, dict) else (invocation.input_data or {})
+        industry = params.get("industry", "SaaS")
+        leads_per_month = float(params.get("leads_per_month", 100))
+        avg_deal_value = float(params.get("avg_deal_value", 500))
+        
+        mult = self.INDUSTRY_MULTIPLIERS.get(industry, 1.0)
+        projected_conv = 0.05 * mult # 5% base * multiplier
+        
+        gross = leads_per_month * projected_conv * avg_deal_value
+        net = gross - 2999 # Sub cost
+        
+        return {
+            "status": "success",
+            "industry": industry,
+            "projected_conversion": f"{projected_conv*100:.1f}%",
+            "monthly_gross": gross,
+            "monthly_net": net,
+            "roi_multiple": gross / 2999 if gross > 0 else 0
+        }
+
 def get_revenue_tools() -> List[BaseTool]:
     cfg = {"type": "object", "properties": {"product_name": {"type": "string"}}}
+    calc_cfg = {"type": "object", "properties": {"industry": {"type": "string"}, "leads_per_month": {"type": "number"}}}
     return [
         SalesFunnelTool(ToolConfig(tool_id="sales_funnel", name="Funnel", description="Funnel Generator", parameters_schema=cfg, allowed_agents=["*"])),
         ProductForgeTool(ToolConfig(tool_id="product_forge", name="Forge", description="Product Forge", parameters_schema=cfg, allowed_agents=["*"])),
@@ -196,5 +227,6 @@ def get_revenue_tools() -> List[BaseTool]:
         ProfitOracleTool(ToolConfig(tool_id="profit_oracle", name="Profit Oracle", description="Net Profit Tracker", parameters_schema={}, allowed_agents=["*"])),
         NicheLanderEngine(ToolConfig(tool_id="niche_engine", name="Niche Engine", description="pSEO Engine", parameters_schema={}, allowed_agents=["*"])),
         AffiliateTrackerTool(ToolConfig(tool_id="affiliate_tracker", name="Affiliate", description="2-Tier tracking", parameters_schema={}, allowed_agents=["*"])),
-        TieredBillingTool(ToolConfig(tool_id="tiered_billing", name="Billing", description="Tiered billing", parameters_schema={}, allowed_agents=["*"]))
+        TieredBillingTool(ToolConfig(tool_id="tiered_billing", name="Billing", description="Tiered billing", parameters_schema={}, allowed_agents=["*"])),
+        ProfitCalculatorTool(ToolConfig(tool_id="profit_calculator", name="ROI Calculator", description="ROI prediction", parameters_schema=calc_cfg, allowed_agents=["*"]))
     ]

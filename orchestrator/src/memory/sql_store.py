@@ -5,12 +5,10 @@ from orchestrator.src.core.config import settings
 from orchestrator.src.logging.logger import get_logger
 
 logger = get_logger(__name__)
-
 Base = declarative_base()
 
 class RunRecord(Base):
     __tablename__ = 'runs'
-    
     id = Column(String, primary_key=True)
     project_id = Column(String, index=True)
     agent_id = Column(String)
@@ -20,7 +18,6 @@ class RunRecord(Base):
 
 class ProfitRecord(Base):
     __tablename__ = 'profit_ledger'
-    
     id = Column(String, primary_key=True)
     type = Column(String) # 'revenue', 'expense'
     category = Column(String) # 'sale', 'api_cost', 'fee'
@@ -31,43 +28,47 @@ class ProfitRecord(Base):
 
 class UserBalance(Base):
     __tablename__ = 'user_balances'
-    
     user_id = Column(String, primary_key=True)
     balance = Column(Float, default=0.0)
     credits = Column(Integer, default=0)
+    tier = Column(String, default='BASIC') # BASIC, PRO, SOVEREIGN
+    founding_node = Column(Integer, default=0) 
     last_updated = Column(DateTime, default=datetime.utcnow)
+
+class UsageRecord(Base):
+    __tablename__ = 'usage_ledger'
+    id = Column(String, primary_key=True)
+    user_id = Column(String, index=True)
+    agent_id = Column(String)
+    tokens = Column(Integer)
+    cost = Column(Float)
+    timestamp = Column(DateTime, default=datetime.utcnow)
 
 class SQLStore:
     def __init__(self, db_url: str = None):
-        # 1. Try provided URL
-        # 2. Try settings (Postgres)
-        # 3. Fallback to local SQLite
-        urls_to_try = [
-            db_url,
-            settings.db_config.connection_url,
-            "sqlite:///./orchestrator.db"
-        ]
+        self.url = db_url or settings.DATABASE_URL
+        if not self.url or ("postgresql" in self.url and "localhost" in self.url):
+             self.url = "sqlite:///./orchestrator.db"
         
-        self.engine = None
-        for url in urls_to_try:
-            if not url: continue
-            try:
-                engine = create_engine(url)
-                # Test connection
-                with engine.connect() as conn:
-                    pass
-                self.engine = engine
-                logger.info(f"SQLStore connected to {url.split('@')[-1] if '@' in url else url}")
-                break
-            except Exception as e:
-                logger.warning(f"Failed to connect to {url}: {e}")
-        
-        if not self.engine:
-            # Last resort: local sqlite without testing
-            self.engine = create_engine("sqlite:///./orchestrator.db")
-            
-        Base.metadata.create_all(self.engine)
+        self.engine = create_engine(self.url)
         self.Session = sessionmaker(bind=self.engine)
+        Base.metadata.create_all(self.engine)
+        self._manual_migrate() # Ensure columns exist
+        logger.info(f"SQLStore connected to {self.url}")
+
+    def _manual_migrate(self):
+        """Force add columns if they don't exist in the current session."""
+        if "sqlite" in self.url:
+            import sqlite3
+            db_path = self.url.replace("sqlite:///", "")
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            cols = ["tier", "founding_node"]
+            for col in cols:
+                try:
+                    cursor.execute(f"ALTER TABLE user_balances ADD COLUMN {col} TEXT DEFAULT 'BASIC'" if col == "tier" else f"ALTER TABLE user_balances ADD COLUMN {col} INTEGER DEFAULT 0")
+                except: pass
+            conn.close()
 
     def add_run(self, run_data: dict):
         session = self.Session()
@@ -75,16 +76,6 @@ class SQLStore:
             record = RunRecord(**run_data)
             session.add(record)
             session.commit()
-        except Exception as e:
-            session.rollback()
-            raise e
-        finally:
-            session.close()
-
-    def get_runs(self, project_id: str):
-        session = self.Session()
-        try:
-            return session.query(RunRecord).filter_by(project_id=project_id).all()
         finally:
             session.close()
 
@@ -94,19 +85,6 @@ class SQLStore:
             record = ProfitRecord(**entry)
             session.add(record)
             session.commit()
-        except Exception as e:
-            session.rollback()
-            raise e
-        finally:
-            session.close()
-
-    def get_total_profit(self) -> float:
-        session = self.Session()
-        try:
-            entries = session.query(ProfitRecord).all()
-            revenue = sum([e.amount for e in entries if e.type == 'revenue'])
-            expenses = sum([e.amount for e in entries if e.type == 'expense'])
-            return revenue - expenses
         finally:
             session.close()
 
@@ -130,7 +108,17 @@ class SQLStore:
         try:
             user = session.query(UserBalance).filter_by(user_id=user_id).first()
             if user:
-                return {"balance": user.balance, "credits": user.credits}
-            return {"balance": 0.0, "credits": 0}
+                return {"balance": user.balance, "credits": user.credits, "tier": user.tier}
+            return {"balance": 0.0, "credits": 0, "tier": "BASIC"}
+        finally:
+            session.close()
+
+    def get_total_profit(self) -> float:
+        session = self.Session()
+        try:
+            entries = session.query(ProfitRecord).all()
+            rev = sum([e.amount for e in entries if e.type == 'revenue'])
+            exp = sum([e.amount for e in entries if e.type == 'expense'])
+            return rev - exp
         finally:
             session.close()

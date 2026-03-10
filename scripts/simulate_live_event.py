@@ -13,7 +13,7 @@ def simulate_payment():
     print("💳 SIMULATING LIVE STRIPE PAYMENT (HDRB Mode)...")
     
     # Target Localhost for direct verification
-    webhook_url = "http://localhost:8000/api/webhooks/stripe"
+    webhook_url = "http://localhost:8000/api/v1/monetization/webhook"
     
     payload = {
         "id": f"evt_sim_{int(time.time())}",
@@ -22,7 +22,11 @@ def simulate_payment():
         "data": {
             "object": {
                 "id": "cs_hdrb_999",
-                "customer_email": "king@commerce.com",
+                "amount_total": 299900,
+                "currency": "usd",
+                "customer_details": {
+                    "email": "king@commerce.com"
+                },
                 "metadata": {
                     "customer_email": "king@commerce.com",
                     "product_id": "prod_jarvis_hdrb"
@@ -33,7 +37,7 @@ def simulate_payment():
     
     headers = {
         "Content-Type": "application/json",
-        "X-Sovereign-Internal": "true",
+        "x-sovereign-internal": "true",
         "Stripe-Signature": "t=123,v1=simulated"
     }
     
