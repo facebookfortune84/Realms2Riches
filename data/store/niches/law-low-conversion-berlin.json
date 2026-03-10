@@ -1,0 +1,24 @@
+{
+  "id": "law-low-conversion-berlin",
+  "title": "Autonomous Law Revenue Agent for Berlin",
+  "headline": "Stop Low Conversion in your Law Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for Law professionals in Berlin.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "Law",
+  "region": "Berlin",
+  "pain_point": "Low Conversion",
+  "image_url": "/marketing/images/law.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous Law Revenue Agent for Berlin",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for Law professionals in Berlin.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

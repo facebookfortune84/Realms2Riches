@@ -15,12 +15,12 @@ class SMTPOutreachTool(BaseTool):
     High-Density SMTP Outreach Tool for Stream 12.
     Uses standard SMTP for maximum compatibility across autonomous nodes.
     """
-    def execute(self, invocation: ToolInvocation) -> Dict[str, Any]:
-        params = invocation.input_data
-        target_email = params.get("target_email")
+    def execute(self, invocation: Any) -> Dict[str, Any]:
+        params = invocation if isinstance(invocation, dict) else (invocation.input_data or {})
+        target_email = params.get("target_email") or params.get("recipient")
         target_name = params.get("target_name", "Entrepreneur")
         subject = params.get("subject", f"Strategic Intelligence for {target_name}")
-        html_body = params.get("html_body")
+        html_body = params.get("html_body") or params.get("body")
         
         if not target_email or "@" not in str(target_email):
             return {"status": "error", "reason": "Invalid target email"}

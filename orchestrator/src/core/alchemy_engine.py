@@ -3,6 +3,7 @@ import json
 import re
 import hashlib
 from datetime import datetime
+from sqlalchemy import Integer, Column, String, Float, ForeignKey
 from orchestrator.src.logging.logger import get_logger
 
 logger = get_logger(__name__)
@@ -83,20 +84,27 @@ Bypass the waitlist. Secure your Sovereign assets immediately:
     try:
         from orchestrator.src.core.catalog.api import catalog_api
         products = catalog_api.get_products()
+        
+        if not products:
+            # Emergency restore via healer
+            from orchestrator.src.core.self_healing import sovereign_healer
+            sovereign_healer._validate_product_slots()
+            products = catalog_api.get_products()
+
         for p in products:
-            # Handle both ProductSchema and dict types
             p_data = p.model_dump() if hasattr(p, "model_dump") else p
             
-            # Safely get first price
             price_val = 0
-            if p_data.get("prices"):
+            # Check for prices list (schema) or direct price key (dict)
+            if p_data.get("prices") and len(p_data["prices"]) > 0:
                 price_val = p_data["prices"][0].get("price", 0)
-            elif p_data.get("price"):
-                price_val = p_data["price"]
+            else:
+                price_val = p_data.get("price", 0)
                 
-            link = p_data.get("checkout_url", f"/api/checkout/session?priceId={p_data.get('id')}")
+            link = p_data.get("checkout_url", f"https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02") # Use fallback live link
             content += f"- **[{p_data['name']} (${price_val})]({link})**: {p_data['description']}\n"
     except Exception as e:
+        logger.error(f"Alchemy: Market injection failed: {e}")
         content += "\n*Market uplink temporarily unavailable.*\n"
 
     content += """

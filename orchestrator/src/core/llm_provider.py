@@ -1,6 +1,9 @@
 import os
 import json
 import logging
+import uuid
+import time
+from datetime import datetime
 from typing import List, Dict, Any, Optional
 from abc import ABC, abstractmethod
 from orchestrator.src.core.config import settings
@@ -39,6 +42,7 @@ class GroqProvider(BaseLLMProvider):
         if self.is_mock:
             return self._mock_respond(messages)
         
+        start_time = time.time()
         try:
             params = {
                 "messages": messages,
@@ -48,6 +52,21 @@ class GroqProvider(BaseLLMProvider):
                 **{k: v for k, v in kwargs.items() if k not in ["max_tokens", "temperature"]}
             }
             chat_completion = self.client.chat.completions.create(**params)
+            
+            # Record Profit Expense (Estimate: $0.0001 per call as a baseline)
+            try:
+                from orchestrator.src.memory.sql_store import SQLStore
+                sql = SQLStore()
+                sql.add_profit_entry({
+                    "id": str(uuid.uuid4()),
+                    "type": "expense",
+                    "category": "api_cost",
+                    "amount": 0.0001,
+                    "timestamp": datetime.utcnow(),
+                    "details": {"model": self.model, "duration": time.time() - start_time}
+                })
+            except: pass
+
             return chat_completion.choices[0].message.content
         except Exception as e:
             logger.error(f"Groq API Error: {e}")

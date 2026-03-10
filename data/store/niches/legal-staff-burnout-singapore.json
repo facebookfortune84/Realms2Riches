@@ -1,0 +1,24 @@
+{
+  "id": "legal-staff-burnout-singapore",
+  "title": "Autonomous Legal Revenue Agent for Singapore",
+  "headline": "Stop Staff Burnout in your Legal Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for Legal professionals in Singapore.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "Legal",
+  "region": "Singapore",
+  "pain_point": "Staff Burnout",
+  "image_url": "/marketing/images/legal.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous Legal Revenue Agent for Singapore",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for Legal professionals in Singapore.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "crypto-low-conversion-sydney",
+  "title": "Autonomous Crypto Revenue Agent for Sydney",
+  "headline": "Stop Low Conversion in your Crypto Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for Crypto professionals in Sydney.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "Crypto",
+  "region": "Sydney",
+  "pain_point": "Low Conversion",
+  "image_url": "/marketing/images/crypto.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous Crypto Revenue Agent for Sydney",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for Crypto professionals in Sydney.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

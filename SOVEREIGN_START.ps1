@@ -1,5 +1,5 @@
 # ============================================================
-# SOVEREIGN_START.ps1 - Vanguard Launch Commander (v5.5.0)
+# SOVEREIGN_START.ps1 - Dominance Launch Commander (v5.6.0)
 # ============================================================
 param (
     [switch]$Prune,
@@ -22,7 +22,7 @@ if ($port8000) {
 
 Write-Host "`n  R E A L M S   2   R I C H E S" -ForegroundColor Magenta
 Write-Host "  S O V E R E I G N   M A T R I X" -ForegroundColor Green
-Write-Host "  v5.5.0-VANGUARD | INDUSTRIAL LAUNCH SEQUENCE`n" -ForegroundColor DarkGray
+Write-Host "  v5.6.0-DOMINANCE | INDUSTRIAL LAUNCH SEQUENCE`n" -ForegroundColor DarkGray
 
 # --- 0. PRE-FLIGHT GOVERNANCE ---
 Write-Host "[0/8] Securing Development Lineage..." -ForegroundColor Cyan
@@ -55,6 +55,13 @@ if (-not $SkipTests) {
     python scripts/test_system_integrity.py
     if ($LASTEXITCODE -ne 0) {
         Write-Host "❌ CRITICAL: Integrity Test Failed." -ForegroundColor Red
+        exit 1
+    }
+
+    Write-Host "`n[3.5/8] Verifying Asset Readiness..." -ForegroundColor Magenta
+    python scripts/verify_assets.py
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "❌ CRITICAL: Asset Verification Failed." -ForegroundColor Red
         exit 1
     }
 } else {
@@ -147,6 +154,7 @@ if ($ForceRelease) {
 Write-Host "`n💎 SOVEREIGN MATRIX IS FULLY OPERATIONAL 💎" -ForegroundColor Green
 Write-Host "==============================================="
 Write-Host "  API URL:    http://localhost:8000"
+Write-Host "  PROFIT BOARD: python scripts/profit_dashboard.py"
 Write-Host "  TRANSPARENCY: http://localhost:8000/api/v1/swarm/transparency"
 Write-Host "  LOGS:       tail -f data/logs/swarm_activity.log"
 Write-Host "==============================================="

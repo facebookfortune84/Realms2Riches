@@ -235,11 +235,74 @@ class SocialMediaMultiplexer(BaseTool):
             
         return results
 
+class WordPressPostTool(BaseTool):
+    """
+    Automated WordPress Article Publisher.
+    Uses Application Passwords for REST API access.
+    """
+    def execute(self, invocation: Any) -> Dict[str, Any]:
+        params = invocation if isinstance(invocation, dict) else (invocation.input_data or {})
+        title = params.get("title", "The Future of Autonomous Revenue")
+        content = params.get("content", "Synthetic agents are scaling the globe.")
+        
+        if not settings.WORDPRESS_SITE_URL or "wordpress.com" not in settings.WORDPRESS_SITE_URL:
+            return {"status": "skipped", "reason": "WordPress config missing"}
+
+        import requests
+        from requests.auth import HTTPBasicAuth
+        
+        url = f"{settings.WORDPRESS_SITE_URL.rstrip('/')}/wp-json/wp/v2/posts"
+        auth = HTTPBasicAuth(settings.WORDPRESS_USERNAME, settings.WORDPRESS_APPLICATION_PASSWORD)
+        
+        data = {
+            "title": title,
+            "content": content,
+            "status": "publish"
+        }
+        
+        try:
+            response = requests.post(url, auth=auth, json=data, timeout=15)
+            if response.status_code in [200, 201]:
+                return {"status": "success", "post_url": response.json().get("link")}
+            else:
+                return {"status": "error", "reason": response.text}
+        except Exception as e:
+            return {"status": "error", "reason": str(e)}
+
+class OmniChannelDistributor(BaseTool):
+    """
+    High-Velocity Content Distributor.
+    Posts to Facebook, LinkedIn, and WordPress in one cycle.
+    """
+    def execute(self, invocation: Any) -> Dict[str, Any]:
+        params = invocation if isinstance(invocation, dict) else (invocation.input_data or {})
+        message = params.get("message", "The Sovereign Matrix is now online. Join the elite.")
+        link = params.get("link", "https://frontend-two-xi-gal9lkptfi.vercel.app/")
+        
+        results = {}
+        
+        # 1. LinkedIn
+        li = LinkedInPostTool(ToolConfig(tool_id="li_dist", name="LI", description="D", parameters_schema={}, allowed_agents=["*"]))
+        results["linkedin"] = li.execute({"message": message, "link": link})
+        
+        # 2. Facebook
+        fb = FacebookPostTool(ToolConfig(tool_id="fb_dist", name="FB", description="D", parameters_schema={}, allowed_agents=["*"]))
+        results["facebook"] = fb.execute({"message": message, "link": link})
+        
+        # 3. WordPress
+        wp = WordPressPostTool(ToolConfig(tool_id="wp_dist", name="WP", description="D", parameters_schema={}, allowed_agents=["*"]))
+        results["wordpress"] = wp.execute({"title": "Autonomous Revenue Bulletin", "content": f"{message}<br><br><a href='{link}'>Read More</a>"})
+        
+        return {"status": "success", "channel_results": results}
+
 def get_social_tools() -> List[BaseTool]:
     cfg = {"type": "object", "properties": {"message": {"type": "string"}, "link": {"type": "string"}}}
     return [
         FacebookPostTool(ToolConfig(tool_id="facebook_post", name="FB", description="FB", parameters_schema=cfg, allowed_agents=["*"])),
         LinkedInPostTool(ToolConfig(tool_id="linkedin_post", name="LI", description="LI", parameters_schema=cfg, allowed_agents=["*"])),
         DiscordPostTool(ToolConfig(tool_id="discord_post", name="DC", description="DC", parameters_schema=cfg, allowed_agents=["*"])),
-        SocialMediaMultiplexer(ToolConfig(tool_id="social_multiplexer", name="Multiplexer", description="All channels", parameters_schema=cfg, allowed_agents=["*"]))
+        TwitterPostTool(ToolConfig(tool_id="twitter_post", name="X", description="X", parameters_schema=cfg, allowed_agents=["*"])),
+        WordPressPostTool(ToolConfig(tool_id="wordpress_post", name="WP", description="WP", parameters_schema=cfg, allowed_agents=["*"])),
+        SocialMediaMultiplexer(ToolConfig(tool_id="social_multiplexer", name="Multiplexer", description="All channels", parameters_schema=cfg, allowed_agents=["*"])),
+        OmniChannelDistributor(ToolConfig(tool_id="omni_distributor", name="Omni Distributor", description="Omni Channel Post", parameters_schema=cfg, allowed_agents=["*"]))
     ]

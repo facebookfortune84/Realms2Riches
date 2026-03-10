@@ -1,0 +1,24 @@
+{
+  "id": "saas-high-lead-cost-berlin",
+  "title": "Autonomous SaaS Revenue Agent for Berlin",
+  "headline": "Stop High Lead Cost in your SaaS Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for SaaS professionals in Berlin.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "SaaS",
+  "region": "Berlin",
+  "pain_point": "High Lead Cost",
+  "image_url": "/marketing/images/saas.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous SaaS Revenue Agent for Berlin",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for SaaS professionals in Berlin.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

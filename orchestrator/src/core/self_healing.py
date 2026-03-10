@@ -3,6 +3,7 @@ import json
 import glob
 import logging
 import sqlite3
+from sqlalchemy import Integer, Column, String, Float, ForeignKey
 from typing import List, Dict, Any
 from orchestrator.src.core.config import settings
 
@@ -19,6 +20,7 @@ class SelfHealingService:
         "data/assets",
         "data/blog",
         "data/store/slots",
+        "data/store/niches",
         "data/marketing/images",
         "data/marketing/videos",
         "data/lineage",
@@ -121,6 +123,31 @@ class SelfHealingService:
             with open(platinum_path, "w") as f:
                 json.dump(platinum_data, f, indent=2)
             self.repair_log.append("Restored Sovereign Platinum baseline.")
+        
+        # 3. Synchronize with Database
+        try:
+            from orchestrator.src.core.catalog.api import catalog_api
+            from orchestrator.src.core.catalog.models import ProductSchema, PriceSchema
+            
+            with open(platinum_path, "r") as f:
+                p = json.load(f)
+                
+            # Upsert into SQL via API
+            catalog_api.create_product(ProductSchema(
+                id=p["id"],
+                name=p["name"],
+                description=p["description"],
+                category=p["category"],
+                prices=[PriceSchema(
+                    product_id=p["id"],
+                    price=float(p["price"]),
+                    currency="USD",
+                    interval="one_time"
+                )]
+            ))
+            logger.info("✅ Database sync complete for Sovereign Platinum.")
+        except Exception as e:
+            logger.error(f"Healer: Database sync failed: {e}")
 
     def _heal_database_schema(self):
         # Database schema healing logic
@@ -131,7 +158,16 @@ class SelfHealingService:
         pass
 
     def _verify_environment_integrity(self):
-        # Check for .env variables
-        pass
+        critical_vars = ["STRIPE_API_KEY", "GROQ_API_KEY", "BACKEND_URL", "SMTP_USER"]
+        missing = []
+        for var in critical_vars:
+            val = getattr(settings, var, None)
+            if not val or "placeholder" in str(val).lower():
+                missing.append(var)
+        
+        if missing:
+            msg = f"CRITICAL ENV VARS MISSING: {missing}"
+            logger.error(msg)
+            self.repair_log.append(msg)
 
 sovereign_healer = SelfHealingService()

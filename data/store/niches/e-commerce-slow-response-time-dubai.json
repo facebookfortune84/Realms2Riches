@@ -1,0 +1,24 @@
+{
+  "id": "e-commerce-slow-response-time-dubai",
+  "title": "Autonomous E-commerce Revenue Agent for Dubai",
+  "headline": "Stop Slow Response Time in your E-commerce Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for E-commerce professionals in Dubai.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "E-commerce",
+  "region": "Dubai",
+  "pain_point": "Slow Response Time",
+  "image_url": "/marketing/images/e-commerce.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous E-commerce Revenue Agent for Dubai",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for E-commerce professionals in Dubai.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

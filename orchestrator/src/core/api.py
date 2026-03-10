@@ -1,9 +1,11 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request, Depends, Security
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request, Depends, Security, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse, FileResponse
 from fastapi.security import APIKeyHeader
+from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.staticfiles import StaticFiles
 from orchestrator.src.core.orchestrator import Orchestrator
+from orchestrator.src.memory.sql_store import SQLStore
 from orchestrator.src.core.config import settings
 from orchestrator.src.core.monetization.webhooks import router as monetization_router
 from orchestrator.src.core.alchemy_engine import get_all_posts, generate_autonomous_blog_post
@@ -22,6 +24,7 @@ import os
 import hashlib
 import stripe
 import requests
+import uuid
 from datetime import datetime
 
 from contextlib import asynccontextmanager
@@ -65,7 +68,38 @@ async def verify_license_header(key: str = Security(api_key_header)):
         raise HTTPException(status_code=403, detail=f"Invalid License: {result.get('error')}")
     return result["data"]
 
-app = FastAPI(title="Sovereign API", version="4.0.0-PLATINUM", lifespan=lifespan)
+# --- RATE LIMITING GUARDRAIL ---
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app, limit: int = 100, window: int = 60):
+        super().__init__(app)
+        self.limit = limit
+        self.window = window
+        self.requests = {} # {ip: [timestamps]}
+
+    async def dispatch(self, request: Request, call_next):
+        # Bypass for local dev if needed
+        if os.getenv("ENV_MODE", "dev") == "dev": return await call_next(request)
+        
+        ip = request.client.host
+        now = time.time()
+        
+        if ip not in self.requests:
+            self.requests[ip] = []
+        
+        # Clean old timestamps
+        self.requests[ip] = [t for t in self.requests[ip] if now - t < self.window]
+        
+        if len(self.requests[ip]) >= self.limit:
+            return JSONResponse(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                content={"detail": "Sovereign shields engaged. Rate limit exceeded."}
+            )
+        
+        self.requests[ip].append(now)
+        return await call_next(request)
+
+app = FastAPI(title="Realms2Riches Sovereign Matrix", version="5.6.0-DOMINANCE", lifespan=lifespan)
+app.add_middleware(RateLimitMiddleware, limit=60, window=60)
 
 # Include Routers
 app.include_router(monetization_router)
@@ -146,11 +180,137 @@ async def get_metrics():
 
 @app.get("/api/telemetry/stats")
 async def get_telemetry_stats():
+    # Integrate with SQLStore for real profit
+    sql = SQLStore()
+    total_profit = sql.get_total_profit()
     return {
-        "clicks": 120,
-        "conversions": 15,
-        "revenue": 450.0
+        "clicks": telemetry_data["clicks"],
+        "conversions": telemetry_data["conversions"],
+        "revenue": telemetry_data["revenue"],
+        "net_profit": total_profit
     }
+
+@app.get("/api/profit/stats")
+async def get_profit_stats():
+    sql = SQLStore()
+    return {
+        "total_profit": sql.get_total_profit(),
+        "currency": "USD",
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+# --- MONETIZATION & PROFIT TRACKING ---
+@app.post("/api/v1/monetization/webhook")
+async def unified_stripe_webhook(request: Request):
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
+    endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
+
+    try:
+        if endpoint_secret:
+            event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+        else:
+            # Local fallback
+            data = json.loads(payload)
+            event = stripe.Event.construct_from(data, stripe.api_key)
+    except Exception as e:
+        logger.error(f"Webhook Signature Error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+    event_type = event["type"]
+    session = event["data"]["object"]
+
+    if event_type == "checkout.session.completed":
+        amount = session.get("amount_total", 0) / 100
+        email = session.get("customer_details", {}).get("email")
+        
+        sql = SQLStore()
+        # 1. Record Revenue
+        sql.add_profit_entry({
+            "id": str(uuid.uuid4()),
+            "type": "revenue",
+            "category": "sale",
+            "amount": amount,
+            "details": {"email": email, "type": "checkout", "session": session.get("id")}
+        })
+        
+        # 2. Record Stripe Fee
+        fee = (amount * 0.029) + 0.30
+        sql.add_profit_entry({
+            "id": str(uuid.uuid4()),
+            "type": "expense",
+            "category": "fee",
+            "amount": fee,
+            "details": {"type": "stripe_fee"}
+        })
+        
+        # 3. Update Telemetry
+        telemetry_data["revenue"] += amount
+        telemetry_data["conversions"] += 1
+        logger.info(f"💰 PROFIT CAPTURED: {amount} from {email}")
+
+    return {"status": "success"}
+
+@app.get("/sitemap.xml")
+async def get_sitemap():
+    path = "data/store/sitemap.xml"
+    if os.path.exists(path):
+        return FileResponse(path, media_type="application/xml")
+    raise HTTPException(status_code=404, detail="Sitemap not found")
+
+@app.get("/niche/{slug}")
+async def get_niche_page(slug: str):
+    niche_path = f"data/store/niches/{slug}.json"
+    if not os.path.exists(niche_path):
+        raise HTTPException(status_code=404, detail="Niche not found")
+    
+    with open(niche_path, "r") as f:
+        data = json.load(f)
+    
+    schema_json = json.dumps(data.get("schema", {}))
+    
+    # Return a high-conversion HTML template with SEO Schema
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>{data['title']}</title>
+        <script type="application/ld+json">{schema_json}</script>
+        <style>
+            body {{ font-family: sans-serif; text-align: center; padding: 50px; background: #0f172a; color: white; }}
+            .card {{ background: #1e293b; padding: 40px; border-radius: 12px; max-width: 600px; margin: auto; border: 1px solid #334155; }}
+            h1 {{ color: #38bdf8; }}
+            .cta {{ background: #0ea5e9; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; margin-top: 20px; }}
+            footer {{ margin-top: 50px; font-size: 0.8rem; color: #64748b; }}
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <h1>{data['headline']}</h1>
+            <p>{data['description']}</p>
+            <a href="{data['cta_link']}" class="cta">Secure Your Sovereign Node</a>
+        </div>
+        <footer>
+            &copy; 2026 Realms2Riches | All Rights Reserved | Autonomous Revenue Network
+        </footer>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html)
+
+@app.get("/api/v1/marketing/exit-intent")
+async def get_exit_intent_content():
+    return {
+        "title": "Wait! Don't Leave Your Revenue on the Table",
+        "message": "Download the 'Sovereign Scaling Guide' for free before you go. 13 streams, 0 staff.",
+        "cta_text": "Send Me The Guide",
+        "image_url": "https://glowfly-sizeable-lazaro.ngrok-free.dev/assets/strategy_guide_cover.png"
+    }
+
+@app.post("/api/v1/marketing/lead-magnet")
+async def capture_lead_magnet(email: str):
+    # Reuse lead capture logic
+    return await capture_lead({"email": email, "source": "exit_intent_magnet"})
 
 @app.get("/api/integrations/status")
 async def get_integrations_status():

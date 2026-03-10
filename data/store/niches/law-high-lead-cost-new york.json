@@ -1,0 +1,24 @@
+{
+  "id": "law-high-lead-cost-new york",
+  "title": "Autonomous Law Revenue Agent for New York",
+  "headline": "Stop High Lead Cost in your Law Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for Law professionals in New York.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "Law",
+  "region": "New York",
+  "pain_point": "High Lead Cost",
+  "image_url": "/marketing/images/law.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous Law Revenue Agent for New York",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for Law professionals in New York.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}
