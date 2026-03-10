@@ -108,8 +108,13 @@ class SQLStore:
         try:
             user = session.query(UserBalance).filter_by(user_id=user_id).first()
             if user:
-                return {"balance": user.balance, "credits": user.credits, "tier": user.tier}
-            return {"balance": 0.0, "credits": 0, "tier": "BASIC"}
+                return {
+                    "balance": user.balance, 
+                    "credits": user.credits, 
+                    "tier": user.tier,
+                    "founding_node": bool(user.founding_node)
+                }
+            return {"balance": 0.0, "credits": 0, "tier": "BASIC", "founding_node": False}
         finally:
             session.close()
 

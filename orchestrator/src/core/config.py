@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     STRIPE_WEBHOOK_SECRET: Optional[str] = None
 
     # --- SOCIAL MEDIA ---
-    FACEBOOK_PAGE_TOKEN: Optional[str] = None
+    FACEBOOK_PAGE_ACCESS_TOKEN: Optional[str] = None
     FACEBOOK_PAGE_ID: Optional[str] = None
     LINKEDIN_ACCESS_TOKEN: Optional[str] = None
     LINKEDIN_PROFILE_URN: Optional[str] = None
