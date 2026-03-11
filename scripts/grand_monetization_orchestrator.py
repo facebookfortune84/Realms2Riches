@@ -21,7 +21,7 @@ from orchestrator.src.validation.schemas import ToolInvocation
 from orchestrator.src.core.monetization.engine import AFFILIATE_LINKS, STRIPE_MONETIZATION
 
 logger = get_logger("GRAND_ORCHESTRATOR")
-TRAFFIC_MANAGER_URL = "http://localhost:8000"
+TRAFFIC_MANAGER_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
 
 # --- CONFIGURATION ---
 POSTS_PER_STREAM = 5     # Generate 5 unique pieces of content per stream per cycle

@@ -2,7 +2,7 @@ import requests
 import json
 import time
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
 
 def audit_endpoints():
     print("💎 STARTING COMPREHENSIVE API AUDIT 💎")

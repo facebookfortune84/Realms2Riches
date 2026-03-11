@@ -23,7 +23,13 @@ class FacebookPostTool(BaseTool):
 
         url = f"https://graph.facebook.com/v19.0/{page_id}/feed"
         payload = {"message": message, "access_token": token}
-        if link: payload["link"] = link
+        if link: 
+            payload["link"] = link
+            # Platinum CTA Implementation
+            payload["call_to_action"] = {
+                "type": "SHOP_NOW",
+                "value": {"link": link}
+            }
         
         try:
             logger.info("Facebook Dispatching...")

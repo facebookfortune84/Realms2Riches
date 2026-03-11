@@ -58,8 +58,13 @@ def test_webhook():
         logger.info("✅ Generated valid Stripe signature.")
     
     # Attempt to ping the listener
-    # Note: Port 4242 is specified in scripts/stripe_webhook_listener.py
-    url = "http://localhost:4242/webhook"
+    # Note: Port 4242 is specified in scripts/stripe_webhook_listener.py for local execution
+    # But we use the live ngrok URL for the primary verification
+    url = f"{settings.BACKEND_URL}/webhook"
+    
+    # Fallback removed - Strict Production Verification
+    # if "localhost" in url and os.name == "nt":
+    #     url = "http://localhost:4242/webhook"
     
     logger.info(f"🚀 Dispatching simulated payment to {url}...")
     

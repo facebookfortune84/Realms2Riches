@@ -37,7 +37,12 @@
         }
 
         startBtn.onclick = () => {
-            ws = new WebSocket('ws://localhost:8000/ws/voice');
+            // Connect to Sovereign Production WebSocket
+            // Note: Use wss:// for https:// origins
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            // Default to production ngrok URL if not serving locally
+            const host = "glowfly-sizeable-lazaro.ngrok-free.dev"; 
+            ws = new WebSocket(`${protocol}//${host}/ws/voice`);
             
             ws.onopen = () => {
                 addLog('Connected to server');

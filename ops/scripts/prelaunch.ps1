@@ -21,7 +21,7 @@ Write-Host "Using Python: $PYTHON_CMD" -ForegroundColor Gray
 # 2. Start Backend (Local Mode)
 Write-Host "--> Starting Backend (Local Mode)..." -ForegroundColor Yellow
 $backendProcess = Start-Process $PYTHON_CMD -ArgumentList "scripts/run_server.py" -PassThru -NoNewWindow
-$backendUrl = "http://127.0.0.1:8000"
+$backendUrl = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
 $maxRetries = 30
 $retryCount = 0
 $serverUp = $false
@@ -29,7 +29,7 @@ $serverUp = $false
 try {
     while ($retryCount -lt $maxRetries) {
         try {
-            $response = Invoke-WebRequest -Uri "$backendUrl/health" -Method Get -ErrorAction Stop
+            $response = Invoke-WebRequest -Uri "$backendUrl/health" -Method Get -UseBasicParsing -ErrorAction Stop
             if ($response.StatusCode -eq 200) {
                 Write-Host "✅ Backend is ONLINE at $backendUrl" -ForegroundColor Green
                 $serverUp = $true
@@ -47,7 +47,16 @@ try {
         exit 1
     }
 
-    # 3. Run Test Matrix
+    # 3. MCP Verification
+    Write-Host "--> Verifying MCP / UCP Architecture..." -ForegroundColor Yellow
+    Invoke-Expression "$PYTHON_CMD mcp_internal\ucp\verify.py"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "❌ MCP Verification FAILED." -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "✅ MCP Architecture is READY." -ForegroundColor Green
+
+    # 4. Run Test Matrix
     Write-Host "--> Running Test Matrix..." -ForegroundColor Yellow
     
     # Define critical suites

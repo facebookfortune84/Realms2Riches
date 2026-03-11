@@ -5,7 +5,7 @@ import sys
 def check_backend():
     # Allow overriding URL via env var, default to local if not set, or read from .env.prod if needed
     # For CI/CLI context where .env.prod might be loaded or we just want to hit localhost
-    url = os.getenv("BACKEND_URL", "http://localhost:8000")
+    url = os.getenv("BACKEND_URL", "https://glowfly-sizeable-lazaro.ngrok-free.dev")
     
     # If running from outside container against localhost
     print(f"Probing Backend at: {url}")

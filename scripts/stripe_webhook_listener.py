@@ -61,7 +61,7 @@ async def webhook_received(request: Request):
 
 def run_server():
     logger.info("📡 STARTING STRIPE WEBHOOK LISTENER ON PORT 4242")
-    logger.info("Make sure to run: stripe listen --forward-to localhost:4242/webhook")
+    logger.info(f"Make sure to run: stripe listen --forward-to {settings.BACKEND_URL}/api/v1/monetization/webhook")
     uvicorn.run(app, host="0.0.0.0", port=4242, log_level="info")
 
 if __name__ == "__main__":

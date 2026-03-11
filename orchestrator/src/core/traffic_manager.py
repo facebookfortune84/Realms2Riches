@@ -50,7 +50,7 @@ traffic_manager = TrafficManager()
 async def redirect_link(target: str, source: str = "unknown", campaign: str = "general"):
     """
     Redirects traffic to the target URL and logs the click.
-    Usage: http://localhost:8000/r?target=https://stripe.com...&source=tiktok&campaign=viral_v1
+    Usage: https://glowfly-sizeable-lazaro.ngrok-free.dev/r?target=https://stripe.com...&source=tiktok&campaign=viral_v1
     """
     traffic_manager.record_click(source, campaign)
     return RedirectResponse(url=target)

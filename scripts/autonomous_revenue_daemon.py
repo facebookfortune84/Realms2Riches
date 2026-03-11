@@ -18,7 +18,7 @@ from orchestrator.src.tools.seo_tools import SEOTool, ToolConfig
 
 logger = get_logger("REVENUE_DAEMON")
 
-TRAFFIC_MANAGER_URL = "http://localhost:8000"
+TRAFFIC_MANAGER_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
 
 class AutonomousRevenueDaemon:
     def __init__(self):

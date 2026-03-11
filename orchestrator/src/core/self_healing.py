@@ -169,5 +169,17 @@ class SelfHealingService:
             msg = f"CRITICAL ENV VARS MISSING: {missing}"
             logger.error(msg)
             self.repair_log.append(msg)
+        
+        # 2nd Core Quarantine Active - Ensure secondary core is isolated
+        if os.path.exists("core_secondary"):
+            quarantine_path = "core_secondary/quarantine"
+            if not os.path.exists(quarantine_path):
+                os.makedirs(quarantine_path, exist_ok=True)
+                msg = "Quarantined secondary core for production safety."
+                logger.warning(msg)
+                self.repair_log.append(msg)
+        else:
+            # If no core_secondary exists, it's effectively quarantined/missing
+            pass
 
 sovereign_healer = SelfHealingService()

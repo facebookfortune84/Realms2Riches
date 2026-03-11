@@ -18,14 +18,20 @@ Ensure `.env.prod` or `.env.local` contains valid API keys for:
 
 ## 3. Launch Methods
 
-### A. Full Stack (Docker - Recommended)
-This method launches the entire infrastructure (API, DB, Worker) in isolated containers.
+### A. Production Launch (Docker - Recommended)
+This method launches the entire infrastructure (API, DB, Worker) in isolated containers, rebuilding only when necessary.
 1. Open PowerShell as Administrator.
 2. Run:
    ```powershell
    .\SOVEREIGN_START.ps1
    ```
-   *Note: This script will verify Docker, build images, run tests, and start the API on port 8000.*
+   *Note: This script enforces production mode, builds Docker images (if code/dependencies changed), and verifies health at the public URL.*
+
+### B. Force Rebuild
+If you need to ensure a completely fresh build (e.g., after significant dependency changes):
+```powershell
+.\SOVEREIGN_START.ps1 -Prune
+```
 
 ### B. Local Development (No Docker)
 Use this method for rapid testing or debugging.
@@ -48,7 +54,7 @@ python scripts/yolo_mode_monetization.py
 ```
 
 ## 4. Verification
-1. **Health Check:** Visit `http://localhost:8000/health` (or your Ngrok URL). Status should be `ok`.
+1. **Health Check:** Visit `https://glowfly-sizeable-lazaro.ngrok-free.dev/health`. Status should be `ok`.
 2. **Payment Monitoring:**
    ```powershell
    $env:PYTHONPATH="."

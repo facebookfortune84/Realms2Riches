@@ -12,8 +12,8 @@ from orchestrator.src.core.config import settings
 def simulate_payment():
     print("💳 SIMULATING LIVE STRIPE PAYMENT (HDRB Mode)...")
     
-    # Target Localhost for direct verification
-    webhook_url = "http://localhost:8000/api/v1/monetization/webhook"
+    # Target Live Backend for direct verification
+    webhook_url = f"{settings.BACKEND_URL}/api/v1/monetization/webhook"
     
     payload = {
         "id": f"evt_sim_{int(time.time())}",

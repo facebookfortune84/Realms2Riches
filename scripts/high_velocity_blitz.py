@@ -17,7 +17,7 @@ from orchestrator.src.validation.schemas import ToolInvocation
 
 logger = get_logger("HIGH_VELOCITY_BLITZ")
 
-TRAFFIC_MANAGER_URL = "http://localhost:8000"
+TRAFFIC_MANAGER_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
 
 # --- CONFIGURATION FOR MAXIMUM REAL SCALE ---
 SEO_BATCH_SIZE = 50        # MAX: 50 Real Articles

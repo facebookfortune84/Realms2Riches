@@ -53,11 +53,13 @@ class TestSocialMonetization(unittest.TestCase):
         mock_post.return_value.json.return_value = {"id": "123", "data": {"id": "456"}}
         
         tool = SocialMediaMultiplexer(self.mock_config)
-        results = tool.execute({"message": "Secure access: Multi-post", "link": "https://checkout.stripe.com/c/pay/test"})
+        results = tool.execute({"message": "Secure access: Multi-post strategy for high-density revenue swarms.", "link": "https://checkout.stripe.com/c/pay/test"})
         
-        self.assertIn("facebook", results)
-        self.assertIn("linkedin", results)
-        self.assertIn("twitter", results)
+        self.assertIn("platforms", results)
+        platforms = results["platforms"]
+        self.assertIn("facebook", platforms)
+        self.assertIn("linkedin", platforms)
+        self.assertIn("twitter", platforms)
 
     @patch('orchestrator.src.tools.marketing_check.settings')
     def test_marketing_readiness_pass(self, mock_settings):

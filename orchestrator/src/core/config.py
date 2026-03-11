@@ -6,15 +6,15 @@ from orchestrator.src.validation.schemas import DatabaseConfig, MarketingConfig
 class Settings(BaseSettings):
     # Detect environment mode - Last file in list has highest priority
     model_config = SettingsConfigDict(
-        env_file=[".env.example", ".env.prod", ".env.local"], 
+        env_file=[".env.example", ".env.local", ".env.prod"], 
         env_file_encoding="utf-8", 
         extra="ignore"
     )
 
     # --- CORE ---
     DATABASE_URL: Optional[str] = None
-    BACKEND_URL: str = "http://localhost:8000"
-    FRONTEND_URL: str = "http://localhost:5173"
+    BACKEND_URL: str = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+    FRONTEND_URL: str = "https://frontend-two-xi-gal9lkptfi.vercel.app/"
     REALM_MASTER_KEY: str = "placeholder_key"
     ENV_MODE: str = "dev"
     BRAND_NAME: str = "Realms 2 Riches"

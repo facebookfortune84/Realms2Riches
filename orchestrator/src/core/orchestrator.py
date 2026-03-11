@@ -82,13 +82,16 @@ class Orchestrator:
         self.stt, self.tts = MockSTTAdapter(), MockTTSAdapter()
         self.cells, self.agents = {}, {}
         self.backlog = AutonomousBacklog(self)
-        self.scheduler = AsyncIOScheduler()
+        self.scheduler: Optional[AsyncIOScheduler] = None
 
     async def startup(self):
         logger.info("Orchestrator: Initializing high-density matrix...")
         logger.info(f"  -> Environment: {settings.ENV_MODE.upper()}")
         logger.info(f"  -> Public Gateway: {settings.BACKEND_URL}")
         governance.sql_store = self.sql_store
+        
+        # Initialize Scheduler here to bind to the active loop
+        self.scheduler = AsyncIOScheduler()
         
         # 0. Execute Baseline Healing
         sovereign_healer.execute_healing_cycle()
