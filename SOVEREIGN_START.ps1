@@ -114,24 +114,36 @@ if ($ngrokPath) {
 }
 
 # --- 6. HEALTH CHECK ---
-Write-Host "[6/8] Waiting for API Heartbeat..." -ForegroundColor Gray
-$maxRetries = 30
+Write-Host "[6/8] Waiting for API Heartbeat..." -ForegroundColor Cyan
+$maxRetries = 60 # Increased timeout for slow tunnel propagation
 $retryCount = 0
 $healthy = $false
 $healthUrl = "$BackendUrl/health"
+$localHealthUrl = "http://localhost:8000/health"
+
+Write-Host "  -> Probing Production URL: $healthUrl" -ForegroundColor Gray
 
 while ($retryCount -lt $maxRetries -and -not $healthy) {
     try {
-        $response = Invoke-RestMethod -Uri $healthUrl -Method Get -ErrorAction SilentlyContinue
+        # First try the production URL
+        $response = Invoke-RestMethod -Uri $healthUrl -Method Get -TimeoutSec 5 -ErrorAction SilentlyContinue
         if ($response.status -eq "SOVEREIGN") {
             $healthy = $true
-            Write-Host "  -> API is ONLINE and SOVEREIGN at $BackendUrl" -ForegroundColor Green
+            Write-Host "`n  -> API is ONLINE and SOVEREIGN at $BackendUrl" -ForegroundColor Green
+        } else {
+            # Fallback check to local port to ensure container is actually up
+            $localResponse = Invoke-RestMethod -Uri $localHealthUrl -Method Get -TimeoutSec 2 -ErrorAction SilentlyContinue
+            if ($localResponse.status -eq "SOVEREIGN") {
+                Write-Host "L" -NoNewline -ForegroundColor Yellow # L for Local Up
+            } else {
+                Write-Host "." -NoNewline -ForegroundColor DarkGray
+            }
         }
     } catch {
-        $retryCount++
-        Start-Sleep -Seconds 2
-        Write-Host "." -NoNewline -ForegroundColor DarkGray
+        Write-Host "x" -NoNewline -ForegroundColor Red
     }
+    $retryCount++
+    Start-Sleep -Seconds 3
 }
 
 if (-not $healthy) {
