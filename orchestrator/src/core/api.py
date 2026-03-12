@@ -119,6 +119,12 @@ async def get_integrations_status():
 async def get_products():
     products = []
     try:
+        # Load available assets for rotation
+        asset_pool = []
+        asset_dir = "data/assets/products"
+        if os.path.exists(asset_dir):
+            asset_pool = [f for f in os.listdir(asset_dir) if f.endswith('.svg') or f.endswith('.png')]
+        
         # Load products
         with open("data/catalog/products.csv", "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
@@ -134,6 +140,12 @@ async def get_products():
                     p['price'] = float(row['price'])
                     p['currency'] = row['currency']
                     p['interval'] = row['interval']
+                    
+                    # Inject rotating image
+                    if asset_pool:
+                        selected_asset = random.choice(asset_pool)
+                        p['image_url'] = f"{settings.BACKEND_URL}/assets/products/{selected_asset}"
+                    
                     products.append(p)
         return products
     except Exception as e:
