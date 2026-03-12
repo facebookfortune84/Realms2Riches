@@ -203,10 +203,17 @@ class Orchestrator:
         logger.info("🕒 SCHEDULER: Initiating Dual Core Sync...")
         # Synchronization logic between primary and secondary
         try:
-             import subprocess
-             # Simple sync of src logic
-             subprocess.run(["powershell.exe", "-Command", "Copy-Item -Path orchestrator/src/* -Destination core_secondary/orchestrator/src/ -Recurse -Force"], check=True)
-             logger.info("✅ Dual Core Parity Maintained.")
+             import shutil
+             import os
+             src = "orchestrator/src"
+             dst = "core_secondary/orchestrator/src"
+             if os.path.exists(src):
+                 if os.path.exists(dst):
+                     shutil.rmtree(dst)
+                 shutil.copytree(src, dst)
+                 logger.info("✅ Dual Core Parity Maintained.")
+             else:
+                 logger.warning("⚠️ Sync skipped: Source directory not found.")
         except Exception as e:
              logger.error(f"❌ Core Sync Failed: {e}")
 

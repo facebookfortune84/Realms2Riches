@@ -126,7 +126,7 @@ Write-Host "  -> Probing Production URL: $healthUrl" -ForegroundColor Gray
 while ($retryCount -lt $maxRetries -and -not $healthy) {
     try {
         # First try the production URL
-        $response = Invoke-RestMethod -Uri $healthUrl -Method Get -TimeoutSec 5 -ErrorAction SilentlyContinue
+        $response = Invoke-RestMethod -Uri $healthUrl -Method Get -TimeoutSec 5 -Headers @{"ngrok-skip-browser-warning"="true"} -ErrorAction SilentlyContinue
         if ($response.status -eq "SOVEREIGN") {
             $healthy = $true
             Write-Host "`n  -> API is ONLINE and SOVEREIGN at $BackendUrl" -ForegroundColor Green
