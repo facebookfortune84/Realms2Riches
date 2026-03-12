@@ -154,11 +154,19 @@ async def get_products():
 
 @app.get("/api/blog/posts")
 async def get_blog_posts():
+    posts = []
     path = "data/blog/posts.json"
     if os.path.exists(path):
-        with open(path, "r") as f:
-            return json.load(f)
-    return []
+        try:
+            with open(path, "r") as f:
+                posts = json.load(f)
+        except Exception as e:
+            logger.error(f"Error loading posts.json: {e}")
+    
+    # Also look for any standalone md files in data/blog that aren't indexed
+    # (Optional: implement auto-discovery here if needed)
+    
+    return JSONResponse(content=posts)
 
 @app.get("/api/blog/posts/{slug}")
 async def get_blog_post(slug: str):
@@ -173,15 +181,28 @@ async def get_blog_post(slug: str):
                     post_meta = p
                     break
     
-    # Load content from markdown
-    md_path = f"data/blog/{slug}.md"
-    if os.path.exists(md_path):
-        with open(md_path, "r", encoding="utf-8") as f:
-            content = f.read()
+    # Check multiple locations
+    md_paths = [f"data/blog/{slug}.md", f"data/blog/posts/{slug}.md"]
+    md_content = None
+    for path in md_paths:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                md_content = f.read()
+            break
+            
+    if md_content is not None:
+        # Simple frontmatter strip
+        content = md_content
+        if md_content.startswith("---"):
+            parts = md_content.split("---", 2)
+            if len(parts) >= 3:
+                content = parts[2].strip()
+                
         return {
             "meta": post_meta or {"title": slug.replace("-", " ").title(), "slug": slug},
             "content": content
         }
+        
     raise HTTPException(status_code=404, detail="Post not found")
 
 @app.post("/api/sovereign/launch")
