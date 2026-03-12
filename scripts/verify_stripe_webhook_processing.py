@@ -60,7 +60,10 @@ def test_webhook():
     # Attempt to ping the listener
     # Note: Port 4242 is specified in scripts/stripe_webhook_listener.py for local execution
     # But we use the live ngrok URL for the primary verification
-    url = f"{settings.BACKEND_URL}/webhook"
+    url = f"{settings.BACKEND_URL}/api/v1/monetization/webhook"
+    
+    headers["ngrok-skip-browser-warning"] = "true"
+    headers["x-sovereign-internal"] = "true"
     
     # Fallback removed - Strict Production Verification
     # if "localhost" in url and os.name == "nt":
