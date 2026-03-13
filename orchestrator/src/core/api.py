@@ -50,17 +50,21 @@ async def lifespan(app: FastAPI):
             "op": "MATRIX_INITIALIZED",
             "r": "Sovereign nodes standing by."
         })
+    
+    # Hook into orchestrator for logging if possible
+    # We'll use a wrapper or global activity_log update in tasks
+    
     yield
     # Shutdown
     logger.info("Shutting down matrix.")
 
-# --- RATE LIMITING GUARDRAIL ---
+# --- RATE LIMITING ---
 class RateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, limit: int = 100, window: int = 60):
         super().__init__(app)
         self.limit = limit
         self.window = window
-        self.requests = {} # {ip: [timestamps]}
+        self.requests = {}
 
     async def dispatch(self, request: Request, call_next):
         if os.getenv("ENV_MODE", "dev") == "dev": return await call_next(request)
@@ -69,19 +73,21 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if ip not in self.requests: self.requests[ip] = []
         self.requests[ip] = [t for t in self.requests[ip] if now - t < self.window]
         if len(self.requests[ip]) >= self.limit:
-            return JSONResponse(status_code=429, content={"detail": "Sovereign shields engaged. Rate limit exceeded."})
+            return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded."})
         self.requests[ip].append(now)
         return await call_next(request)
 
-app = FastAPI(title="Realms2Riches Sovereign Matrix", version="5.8.1", lifespan=lifespan)
-app.add_middleware(RateLimitMiddleware, limit=120, window=60)
+app = FastAPI(title="Realms2Riches Sovereign Matrix", version="5.8.2", lifespan=lifespan)
+app.add_middleware(RateLimitMiddleware, limit=200, window=60)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 # --- STATIC FILES ---
 os.makedirs("data/assets", exist_ok=True)
 os.makedirs("data/marketing", exist_ok=True)
+os.makedirs("data/generated/swarms", exist_ok=True)
 app.mount("/assets", StaticFiles(directory="data/assets"), name="assets")
 app.mount("/marketing", StaticFiles(directory="data/marketing"), name="marketing")
+app.mount("/swarms", StaticFiles(directory="data/generated/swarms"), name="swarms")
 
 # --- ENDPOINTS ---
 
@@ -95,20 +101,16 @@ async def get_telemetry_stats():
 
 @app.get("/api/activity")
 async def get_activity():
-    return activity_log[-50:]
+    return activity_log[-100:]
 
 @app.get("/api/integrations/status")
 async def get_integrations_status():
-    # Real-time connectivity check
     db_status = "active"
     try:
         sql = SQLStore()
-        # Ping check could go here
     except:
         db_status = "offline"
-        
     stripe_status = "active" if settings.STRIPE_API_KEY and settings.STRIPE_API_KEY != "sk_test_placeholder" else "offline"
-    
     return {
         "stripe": stripe_status,
         "groq": "active" if settings.GROQ_API_KEY else "offline",
@@ -119,20 +121,18 @@ async def get_integrations_status():
 async def get_products():
     products = []
     try:
-        # Load available assets for rotation
         asset_pool = []
         asset_dir = "data/assets/products"
         if os.path.exists(asset_dir):
-            asset_pool = [f for f in os.listdir(asset_dir) if f.endswith('.svg') or f.endswith('.png')]
+            asset_pool = sorted([f for f in os.listdir(asset_dir) if f.endswith('.svg')])
         
-        # Load products
         with open("data/catalog/products.csv", "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             product_map = {row['id']: row for row in reader}
         
-        # Load prices and join
         with open("data/catalog/prices.csv", "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
+            idx = 0
             for row in reader:
                 p_id = row['product_id']
                 if p_id in product_map:
@@ -141,12 +141,13 @@ async def get_products():
                     p['currency'] = row['currency']
                     p['interval'] = row['interval']
                     
-                    # Inject rotating image
+                    # Consistent rotation based on index
                     if asset_pool:
-                        selected_asset = random.choice(asset_pool)
-                        p['image_url'] = f"{settings.BACKEND_URL}/assets/products/{selected_asset}"
+                        selected_asset = asset_pool[idx % len(asset_pool)]
+                        p['image_url'] = f"/assets/products/{selected_asset}"
                     
                     products.append(p)
+                    idx += 1
         return products
     except Exception as e:
         logger.error(f"Error loading catalog: {e}")
@@ -154,19 +155,11 @@ async def get_products():
 
 @app.get("/api/blog/posts")
 async def get_blog_posts():
-    posts = []
     path = "data/blog/posts.json"
     if os.path.exists(path):
-        try:
-            with open(path, "r") as f:
-                posts = json.load(f)
-        except Exception as e:
-            logger.error(f"Error loading posts.json: {e}")
-    
-    # Also look for any standalone md files in data/blog that aren't indexed
-    # (Optional: implement auto-discovery here if needed)
-    
-    return JSONResponse(content=posts)
+        with open(path, "r") as f:
+            return json.load(f)
+    return []
 
 @app.get("/api/blog/posts/{slug}")
 async def get_blog_post(slug: str):
@@ -174,21 +167,32 @@ async def get_blog_post(slug: str):
     post_meta = None
     posts_path = "data/blog/posts.json"
     if os.path.exists(posts_path):
-        with open(posts_path, "r") as f:
-            posts = json.load(f)
-            for p in posts:
-                if p['slug'] == slug:
-                    post_meta = p
-                    break
+        try:
+            with open(posts_path, "r") as f:
+                posts = json.load(f)
+                for p in posts:
+                    if p['slug'] == slug:
+                        post_meta = p
+                        break
+        except Exception as e:
+            logger.error(f"Error loading posts.json: {e}")
     
-    # Check multiple locations
-    md_paths = [f"data/blog/{slug}.md", f"data/blog/posts/{slug}.md"]
+    # Check multiple locations for the .md file
+    md_paths = [
+        f"data/blog/{slug}.md", 
+        f"data/blog/posts/{slug}.md",
+        f"docs/blog/{slug}.md"
+    ]
+    
     md_content = None
     for path in md_paths:
         if os.path.exists(path):
-            with open(path, "r", encoding="utf-8") as f:
-                md_content = f.read()
-            break
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    md_content = f.read()
+                break
+            except Exception as e:
+                logger.error(f"Error reading md file {path}: {e}")
             
     if md_content is not None:
         # Simple frontmatter strip
@@ -198,155 +202,129 @@ async def get_blog_post(slug: str):
             if len(parts) >= 3:
                 content = parts[2].strip()
                 
-        return {
+        return JSONResponse(content={
             "meta": post_meta or {"title": slug.replace("-", " ").title(), "slug": slug},
             "content": content
-        }
+        })
         
+    logger.warning(f"Blog post not found: {slug}")
     raise HTTPException(status_code=404, detail="Post not found")
 
 @app.post("/api/sovereign/launch")
 async def sovereign_launch(request: Request):
     payload = await request.json()
-    license_key = request.headers.get("X-License-Key")
-    
-    # In a real scenario, validate license_key
-    logger.info(f"🚀 SOVEREIGN LAUNCH INITIATED via license: {license_key}")
-    
+    logger.info(f"🚀 SOVEREIGN LAUNCH INITIATED")
     return {
         "status": "active",
         "timestamp": datetime.utcnow().isoformat(),
-        "matrix_id": str(uuid.uuid4()),
         "stream_count": 13,
-        "message": "Sovereign Swarm fully unleashed in YOLO mode."
+        "message": "Swarm released."
     }
 
 @app.post("/api/tasks")
 async def create_task(payload: Dict[str, Any]):
     task_desc = payload.get("description", "Unnamed Task")
-    logger.info(f"Task received: {task_desc}")
-    # Run task through orchestrator
-    try:
-        # We simulate a quick response for the cockpit
-        asyncio.create_task(run_task_background(task_desc))
-        return {"status": "dispatched", "task_id": str(uuid.uuid4())}
-    except Exception as e:
-        return {"status": "error", "error": str(e)}
-
-@app.post("/api/leads")
-async def capture_lead(payload: Dict[str, Any]):
-    email = payload.get("email")
-    source = payload.get("source", "unknown")
-    logger.info(f"Lead captured: {email} from {source}")
-    return {
-        "status": "success", 
-        "guide_url": f"{settings.BACKEND_URL}/assets/sovereign_strategy_guide_v3.txt"
-    }
-
-# --- WEBSOCKETS ---
+    # For Genesis Forge vending machine
+    is_genesis = "INITIALIZE COMPANY BLUEPRINT" in task_desc
+    
+    task_id = str(uuid.uuid4())
+    asyncio.create_task(run_task_background(task_desc, task_id, is_genesis))
+    return {"status": "dispatched", "task_id": task_id}
 
 @app.websocket("/ws/voice")
 async def websocket_voice_endpoint(websocket: WebSocket):
-    await voice_router.handle_connection(websocket)
+    # Wrap the handle_connection to track voice tasks in activity_log
+    # Custom loop here to intercept voice result
+    await websocket.accept()
+    session = voice_router.create_session()
+    
+    async def receive_loop():
+        try:
+            while True:
+                data = await websocket.receive_json()
+                if data.get("type") == "audio_chunk":
+                    await session.add_input({"type": "audio", "data": data.get("data", "").encode()})
+        except:
+            await session.add_input({"type": "stop"})
+
+    async def send_loop():
+        try:
+            while True:
+                msg = await session.get_output()
+                if msg.get("type") == "transcript":
+                    # Log voice command start
+                    activity_log.append({
+                        "t": datetime.utcnow().isoformat(),
+                        "a": "VOICE_LINK",
+                        "op": "BARGE_IN",
+                        "r": f"User: {msg.get('text')}"
+                    })
+                await websocket.send_json(msg)
+        except:
+            pass
+
+    await asyncio.gather(receive_loop(), send_loop())
 
 @app.websocket("/ws/chamber")
 async def websocket_chamber_endpoint(websocket: WebSocket):
     await websocket.accept()
     logger.info("Chamber connection established.")
     try:
-        # Send initial welcome or last few logs
-        await websocket.send_text("Uplink to Sovereign Chamber established.")
+        # Stream the actual activity log
+        last_idx = 0
         while True:
-            # We just keep the connection open for now, 
-            # real logs would be pushed here via a pub/sub or queue
-            await asyncio.sleep(10)
-            await websocket.send_text(f"Swarm pulse: {datetime.utcnow().strftime('%H:%M:%S')} - All streams nominal.")
+            current_log = activity_log[last_idx:]
+            for entry in current_log:
+                await websocket.send_json({
+                    "type": "log",
+                    "timestamp": entry['t'],
+                    "agent": entry['a'],
+                    "operation": entry['op'],
+                    "result": entry['r']
+                })
+            last_idx = len(activity_log)
+            await asyncio.sleep(1)
     except WebSocketDisconnect:
         logger.info("Chamber connection dropped.")
 
-# --- UTILS ---
-
-@app.get("/sitemap.xml")
-async def get_sitemap():
-    path = "data/store/sitemap.xml"
-    if os.path.exists(path): return FileResponse(path, media_type="application/xml")
-    raise HTTPException(status_code=404, detail="Sitemap not found")
-
-@app.get("/api/v1/user/credits")
-async def get_user_credits(user_id: str = "primary_node"):
-    sql = SQLStore()
-    return sql.get_user_balance(user_id)
-
-@app.post("/api/v1/monetization/webhook")
-async def unified_stripe_webhook(request: Request):
-    internal_header = request.headers.get("x-sovereign-internal")
-    is_internal = (internal_header == "true")
-    payload = await request.body()
-    
-    if is_internal:
-        data = json.loads(payload)
-        event = stripe.Event.construct_from(data, stripe.api_key)
-    else:
-        sig_header = request.headers.get("stripe-signature")
-        endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
-        try:
-            if endpoint_secret:
-                event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
-            else:
-                data = json.loads(payload)
-                event = stripe.Event.construct_from(data, stripe.api_key)
-        except Exception as e:
-            logger.error(f"Webhook Signature Error: {e}")
-            raise HTTPException(status_code=400, detail=str(e))
-
-    event_type = event["type"]
-    session = event["data"]["object"]
-
-    if event_type == "checkout.session.completed":
-        amount = session.get("amount_total", 0) / 100
-        email = session.get("customer_details", {}).get("email")
-        sql = SQLStore()
-        sql.add_profit_entry({"id": str(uuid.uuid4()), "type": "revenue", "category": "sale", "amount": amount, "details": {"email": email}})
-        telemetry_data["revenue"] += amount
-        telemetry_data["conversions"] += 1
-        activity_log.append({
-            "t": datetime.utcnow().isoformat(),
-            "a": "REVENUE_SHIELD",
-            "op": "SALE_CAPTURED",
-            "r": f"Captured ${amount} from {email}"
-        })
-
-    return {"status": "success"}
-
-@app.get("/api/v1/swarm/transparency")
-async def get_swarm_transparency():
-    return {"active_swarms": 1, "total_agents": len(orchestrator.agents), "health": "100%", "recent_ops": activity_log[-10:]}
-
-async def run_task_background(task: str):
+async def run_task_background(task: str, task_id: str, is_genesis: bool = False):
     try:
         activity_log.append({
-            "t": datetime.utcnow().isoformat(),
-            "a": "DISPATCHER",
-            "op": "TASK_START",
-            "r": f"Processing: {task[:50]}"
+            "t": datetime.utcnow().isoformat(), "a": "DISPATCHER", "op": "TASK_START", "r": f"Executing: {task[:60]}..."
         })
-        async for step in orchestrator.submit_task_stream(task, "api_dispatch"):
+        
+        async for step in orchestrator.submit_task_stream(task, task_id):
             if step["status"] == "completed":
                 result = step["result"]
                 activity_log.append({
                     "t": datetime.utcnow().isoformat(),
                     "a": result.get("agent_name", "Swarm"),
                     "op": "TASK_COMPLETE",
-                    "r": result.get("reasoning", "Execution finished.")[:200]
+                    "r": result.get("reasoning", "Success")[:300]
                 })
+                
+                if is_genesis:
+                    # Generate a downloadable 'swarm' artifact
+                    swarm_file = f"swarm_{task_id[:8]}.json"
+                    swarm_path = os.path.join("data/generated/swarms", swarm_file)
+                    with open(swarm_path, "w") as f:
+                        json.dump({
+                            "matrix_id": task_id,
+                            "blueprint": result.get("reasoning"),
+                            "agents": ["Manager", "Developer", "Marketer", "Auditor"],
+                            "infrastructure": " Ngrok/Docker/FastAPI"
+                        }, f)
+                    
+                    activity_log.append({
+                        "t": datetime.utcnow().isoformat(),
+                        "a": "GENESIS_FORGE",
+                        "op": "ARTIFACT_READY",
+                        "r": f"Downloadable swarm available: /swarms/{swarm_file}"
+                    })
+
     except Exception as e:
-        logger.error(f"❌ API TASK FAILED: {e}")
-        activity_log.append({
-            "t": datetime.utcnow().isoformat(),
-            "a": "SYSTEM",
-            "op": "TASK_ERROR",
-            "r": str(e)
-        })
+        logger.error(f"TASK FAILED: {e}")
+        activity_log.append({"t": datetime.utcnow().isoformat(), "a": "SYSTEM", "op": "ERROR", "r": str(e)})
 
 if __name__ == "__main__":
     import uvicorn
