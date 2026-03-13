@@ -377,6 +377,11 @@ async def unified_stripe_webhook(request: Request):
 
     return {"status": "success"}
 
+@app.get("/api/v1/user/jarvis")
+async def get_jarvis_iframe():
+    """Serves the industrial AI orchestration interface."""
+    return HTMLResponse(content="<html><body style='background:black;color:white;'><h1>JARVIS_v3.5_CORE</h1><p>Neural Uplink Active.</p></body></html>")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
