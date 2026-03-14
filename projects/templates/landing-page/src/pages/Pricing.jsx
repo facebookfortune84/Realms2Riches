@@ -10,44 +10,50 @@ export default function Pricing() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Aggressive parallel pre-fetching could go here if needed
     const headers = { 
         'X-License-Key': import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || 'mock_dev_key',
         'ngrok-skip-browser-warning': 'true'
     };
-    fetch(`${BACKEND_URL}/products`, { headers })
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch pricing');
-        return res.json();
-      })
-      .then(data => {
-        if (data && data.length > 0) {
-            setProducts(data);
-        } else {
-            setError("No products available.");
+    
+    const fetchCatalog = async () => {
+        try {
+            const res = await fetch(`${BACKEND_URL}/products`, { headers });
+            if (!res.ok) throw new Error('Failed to fetch pricing');
+            const data = await res.json();
+            if (data && data.length > 0) {
+                setProducts(data);
+            } else {
+                setError("No products available.");
+            }
+        } catch (err) {
+            console.error("Pricing Load Error:", err);
+            setError("Catalog Offline.");
+        } finally {
+            setLoading(false);
         }
-      })
-      .catch(err => {
-        console.error("Pricing Load Error:", err);
-        setError("Catalog Offline.");
-      })
-      .finally(() => setLoading(false));
+    };
+
+    fetchCatalog();
   }, []);
 
   // Theatrical Wobble Animation
   const wobbleVariant = {
-    initial: { scale: 1, rotate: 0 },
+    initial: { scale: 1, rotate: 0, filter: "brightness(0.8) grayscale(0.2)" },
     hover: { 
-      scale: 1.05, 
-      rotate: [0, -1, 1, -1, 0],
+      scale: 1.08, 
+      rotate: [0, -1.5, 1.5, -1.5, 0],
+      filter: "brightness(1.1) grayscale(0)",
       transition: { 
-        rotate: { repeat: Infinity, duration: 0.5 },
-        scale: { duration: 0.3 }
+        rotate: { repeat: Infinity, duration: 0.4, ease: "easeInOut" },
+        scale: { duration: 0.4, ease: "easeOut" },
+        filter: { duration: 0.3 }
       }
     }
   };
 
   return (
-    <div className="py-24 max-w-7xl mx-auto px-4 font-mono bg-black">
+    <div className="py-24 max-w-7xl mx-auto px-4 font-mono bg-black min-h-screen">
       <div className="text-center mb-24">
         <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
@@ -87,20 +93,22 @@ export default function Pricing() {
               initial="initial"
               whileHover="hover"
               variants={wobbleVariant}
-              className="bg-[#050505] border-2 border-white/5 rounded-[2.5rem] overflow-hidden hover:border-primary/40 transition-colors flex flex-col group shadow-[0_20px_50px_rgba(0,0,0,0.5)] h-full relative"
+              className="bg-[#050505] border-2 border-white/5 rounded-[2.5rem] overflow-hidden hover:border-primary/40 transition-all flex flex-col group shadow-[0_20px_50px_rgba(0,0,0,0.5)] h-full relative"
             >
               {/* Product Image Container */}
               <div className="aspect-video bg-[#111] border-b-2 border-white/5 relative flex items-center justify-center overflow-hidden">
                 <img 
                     src={p.image_url.startsWith('http') ? p.image_url : `${BACKEND_URL}${p.image_url}`} 
                     alt={p.name}
-                    className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-700 ease-out"
+                    className="w-full h-full object-contain p-2 transition-transform duration-700 ease-out"
                     onError={(e) => e.target.src = "https://www.realmstoriches.xyz/img/bannerimage(3)-600.webp"}
+                    loading="eager"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-40" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-30" />
+                {/* NEON GREEN OVERLAY REMOVED AS REQUESTED */}
               </div>
 
-              <div className="p-10 flex flex-col flex-grow relative z-10">
+              <div className="p-10 flex flex-col flex-grow relative z-10 bg-gradient-to-b from-[#080808] to-black">
                 <div className="mb-8">
                     <div className="flex justify-between items-start mb-2">
                         <h3 className="text-xl font-black text-white tracking-tighter uppercase italic">{p.name}</h3>
@@ -114,7 +122,7 @@ export default function Pricing() {
                     </div>
                 </div>
 
-                <p className="text-gray-400 text-xs mb-10 flex-grow leading-relaxed font-medium uppercase tracking-tight opacity-70 group-hover:opacity-100 transition-opacity">
+                <p className="text-gray-400 text-xs mb-10 flex-grow leading-relaxed font-bold uppercase tracking-tighter opacity-60 group-hover:opacity-100 transition-opacity">
                     {p.description}
                 </p>
 
@@ -130,7 +138,7 @@ export default function Pricing() {
                     </a>
                     <div className="flex justify-between items-center px-2">
                         <span className="text-[8px] text-gray-700 uppercase font-black tracking-[0.3em]">SECURE_LINK_ENCRYPTED</span>
-                        <span className="text-[8px] text-primary font-black uppercase">{p.id.split('_').pop()}</span>
+                        <span className="text-[8px] text-primary font-black uppercase opacity-50">{p.id.split('_').pop()}</span>
                     </div>
                 </div>
               </div>

@@ -98,11 +98,13 @@ async def health_check():
 
 @app.get("/api/telemetry/stats")
 async def get_telemetry_stats():
+    # Return actual telemetry or consistent baseline
     return telemetry_data
 
 @app.get("/api/activity")
 async def get_activity():
-    return activity_log[-100:]
+    # Reverse to show latest first for dashboard
+    return activity_log[::-1][:50]
 
 @app.get("/api/integrations/status")
 async def get_integrations_status():
