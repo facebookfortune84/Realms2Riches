@@ -1,0 +1,38 @@
+[
+  {
+    "product_id": "prod_U8zR1TluMwksTn",
+    "name": "AI Workflow Integration",
+    "description": "Full-scale neural workflow automation and optimization.",
+    "price_id": "price_1TAhSCDo5o1YgZszuDGdVGLu",
+    "amount": 999.0,
+    "interval": "month",
+    "payment_link": "https://buy.stripe.com/5kQ14n0370Vr8oG1118so0f"
+  },
+  {
+    "product_id": "prod_U8zRHMkk9Vxl31",
+    "name": "Business Automation Suite",
+    "description": "End-to-end industrial automation for all business operations.",
+    "price_id": "price_1TAhSDDo5o1YgZszVOwTYZ6F",
+    "amount": 2499.0,
+    "interval": "month",
+    "payment_link": "https://buy.stripe.com/cNiaEXcPT9rXcEW9xx8so0g"
+  },
+  {
+    "product_id": "prod_U8zR4I38TIge2L",
+    "name": "Custom Software Development",
+    "description": "Bespoke cybernetic software solutions engineered for scale.",
+    "price_id": "price_1TAhSEDo5o1YgZszoyOx2fSt",
+    "amount": 4999.0,
+    "interval": "one_time",
+    "payment_link": "https://buy.stripe.com/4gM8wP03747DgVc6ll8so0h"
+  },
+  {
+    "product_id": "prod_U8zRjgQgf0ynxB",
+    "name": "Enterprise Infrastructure Setup",
+    "description": "Industrial-grade secure infrastructure and cloud orchestration.",
+    "price_id": "price_1TAhSFDo5o1YgZszNtEDLww3",
+    "amount": 7500.0,
+    "interval": "one_time",
+    "payment_link": "https://buy.stripe.com/6oU4gzdTX33z8oGfVV8so0i"
+  }
+]

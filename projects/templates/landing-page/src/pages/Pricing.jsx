@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Zap, ShoppingCart } from 'lucide-react';
+import { Check, Zap, ShoppingCart, Info } from 'lucide-react';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev";
 
@@ -33,83 +33,104 @@ export default function Pricing() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Theatrical Wobble Animation
+  const wobbleVariant = {
+    initial: { scale: 1, rotate: 0 },
+    hover: { 
+      scale: 1.05, 
+      rotate: [0, -1, 1, -1, 0],
+      transition: { 
+        rotate: { repeat: Infinity, duration: 0.5 },
+        scale: { duration: 0.3 }
+      }
+    }
+  };
+
   return (
-    <div className="py-20 max-w-7xl mx-auto px-4 font-mono bg-black">
-      <div className="text-center mb-20">
+    <div className="py-24 max-w-7xl mx-auto px-4 font-mono bg-black">
+      <div className="text-center mb-24">
+        <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="inline-block p-4 bg-primary/10 rounded-3xl border border-primary/20 mb-6 shadow-[0_0_50px_rgba(0,255,136,0.1)]"
+        >
+            <img src={`${BACKEND_URL}/assets/branding/forge_logo.png`} alt="Forge" className="h-20 w-auto" />
+        </motion.div>
         <motion.h2 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-6xl font-black tracking-tighter uppercase italic mb-4 text-white"
+          className="text-7xl font-black tracking-tighter uppercase italic mb-4 text-white"
         >
-          Pricing <span className="text-primary drop-shadow-[0_0_15px_rgba(0,255,136,0.5)]">Matrix</span>
+          Industrial <span className="text-primary drop-shadow-[0_0_20px_rgba(0,255,136,0.4)]">Matrix</span>
         </motion.h2>
-        <p className="text-gray-500 uppercase tracking-widest text-xs">Direct Neural Acquisition Channels</p>
+        <p className="text-gray-500 uppercase tracking-[0.5em] text-[10px] font-bold">Autonomous Provisioning Channels</p>
       </div>
       
       {loading && (
-        <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-            <div className="text-primary text-xs uppercase tracking-[0.3em] animate-pulse">Synchronizing Catalog...</div>
+        <div className="flex flex-col items-center justify-center py-24 gap-6">
+            <div className="w-16 h-16 border-4 border-primary/10 border-t-primary rounded-full animate-spin shadow-[0_0_30px_rgba(0,255,136,0.2)]" />
+            <div className="text-primary text-[10px] font-black uppercase tracking-[0.4em] animate-pulse">Syncing Swarm Economics...</div>
         </div>
       )}
       
-      {error && <div className="text-center text-red-500 bg-red-500/10 p-4 rounded-xl border border-red-500/20">{error}</div>}
+      {error && <div className="text-center text-red-500 bg-red-500/5 p-8 rounded-3xl border-2 border-red-500/20 font-black uppercase tracking-widest">{error}</div>}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 items-stretch">
         {!loading && products.map((p, i) => {
            const priceValue = p.price ?? "Contact";
            const intervalValue = p.interval ?? 'once';
-           const checkoutUrl = p.checkout_url || "https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en";
+           const checkoutUrl = p.checkout_url;
            
            return (
             <motion.div 
               key={p.id || i} 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.05 }}
-              className="bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden hover:border-primary/50 transition-all flex flex-col group shadow-[0_0_30px_rgba(0,0,0,0.8)] hover:shadow-[0_0_40px_rgba(0,255,136,0.1)] h-full relative"
+              initial="initial"
+              whileHover="hover"
+              variants={wobbleVariant}
+              className="bg-[#050505] border-2 border-white/5 rounded-[2.5rem] overflow-hidden hover:border-primary/40 transition-colors flex flex-col group shadow-[0_20px_50px_rgba(0,0,0,0.5)] h-full relative"
             >
-              {/* Product Image / Header */}
-              <div className="h-56 bg-[#111] border-b border-white/5 relative flex items-center justify-center overflow-hidden transition-all duration-700">
+              {/* Product Image Container */}
+              <div className="aspect-video bg-[#111] border-b-2 border-white/5 relative flex items-center justify-center overflow-hidden">
                 <img 
                     src={p.image_url.startsWith('http') ? p.image_url : `${BACKEND_URL}${p.image_url}`} 
                     alt={p.name}
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+                    className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-700 ease-out"
                     onError={(e) => e.target.src = "https://www.realmstoriches.xyz/img/bannerimage(3)-600.webp"}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent opacity-60" />
-                <span className="absolute bottom-4 left-6 text-primary/90 text-4xl font-black italic uppercase tracking-tighter z-10 drop-shadow-lg">
-                    {p.name.split(' ')[0]}
-                </span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-40" />
               </div>
 
-              <div className="p-8 flex flex-col flex-grow relative z-10">
-                <div className="mb-6">
-                    <h3 className="text-xl font-bold mb-1 uppercase text-white tracking-tight">{p.name}</h3>
+              <div className="p-10 flex flex-col flex-grow relative z-10">
+                <div className="mb-8">
+                    <div className="flex justify-between items-start mb-2">
+                        <h3 className="text-xl font-black text-white tracking-tighter uppercase italic">{p.name}</h3>
+                        <div className="p-2 bg-white/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"><Info size={14} className="text-primary" /></div>
+                    </div>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-primary">${priceValue}</span>
-                        <span className="text-gray-600 text-[10px] uppercase font-bold">
-                            /{intervalValue === 'one_time' || intervalValue === 'once' ? 'once' : intervalValue}
+                        <span className="text-4xl font-black text-primary italic tracking-tighter">${priceValue}</span>
+                        <span className="text-gray-600 text-[10px] font-black uppercase tracking-widest">
+                            {intervalValue === 'one_time' || intervalValue === 'once' ? '/FIXED' : `/${intervalValue.toUpperCase()}`}
                         </span>
                     </div>
                 </div>
 
-                <p className="text-gray-400 text-xs mb-8 flex-grow leading-relaxed italic border-l-2 border-primary/20 pl-4">
+                <p className="text-gray-400 text-xs mb-10 flex-grow leading-relaxed font-medium uppercase tracking-tight opacity-70 group-hover:opacity-100 transition-opacity">
                     {p.description}
                 </p>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                     <a 
                       href={checkoutUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full bg-primary text-black py-4 rounded-xl font-black text-[10px] uppercase hover:bg-white transition-all text-center flex items-center justify-center gap-2 shadow-[0_5px_15px_rgba(0,255,136,0.2)]"
+                      className="w-full bg-primary text-black py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] hover:bg-white transition-all text-center flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(0,255,136,0.15)] group-hover:shadow-[0_15px_40px_rgba(0,255,136,0.25)]"
                     >
-                      <ShoppingCart size={14} />
+                      <ShoppingCart size={16} strokeWidth={3} />
                       Initialize Acquisition
                     </a>
-                    <div className="text-[9px] text-center text-gray-600 uppercase tracking-widest font-bold">
-                        Verified: {p.id}
+                    <div className="flex justify-between items-center px-2">
+                        <span className="text-[8px] text-gray-700 uppercase font-black tracking-[0.3em]">SECURE_LINK_ENCRYPTED</span>
+                        <span className="text-[8px] text-primary font-black uppercase">{p.id.split('_').pop()}</span>
                     </div>
                 </div>
               </div>
