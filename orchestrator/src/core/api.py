@@ -85,6 +85,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, 
 os.makedirs("data/assets", exist_ok=True)
 os.makedirs("data/marketing", exist_ok=True)
 os.makedirs("data/generated/swarms", exist_ok=True)
+os.makedirs("data/assets/branding", exist_ok=True)
 app.mount("/assets", StaticFiles(directory="data/assets"), name="assets")
 app.mount("/marketing", StaticFiles(directory="data/marketing"), name="marketing")
 app.mount("/swarms", StaticFiles(directory="data/generated/swarms"), name="swarms")
@@ -121,18 +122,14 @@ async def get_integrations_status():
 async def get_products():
     products = []
     try:
-        asset_pool = []
-        asset_dir = "data/assets/products"
-        if os.path.exists(asset_dir):
-            asset_pool = sorted([f for f in os.listdir(asset_dir) if f.endswith('.svg')])
-        
+        # Load products from CSV
         with open("data/catalog/products.csv", "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             product_map = {row['id']: row for row in reader}
         
+        # Load prices and join with products
         with open("data/catalog/prices.csv", "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
-            idx = 0
             for row in reader:
                 p_id = row['product_id']
                 if p_id in product_map:
@@ -141,13 +138,11 @@ async def get_products():
                     p['currency'] = row['currency']
                     p['interval'] = row['interval']
                     
-                    # Consistent rotation based on index
-                    if asset_pool:
-                        selected_asset = asset_pool[idx % len(asset_pool)]
-                        p['image_url'] = f"/assets/products/{selected_asset}"
+                    # Ensure image_url is served as a resolved path
+                    if p['image_url'] and not p['image_url'].startswith('http'):
+                        p['image_url'] = p['image_url']
                     
                     products.append(p)
-                    idx += 1
         return products
     except Exception as e:
         logger.error(f"Error loading catalog: {e}")
