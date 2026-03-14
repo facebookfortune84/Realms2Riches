@@ -1,9 +1,23 @@
 [
   {
+    "slug": "the-impact-of-autonomous-swarms-on-global-supply-chain-logistics",
+    "title": "The Impact of Autonomous Swarms on Global Supply Chain Logistics",
+    "date": "2026-03-13",
+    "summary": "Full research paper on The Impact of Autonomous Swarms on Global Supply Chain Logistics.",
+    "tags": [
+      "Industrial",
+      "Research"
+    ]
+  },
+  {
     "slug": "future-of-agentic-ai",
     "title": "The Future of Agentic AI",
     "date": "2026-03-01",
     "summary": "How multi-agent swarms are redefining software development.",
-    "tags": ["AI", "Agents", "Future"]
+    "tags": [
+      "AI",
+      "Agents",
+      "Future"
+    ]
   }
 ]

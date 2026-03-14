@@ -2,9 +2,9 @@ name: Sovereign CI/CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "dev", "stasis" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "dev", "stasis" ]
   schedule:
     - cron: '0 0 * * *' # Daily integrity scan
 
