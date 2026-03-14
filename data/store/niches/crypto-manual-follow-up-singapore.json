@@ -1,0 +1,24 @@
+{
+  "id": "crypto-manual-follow-up-singapore",
+  "title": "Autonomous Crypto Revenue Agent for Singapore",
+  "headline": "Stop Manual Follow-up in your Crypto Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for Crypto professionals in Singapore.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "Crypto",
+  "region": "Singapore",
+  "pain_point": "Manual Follow-up",
+  "image_url": "/marketing/images/crypto.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous Crypto Revenue Agent for Singapore",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for Crypto professionals in Singapore.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

@@ -42,7 +42,7 @@ def check_infrastructure():
 async def check_endpoints():
     """Verify local API health and telemetry."""
     # Assuming the user runs this AFTER docker-compose up
-    base_url = "http://localhost:8000"
+    base_url = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
     
     try:
         # 1. Health

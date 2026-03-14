@@ -6,7 +6,7 @@
 ---
 
 ## 🟢 PHASE 1: THE MISSION CONTROL (Dashboard)
-**Target:** `http://localhost:5173/dashboard`
+**Target:** `https://frontend-two-xi-gal9lkptfi.vercel.app/dashboard`
 
 1.  **The Matrix Check**
     *   **Action:** Load the Dashboard.
@@ -25,7 +25,7 @@
 ---
 
 ## 🔴 PHASE 2: THE WAR ROOM (Cockpit)
-**Target:** `http://localhost:5173/cockpit`
+**Target:** `https://frontend-two-xi-gal9lkptfi.vercel.app/cockpit`
 
 1.  **Directive Injection**
     *   **Action:** Type `Analyze the 2026 AI Agent market cap`. Press Enter.
@@ -58,7 +58,7 @@
 ---
 
 ## 🟡 PHASE 4: THE PUBLIC FACE (Marketing)
-**Target:** `http://localhost:5173/pricing` & `/blog`
+**Target:** `https://frontend-two-xi-gal9lkptfi.vercel.app/pricing` & `/blog`
 
 1.  **Pricing Matrix**
     *   **Action:** Visit `/pricing`.

@@ -9,7 +9,7 @@ import aiohttp
 sys.path.append(os.getcwd())
 
 # Configuration
-BACKEND_URL = "http://localhost:8000" # Local access to the Docker container
+BACKEND_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev" # Remote access to the Docker container via Ngrok
 NGROK_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev" # Expected external URL for assets
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

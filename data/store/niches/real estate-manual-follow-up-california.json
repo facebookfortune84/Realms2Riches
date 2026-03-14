@@ -1,0 +1,24 @@
+{
+  "id": "real estate-manual-follow-up-california",
+  "title": "Autonomous Real Estate Revenue Agent for California",
+  "headline": "Stop Manual Follow-up in your Real Estate Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for Real Estate professionals in California.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "Real Estate",
+  "region": "California",
+  "pain_point": "Manual Follow-up",
+  "image_url": "/marketing/images/real estate.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous Real Estate Revenue Agent for California",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for Real Estate professionals in California.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

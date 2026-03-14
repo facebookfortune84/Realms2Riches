@@ -132,7 +132,7 @@
     },
     {
       "name": "InspectSite",
-      "description": "Takes screenshots to verify user-reported visual bugs or capture reference designs from live websites for recreation.\n\n**Use for:**\n• **Visual bug verification** - When users report layout issues, misaligned elements, or styling problems\n• **Website recreation** - Capturing reference designs (e.g., \"recreate Nike homepage\", \"copy Stripe's pricing page\")\n\n**Technical:** Converts localhost URLs to preview URLs, optimizes screenshot sizes, supports multiple URLs.",
+      "description": "Takes screenshots to verify user-reported visual bugs or capture reference designs from live websites for recreation.\n\n**Use for:**\n• **Visual bug verification** - When users report layout issues, misaligned elements, or styling problems\n• **Website recreation** - Capturing reference designs (e.g., \"recreate Nike homepage\", \"copy Stripe's pricing page\")\n\n**Technical:** Optimizes screenshot sizes, supports multiple URLs.",
       "parameters": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "additionalProperties": false,
@@ -146,7 +146,7 @@
             "type": "string"
           },
           "urls": {
-            "description": "URLs to capture screenshots of. Supports both live websites and local development servers.\n\n**Supported URL types:**\n• **Live websites**: \"https://example.com\", \"https://app.vercel.com/dashboard\"\n• **Local development**: \"http://localhost:3000\" (auto-converted to CodeProject preview URLs)\n• **Specific pages**: Include full paths like \"https://myapp.com/dashboard\" or \"localhost:3000/products\"\n\n**Best practices:**\n• Use specific page routes rather than just homepage for targeted inspection\n• Include localhost URLs to verify your CodeProject preview is working\n• Multiple URLs can be captured in a single request for comparison",
+            "description": "URLs to capture screenshots of. Supports live websites.\n\n**Supported URL types:**\n• **Live websites**: \"https://example.com\", \"https://app.vercel.com/dashboard\"\n• **Specific pages**: Include full paths like \"https://myapp.com/dashboard\"\n\n**Best practices:**\n• Use specific page routes rather than just homepage for targeted inspection\n• Multiple URLs can be captured in a single request for comparison",
             "items": {
               "type": "string"
             },

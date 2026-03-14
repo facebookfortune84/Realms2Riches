@@ -9,7 +9,7 @@ import socket
 sys.path.append(os.getcwd())
 
 class SovereignFinalAudit(unittest.TestCase):
-    BASE_URL = "http://localhost:8000"
+    BASE_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
 
     def setUp(self):
         print("   -> Waiting for API Port (localhost:8000)...")

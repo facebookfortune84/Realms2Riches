@@ -23,41 +23,15 @@ export default function Pricing() {
         if (data && data.length > 0) {
             setProducts(data);
         } else {
-            // High-fidelity fallback for 18 products
-            setProducts([
-                { id: "prod_jarvis_basic", name: "Jarvis 3.5 Basic", description: "Lean AI firepower for founders.", price: 29.99, interval: "mo", image_url: "https://www.realmstoriches.xyz/img/bannerimage(3)-600.webp" },
-                { id: "prod_jarvis_premium", name: "Jarvis 3.5 Premium", description: "Full-stack AI orchestration.", price: 199.99, interval: "mo", image_url: "https://www.realmstoriches.xyz/img/bannerimage(3)-600.webp" }
-            ]);
+            setError("No products available.");
         }
       })
       .catch(err => {
         console.error("Pricing Load Error:", err);
-        setError("Catalog Unavailable.");
+        setError("Catalog Offline.");
       })
       .finally(() => setLoading(false));
   }, []);
-
-  const STRIPE_LINKS = {
-    "prod_jarvis_basic": "https://buy.stripe.com/9B68wP7ubg7YbAB8avgYU04?locale=en",
-    "prod_jarvis_custom": "https://buy.stripe.com/bJedR97ubdZQ489duPgYU05?locale=en",
-    "prod_jarvis_premium": "https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en",
-    "prod_titan_basic": "https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en",
-    "prod_titan_pro": "https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en",
-    "prod_platinum_matrix": "https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en",
-    "prod_audit_report": "https://checkout.realmstoriches.xyz/b/7sYdR93I1ceKd7Q6Uh0x206",
-    "prod_svc_mgmt": "https://checkout.realmstoriches.xyz/b/28EfZh0vPceK1p87Yl0x200",
-    "prod_svc_brand": "https://checkout.realmstoriches.xyz/b/4gMbJ1emFfqW9VE6Uh0x201",
-    "prod_svc_marketing": "https://checkout.realmstoriches.xyz/b/cNi14n6UdfqWebU6Uh0x202",
-    "prod_svc_web_basic": "https://checkout.realmstoriches.xyz/b/fZudR9cexfqW7Nwbax0x203",
-    "prod_svc_web_adv": "https://checkout.realmstoriches.xyz/b/3cI00j4M5baG3xg5Qd0x204",
-    "prod_svc_ecom": "https://checkout.realmstoriches.xyz/b/5kQ4gz3I13Ie8RAceB0x205",
-    "prod_svc_seo": "https://checkout.realmstoriches.xyz/b/7sYdR93I1ceKd7Q6Uh0x206",
-    "prod_svc_social": "https://checkout.realmstoriches.xyz/b/7sY9ATbat5Qm7Nw4M90x207",
-    "prod_svc_elite": "https://checkout.realmstoriches.xyz/b/bJecN5diB5Qm5Fo6Uh0x208",
-    "prod_svc_startup": "https://checkout.realmstoriches.xyz/b/bJe28rdiB0w21p85Qd0x209",
-    "prod_svc_domination": "https://checkout.realmstoriches.xyz/b/aFafZhdiB7YuffYemJ0x20a",
-    "prod_svc_growth": "https://checkout.realmstoriches.xyz/b/5kQ5kD7YhdiO5Fo1zX0x20b"
-  };
 
   return (
     <div className="py-20 max-w-7xl mx-auto px-4 font-mono bg-black">
@@ -83,27 +57,28 @@ export default function Pricing() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
         {!loading && products.map((p, i) => {
-           const priceValue = p.prices?.[0]?.price ?? p.price ?? "Contact";
-           const intervalValue = p.prices?.[0]?.interval ?? p.interval ?? 'mo';
-           const checkoutUrl = STRIPE_LINKS[p.id] || "https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en";
+           const priceValue = p.price ?? "Contact";
+           const intervalValue = p.interval ?? 'once';
+           const checkoutUrl = p.checkout_url || "https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en";
            
            return (
             <motion.div 
-              key={i} 
+              key={p.id || i} 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.05 }}
               className="bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden hover:border-primary/50 transition-all flex flex-col group shadow-[0_0_30px_rgba(0,0,0,0.8)] hover:shadow-[0_0_40px_rgba(0,255,136,0.1)] h-full relative"
             >
               {/* Product Image / Header */}
-              <div className="h-56 bg-black border-b border-white/5 relative flex items-center justify-center overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700">
+              <div className="h-56 bg-[#111] border-b border-white/5 relative flex items-center justify-center overflow-hidden transition-all duration-700">
                 <img 
-                    src={p.image_url || "https://www.realmstoriches.xyz/img/bannerimage(3)-600.webp"} 
+                    src={p.image_url.startsWith('http') ? p.image_url : `${BACKEND_URL}${p.image_url}`} 
                     alt={p.name}
-                    className="w-full h-full object-cover opacity-40 group-hover:opacity-60 group-hover:scale-110 transition-all duration-700"
+                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+                    onError={(e) => e.target.src = "https://www.realmstoriches.xyz/img/bannerimage(3)-600.webp"}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
-                <span className="absolute bottom-4 left-6 text-primary/80 text-4xl font-black italic uppercase tracking-tighter z-10 group-hover:text-primary transition-colors">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent opacity-60" />
+                <span className="absolute bottom-4 left-6 text-primary/90 text-4xl font-black italic uppercase tracking-tighter z-10 drop-shadow-lg">
                     {p.name.split(' ')[0]}
                 </span>
               </div>
@@ -134,7 +109,7 @@ export default function Pricing() {
                       Initialize Acquisition
                     </a>
                     <div className="text-[9px] text-center text-gray-600 uppercase tracking-widest font-bold">
-                        Secure SSL Encryption Active
+                        Verified: {p.id}
                     </div>
                 </div>
               </div>

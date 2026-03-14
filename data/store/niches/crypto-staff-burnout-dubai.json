@@ -1,0 +1,24 @@
+{
+  "id": "crypto-staff-burnout-dubai",
+  "title": "Autonomous Crypto Revenue Agent for Dubai",
+  "headline": "Stop Staff Burnout in your Crypto Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for Crypto professionals in Dubai.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "Crypto",
+  "region": "Dubai",
+  "pain_point": "Staff Burnout",
+  "image_url": "/marketing/images/crypto.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous Crypto Revenue Agent for Dubai",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for Crypto professionals in Dubai.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

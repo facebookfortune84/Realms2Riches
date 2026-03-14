@@ -12,27 +12,27 @@ class TestSocialCTAIntegrity(unittest.TestCase):
     
     def test_validator_rejects_missing_link(self):
         """Verify posts without any link are halted."""
-        result = SocialPostValidator.validate("Buy now!", None)
+        result, _ = SocialPostValidator.validate("Buy now!", None)
         self.assertFalse(result)
         print("✅ Validator halted missing link.")
 
     def test_validator_rejects_hallucinated_link(self):
         """Verify posts with generic/unverified links are halted."""
-        result = SocialPostValidator.validate("Click here", "https://example.com")
+        result, _ = SocialPostValidator.validate("Click here", "https://example.com")
         self.assertFalse(result)
         print("✅ Validator halted unverified link (example.com).")
 
     def test_validator_accepts_stripe_link(self):
         """Verify Stripe Checkout links pass."""
         link = "https://checkout.stripe.com/c/pay/cs_live_12345"
-        result = SocialPostValidator.validate("Secure access:", link)
+        result, _ = SocialPostValidator.validate("Secure access:", link)
         self.assertTrue(result)
         print("✅ Validator accepted valid Stripe link.")
 
     def test_validator_accepts_ngrok_deep_link(self):
         """Verify ngrok deep links pass (for dev/production hybrid)."""
         link = "https://glowfly-sizeable-lazaro.ngrok-free.dev/api/checkout/session?id=1"
-        result = SocialPostValidator.validate("Buy now", link)
+        result, _ = SocialPostValidator.validate("Buy now", link)
         self.assertTrue(result)
         print("✅ Validator accepted ngrok checkout link.")
 

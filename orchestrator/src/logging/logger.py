@@ -23,7 +23,7 @@ def get_logger(name: str, level: str = "INFO") -> logging.Logger:
     logger.setLevel(level)
     
     if not logger.handlers:
-        handler = logging.StreamHandler(sys.stdout)
+        handler = logging.StreamHandler(sys.stderr)
         handler.setFormatter(JsonFormatter())
         logger.addHandler(handler)
         

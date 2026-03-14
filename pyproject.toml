@@ -39,6 +39,7 @@ google-auth-oauthlib = "^1.2.4"
 google-api-python-client = "^2.190.0"
 google-auth-httplib2 = "^0.3.0"
 nest-asyncio = "^1.6.0"
+mcp = "^1.2.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
@@ -62,3 +63,8 @@ target-version = "py311"
 python_version = "3.11"
 strict = true
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]

@@ -1,0 +1,24 @@
+{
+  "id": "hvac-high-lead-cost-california",
+  "title": "Autonomous HVAC Revenue Agent for California",
+  "headline": "Stop High Lead Cost in your HVAC Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for HVAC professionals in California.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "HVAC",
+  "region": "California",
+  "pain_point": "High Lead Cost",
+  "image_url": "/marketing/images/hvac.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous HVAC Revenue Agent for California",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for HVAC professionals in California.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

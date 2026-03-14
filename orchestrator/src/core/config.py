@@ -6,20 +6,21 @@ from orchestrator.src.validation.schemas import DatabaseConfig, MarketingConfig
 class Settings(BaseSettings):
     # Detect environment mode - Last file in list has highest priority
     model_config = SettingsConfigDict(
-        env_file=[".env.example", ".env.prod", ".env.local"], 
+        env_file=[".env.example", ".env.local", ".env.prod"], 
         env_file_encoding="utf-8", 
         extra="ignore"
     )
 
     # --- CORE ---
     DATABASE_URL: Optional[str] = None
-    FRONTEND_URL: str = "http://localhost:5173"
+    BACKEND_URL: str = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+    FRONTEND_URL: str = "https://frontend-two-xi-gal9lkptfi.vercel.app/"
     REALM_MASTER_KEY: str = "placeholder_key"
     ENV_MODE: str = "dev"
     BRAND_NAME: str = "Realms 2 Riches"
     PRODUCT_NAME: str = "Sovereign Swarm"
-    MARKETING_SITE_URL: str = "https://www.realmstoriches.xyz"
-    CONTACT_EMAIL: str = "robertdemottojr50@gmail.com"
+    MARKETING_SITE_URL: str = "https://frontend-two-xi-gal9lkptfi.vercel.app/"
+    CONTACT_EMAIL: str = "robertdemottojr83@gmail.com"
 
     # --- DATABASE ---
     POSTGRES_USER: str = "postgres"
@@ -52,7 +53,7 @@ class Settings(BaseSettings):
     STRIPE_WEBHOOK_SECRET: Optional[str] = None
 
     # --- SOCIAL MEDIA ---
-    FACEBOOK_PAGE_TOKEN: Optional[str] = None
+    FACEBOOK_PAGE_ACCESS_TOKEN: Optional[str] = None
     FACEBOOK_PAGE_ID: Optional[str] = None
     LINKEDIN_ACCESS_TOKEN: Optional[str] = None
     LINKEDIN_PROFILE_URN: Optional[str] = None
@@ -60,6 +61,10 @@ class Settings(BaseSettings):
     LINKEDIN_CLIENT_ID: Optional[str] = None
     LINKEDIN_CLIENT_SECRET: Optional[str] = None
     X_ACCESS_TOKEN: Optional[str] = None
+    SOCIAL_TWITTER_HANDLE: str = "@Realms2Riches"
+    SOCIAL_LINKEDIN_URL: str = "https://linkedin.com/company/realms2riches"
+    SOCIAL_YOUTUBE_URL: str = "https://youtube.com/c/realms2riches"
+    SOCIAL_GITHUB_URL: str = "https://github.com/realms2riches"
 
     # --- RELIABILITY & OBSERVABILITY ---
     TELEMETRY_ENABLED: bool = True
@@ -70,11 +75,16 @@ class Settings(BaseSettings):
     # --- PROPERTIES ---
     @property
     def db_config(self) -> DatabaseConfig:
+        host = self.POSTGRES_HOST
+        # Conscious Fallback for local execution vs docker
+        if host == "postgres" and os.name == "nt": 
+            host = "localhost"
+            
         return DatabaseConfig(
             POSTGRES_USER=self.POSTGRES_USER,
             POSTGRES_PASSWORD=self.POSTGRES_PASSWORD,
             POSTGRES_DB=self.POSTGRES_DB,
-            POSTGRES_HOST=self.POSTGRES_HOST,
+            POSTGRES_HOST=host,
             POSTGRES_PORT=self.POSTGRES_PORT,
             DATABASE_URL=self.DATABASE_URL
         )
@@ -85,7 +95,11 @@ class Settings(BaseSettings):
             BRAND_NAME=self.BRAND_NAME,
             PRODUCT_NAME=self.PRODUCT_NAME,
             MARKETING_SITE_URL=self.MARKETING_SITE_URL,
-            CONTACT_EMAIL=self.CONTACT_EMAIL
+            CONTACT_EMAIL=self.CONTACT_EMAIL,
+            SOCIAL_TWITTER_HANDLE=self.SOCIAL_TWITTER_HANDLE,
+            SOCIAL_LINKEDIN_URL=self.SOCIAL_LINKEDIN_URL,
+            SOCIAL_YOUTUBE_URL=self.SOCIAL_YOUTUBE_URL,
+            SOCIAL_GITHUB_URL=self.SOCIAL_GITHUB_URL
         )
 
 settings = Settings()

@@ -8,7 +8,7 @@ import time
 sys.path.append(os.getcwd())
 
 class SovereignIntegrityAudit(unittest.TestCase):
-    BASE_URL = "http://localhost:8000"
+    BASE_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
     NGROK_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
 
     def test_01_health_and_rag_count(self):

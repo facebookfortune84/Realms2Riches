@@ -99,4 +99,55 @@ class CatalogAPI:
         finally:
             session.close()
 
+    def create_product(self, product: ProductSchema) -> bool:
+        """Upsert a product and its prices into the database."""
+        session = self.store.Session()
+        try:
+            # 1. Upsert Product
+            db_product = session.query(ProductModel).filter_by(id=product.id).first()
+            if not db_product:
+                db_product = ProductModel(
+                    id=product.id,
+                    name=product.name,
+                    description=product.description,
+                    category=product.category
+                )
+                session.add(db_product)
+            else:
+                db_product.name = product.name
+                db_product.description = product.description
+                db_product.category = product.category
+            
+            session.flush()
+
+            # 2. Upsert Prices
+            for price in product.prices:
+                db_price = session.query(PriceModel).filter_by(
+                    product_id=product.id, 
+                    price=price.price, 
+                    currency=price.currency
+                ).first()
+                
+                if not db_price:
+                    db_price = PriceModel(
+                        product_id=product.id,
+                        price=price.price,
+                        currency=price.currency,
+                        interval=price.interval,
+                        stripe_price_id=price.stripe_price_id
+                    )
+                    session.add(db_price)
+                else:
+                    db_price.interval = price.interval
+                    db_price.stripe_price_id = price.stripe_price_id
+            
+            session.commit()
+            return True
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Catalog Create Error: {e}")
+            return False
+        finally:
+            session.close()
+
 catalog_api = CatalogAPI()

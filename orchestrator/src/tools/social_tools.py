@@ -1,78 +1,52 @@
 import os
 import requests
+import logging
 from typing import Dict, Any, List, Optional
 from orchestrator.src.tools.base import BaseTool, ToolConfig
+from orchestrator.src.validation.schemas import ToolInvocation
 from orchestrator.src.core.config import settings
-from orchestrator.src.logging.logger import get_logger
+from datetime import datetime
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 class FacebookPostTool(BaseTool):
-    def __init__(self, config: ToolConfig):
-        super().__init__(config)
-        self.access_token = settings.FACEBOOK_PAGE_TOKEN
-        self.page_id = settings.FACEBOOK_PAGE_ID or "me"
-
-    def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        message, link, media_url = params.get("message"), params.get("link"), params.get("media_url")
-        if not self.access_token or self.access_token == "placeholder":
-            logger.warning("Facebook Dispatch: Missing Token.")
-            return {"status": "skipped", "reason": "No valid token"}
-
-        # Determine if Video or Photo
-        is_video = media_url and ".mp4" in media_url.lower()
-        is_raster = media_url and any(ext in media_url.lower() for ext in [".png", ".jpg", ".jpeg"])
+    def execute(self, invocation: Any) -> Dict[str, Any]:
+        params = invocation if isinstance(invocation, dict) else (invocation.input_data or {})
+        message = params.get("message")
+        link = params.get("link")
         
-        headers = {"ngrok-skip-browser-warning": "true"}
+        token = settings.FACEBOOK_PAGE_ACCESS_TOKEN
+        page_id = settings.FACEBOOK_PAGE_ID
         
-        if is_video:
-            url = f"https://graph.facebook.com/v19.0/{self.page_id}/videos"
-            payload = {
-                "file_url": media_url,
-                "description": f"ACQUIRE NOW: {link}\n\n{message}",
-                "access_token": self.access_token
-            }
-        elif is_raster:
-            url = f"https://graph.facebook.com/v19.0/{self.page_id}/photos"
-            payload = {
-                "url": media_url,
-                "caption": f"ACQUIRE NOW: {link}\n\n{message}",
-                "access_token": self.access_token
-            }
-        else:
-            # Fallback to Link Card (Feed)
-            url = f"https://graph.facebook.com/v19.0/{self.page_id}/feed"
-            payload = {
-                "message": message,
-                "link": link,
-                "access_token": self.access_token
-            }
+        if not token or token == "placeholder":
+            return {"status": "skipped", "reason": "No FB token"}
 
+        url = f"https://graph.facebook.com/v19.0/{page_id}/feed"
+        payload = {"message": message, "access_token": token}
+        if link: 
+            payload["link"] = link
+            # Platinum CTA Implementation
+            payload["call_to_action"] = {
+                "type": "SHOP_NOW",
+                "value": {"link": link}
+            }
+        
         try:
-            logger.info(f"Facebook Dispatching to {url} | Media: {bool(media_url)}")
-            response = requests.post(url, json=payload, headers=headers, timeout=30)
-            if response.status_code != 200:
-                err_msg = f"FB API Error: {response.status_code} - {response.text}"
-                logger.error(err_msg)
-                return {"status": "error", "reason": err_msg[:200]}
-            
-            post_id = response.json().get("id") or response.json().get("post_id")
-            logger.info(f"✅ Facebook SUCCESS: Post ID {post_id}")
-            return {"status": "success", "platform": "facebook", "id": post_id}
+            logger.info("Facebook Dispatching...")
+            res = requests.post(url, json=payload, timeout=15)
+            if res.status_code == 200:
+                return {"status": "success", "platform": "facebook", "id": res.json().get("id")}
+            return {"status": "error", "reason": res.text}
         except Exception as e:
-            logger.error(f"Facebook Exception: {e}")
             return {"status": "error", "reason": str(e)}
 
 class LinkedInPostTool(BaseTool):
     def __init__(self, config: ToolConfig):
         super().__init__(config)
         self.access_token = settings.LINKEDIN_ACCESS_TOKEN
-        self.author_urn = settings.LINKEDIN_PROFILE_URN or "urn:li:person:placeholder"
+        self.author_urn = settings.LINKEDIN_PROFILE_URN
 
-    def _refresh_token(self) -> bool:
-        logger.info("LinkedIn: Attempting token refresh...")
-        if not all([settings.LINKEDIN_REFRESH_TOKEN, settings.LINKEDIN_CLIENT_ID, settings.LINKEDIN_CLIENT_SECRET]):
-            return False
+    def _refresh_token(self):
         url = "https://www.linkedin.com/oauth/v2/accessToken"
         payload = {
             "grant_type": "refresh_token",
@@ -93,8 +67,9 @@ class LinkedInPostTool(BaseTool):
             logger.error(f"LinkedIn Refresh Fail: {e}")
             return False
 
-    def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        text, link, media_url = params.get("message"), params.get("link"), params.get("media_url")
+    def execute(self, invocation: Any) -> Dict[str, Any]:
+        params = invocation if isinstance(invocation, dict) else (invocation.input_data or {})
+        text, link = params.get("message"), params.get("link")
         token = self.access_token
         if not token or token == "placeholder": return {"status": "skipped"}
         if token.startswith("Bearer "): token = token.replace("Bearer ", "")
@@ -120,66 +95,142 @@ class LinkedInPostTool(BaseTool):
             payload["content"] = {
                 "article": {
                     "source": link, 
-                    "title": "🚀 SECURE YOUR SOVEREIGN LICENSE", 
-                    "description": "Initialize your 1000-agent swarm today."
+                    "title": "🚀 INITIALIZE YOUR SOVEREIGN Swarm", 
+                    "description": "Scale to 1000 agents immediately."
                 }
             }
-            if media_url and ".svg" not in media_url.lower():
-                payload["content"]["article"]["thumbnail"] = media_url
 
         try:
-            logger.info(f"LinkedIn Dispatching | Link: {bool(link)}")
+            logger.info("LinkedIn Dispatching...")
             response = requests.post(url, json=payload, headers=headers, timeout=15)
-            
             if response.status_code == 401 and self._refresh_token():
                 headers["Authorization"] = f"Bearer {self.access_token}"
                 response = requests.post(url, json=payload, headers=headers, timeout=15)
             
             if response.status_code != 201:
-                err_msg = f"LinkedIn API Error: {response.status_code} - {response.text}"
-                logger.error(err_msg)
-                return {"status": "error", "reason": err_msg[:200]}
-                
-            logger.info("✅ LinkedIn SUCCESS.")
+                return {"status": "error", "reason": response.text}
             return {"status": "success", "platform": "linkedin"}
         except Exception as e:
-            logger.error(f"LinkedIn Exception: {e}")
+            return {"status": "error", "reason": str(e)}
+
+class TwitterPostTool(BaseTool):
+    def __init__(self, config: ToolConfig):
+        super().__init__(config)
+        self.access_token = settings.X_ACCESS_TOKEN
+
+    def execute(self, invocation: Any) -> Dict[str, Any]:
+        params = invocation if isinstance(invocation, dict) else (invocation.input_data or {})
+        message, link = params.get("message"), params.get("link")
+        if not self.access_token or self.access_token == "placeholder":
+            return {"status": "skipped"}
+
+        url = "https://api.twitter.com/2/tweets"
+        headers = {"Authorization": f"Bearer {self.access_token}", "Content-Type": "application/json"}
+        full_text = f"{message}\n\nACQUIRE: {link}" if link else message
+        payload = {"text": full_text[:280]}
+
+        try:
+            logger.info("X (Twitter) Dispatching...")
+            response = requests.post(url, json=payload, headers=headers, timeout=15)
+            if response.status_code in [200, 201]:
+                return {"status": "success", "platform": "x", "id": response.json().get("data", {}).get("id")}
+            return {"status": "error", "reason": response.text}
+        except Exception as e:
+            return {"status": "error", "reason": str(e)}
+
+class DiscordPostTool(BaseTool):
+    def execute(self, invocation: Any) -> Dict[str, Any]:
+        params = invocation if isinstance(invocation, dict) else (invocation.input_data or {})
+        message, link = params.get("message"), params.get("link")
+        webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
+        if not webhook_url: return {"status": "skipped"}
+
+        payload = {"content": f"{message}\n\nACQUIRE: {link}" if link else message}
+        try:
+            requests.post(webhook_url, json=payload, timeout=10)
+            return {"status": "success", "platform": "discord"}
+        except Exception as e:
             return {"status": "error", "reason": str(e)}
 
 class SocialMediaMultiplexer(BaseTool):
+    """
+    Industrial Viral Multiplexer.
+    Ensures high-quality insights and zero 'garbage' posts.
+    """
     def __init__(self, config: ToolConfig):
         super().__init__(config)
-        self.fb_tool = FacebookPostTool(ToolConfig(tool_id="fb", name="fb", description="fb", parameters_schema={}, allowed_agents=["*"]))
-        self.li_tool = LinkedInPostTool(ToolConfig(tool_id="li", name="li", description="li", parameters_schema={}, allowed_agents=["*"]))
+        self.fb_tool = FacebookPostTool(ToolConfig(tool_id="fb_int", name="FB", description="D", parameters_schema={}, allowed_agents=["*"]))
+        self.li_tool = LinkedInPostTool(ToolConfig(tool_id="li_int", name="LI", description="D", parameters_schema={}, allowed_agents=["*"]))
+        self.tw_tool = TwitterPostTool(ToolConfig(tool_id="tw_int", name="X", description="D", parameters_schema={}, allowed_agents=["*"]))
+        self.dc_tool = DiscordPostTool(ToolConfig(tool_id="dc_int", name="DC", description="D", parameters_schema={}, allowed_agents=["*"]))
 
-    def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, invocation: Any) -> Dict[str, Any]:
         from orchestrator.src.validation.social_validator import SocialPostValidator
-        message, link, media_url = params.get("message"), params.get("link"), params.get("media_url")
+        params = invocation if isinstance(invocation, dict) else (invocation.input_data or {})
+        insight = params.get("insight") or params.get("message")
+        link = params.get("link", "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02")
         
-        # 1. PRE-FLIGHT VALIDATION
-        is_valid, reason = SocialPostValidator.validate(message, link)
-        if not is_valid:
-            logger.warning(f"🛡️ MULTIPLEXER VALIDATION FAIL: {reason}")
-            return {"status": "error", "error_type": "validation_fail", "reason": reason}
-        
-        # 2. DISPATCH
+        if not insight or len(insight) < 30:
+            return {"status": "error", "reason": "Insight quality threshold not met (min 30 chars)."}
+
+        is_valid, reason = SocialPostValidator.validate(insight, link)
+        if not is_valid: return {"status": "error", "reason": reason}
+
         results = {
-            "facebook": self.fb_tool.execute({"message": message, "link": link, "media_url": media_url}),
-            "linkedin": self.li_tool.execute({"message": message, "link": link, "media_url": media_url})
+            "facebook": self.fb_tool.execute({"message": f"💎 SOVEREIGN INTELLIGENCE: {insight}\n\n👉 SECURE NODE: {link}"}),
+            "linkedin": self.li_tool.execute({"message": f"Industrial Growth Report: {insight}\n\n#AI #SovereignMatrix\n\nLink: {link}"}),
+            "twitter": self.tw_tool.execute({"message": f"🔥 {insight[:200]}... ACQUIRE: {link}"}),
+            "discord": self.dc_tool.execute({"message": f"📢 **MATRIX ALERT**: {insight}\n\n{link}"})
         }
+        return {"status": "success", "platforms": results}
+
+class WordPressPostTool(BaseTool):
+    def execute(self, invocation: Any) -> Dict[str, Any]:
+        params = invocation if isinstance(invocation, dict) else (invocation.input_data or {})
+        title = params.get("title", "The Future of Autonomous Revenue")
+        content = params.get("content", "Synthetic agents are scaling the globe.")
+        if not settings.WORDPRESS_SITE_URL: return {"status": "skipped"}
+
+        from requests.auth import HTTPBasicAuth
+        url = f"{settings.WORDPRESS_SITE_URL.rstrip('/')}/wp-json/wp/v2/posts"
+        auth = HTTPBasicAuth(settings.WORDPRESS_USERNAME, settings.WORDPRESS_APPLICATION_PASSWORD)
+        data = {"title": title, "content": content, "status": "publish"}
         
-        # 3. SELF-HEALING FALLBACK (Detailed Audit)
-        failed_channels = [c for c, r in results.items() if r.get("status") == "error"]
-        if failed_channels:
-            logger.error(f"🛡️ CHANNEL DEVIATION: {failed_channels}. Retrying with optimization track...")
-            # Results are processed by the recursive loop in scheduler.py
-            
-        return results
+        try:
+            res = requests.post(url, auth=auth, json=data, timeout=15)
+            if res.status_code in [200, 201]:
+                return {"status": "success", "post_url": res.json().get("link")}
+            return {"status": "error", "reason": res.text}
+        except Exception as e:
+            return {"status": "error", "reason": str(e)}
+
+class OmniChannelDistributor(BaseTool):
+    def execute(self, invocation: Any) -> Dict[str, Any]:
+        params = invocation if isinstance(invocation, dict) else (invocation.input_data or {})
+        msg = params.get("message", "The Sovereign Matrix is online.")
+        link = params.get("link", settings.MARKETING_SITE_URL)
+        
+        li = LinkedInPostTool(ToolConfig(tool_id="li_dist", name="LI", description="D", parameters_schema={}, allowed_agents=["*"]))
+        fb = FacebookPostTool(ToolConfig(tool_id="fb_dist", name="FB", description="D", parameters_schema={}, allowed_agents=["*"]))
+        wp = WordPressPostTool(ToolConfig(tool_id="wp_dist", name="WP", description="D", parameters_schema={}, allowed_agents=["*"]))
+        
+        return {
+            "status": "success", 
+            "channel_results": {
+                "linkedin": li.execute({"message": msg, "link": link}),
+                "facebook": fb.execute({"message": msg, "link": link}),
+                "wordpress": wp.execute({"title": "Sovereign Bulletin", "content": f"{msg}<br><br><a href='{link}'>Read More</a>"})
+            }
+        }
 
 def get_social_tools() -> List[BaseTool]:
     cfg = {"type": "object", "properties": {"message": {"type": "string"}, "link": {"type": "string"}}}
     return [
         FacebookPostTool(ToolConfig(tool_id="facebook_post", name="FB", description="FB", parameters_schema=cfg, allowed_agents=["*"])),
         LinkedInPostTool(ToolConfig(tool_id="linkedin_post", name="LI", description="LI", parameters_schema=cfg, allowed_agents=["*"])),
-        SocialMediaMultiplexer(ToolConfig(tool_id="social_multiplexer", name="Multiplexer", description="All channels", parameters_schema=cfg, allowed_agents=["*"]))
+        DiscordPostTool(ToolConfig(tool_id="discord_post", name="DC", description="DC", parameters_schema=cfg, allowed_agents=["*"])),
+        TwitterPostTool(ToolConfig(tool_id="twitter_post", name="X", description="X", parameters_schema=cfg, allowed_agents=["*"])),
+        WordPressPostTool(ToolConfig(tool_id="wordpress_post", name="WP", description="WP", parameters_schema=cfg, allowed_agents=["*"])),
+        SocialMediaMultiplexer(ToolConfig(tool_id="social_multiplexer", name="Multiplexer", description="All channels", parameters_schema=cfg, allowed_agents=["*"])),
+        OmniChannelDistributor(ToolConfig(tool_id="omni_distributor", name="Omni Distributor", description="Omni Channel Post", parameters_schema=cfg, allowed_agents=["*"]))
     ]

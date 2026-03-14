@@ -1,14 +1,28 @@
 {
-  "timestamp": "2026-02-26T03:00:02.922415",
+  "timestamp": "2026-03-11T13:09:55.043229",
   "status": "READY",
   "checks": {
-    "backend": "pass",
-    "database": "pass",
-    "catalog": "pass",
-    "stripe": "pass",
-    "voice": "pass",
-    "agents": "pass",
-    "task_flow": "pass",
-    "metrics": "fail"
+    "config": {
+      "status": "pass",
+      "missing": []
+    },
+    "database": {
+      "status": "pass"
+    },
+    "catalog": {
+      "status": "pass",
+      "count": 2
+    },
+    "marketing": {
+      "status": "pass"
+    },
+    "tests": {
+      "status": "pass",
+      "exit_code": 0
+    },
+    "governance": {
+      "git_tag": "v5.2.0-SOVEREIGN-3-g4296221",
+      "lineage_manifest": false
+    }
   }
 }

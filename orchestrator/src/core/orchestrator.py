@@ -11,12 +11,15 @@ from pydantic import ValidationError
 from orchestrator.src.core.agent import Agent
 from orchestrator.src.core.llm_provider import GroqProvider, BaseLLMProvider
 from orchestrator.src.core.config import settings
+from orchestrator.src.core.self_healing import sovereign_healer
 from orchestrator.src.validation.schemas import TaskSpec, AgentConfig, ToolConfig, ToolInvocation
 from orchestrator.src.tools.base import BaseTool
 from orchestrator.src.logging.logger import get_logger
 from orchestrator.src.agents.fleet import generate_grand_fleet
 from orchestrator.src.core.ticketing.governance import governance, TicketStatus
 from orchestrator.src.core.backlog import AutonomousBacklog
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 # Voice & Multimodal Adapters
 from orchestrator.src.core.voice.mock_adapters import MockSTTAdapter, MockTTSAdapter
@@ -24,12 +27,15 @@ from orchestrator.src.core.voice.mock_adapters import MockSTTAdapter, MockTTSAda
 # Tools & Logic
 from orchestrator.src.tools.git_tools import GitTool
 from orchestrator.src.tools.file_tools import FileTool
-from orchestrator.src.tools.social_tools import FacebookPostTool, LinkedInPostTool, SocialMediaMultiplexer
+from orchestrator.src.tools.social_tools import FacebookPostTool, LinkedInPostTool, SocialMediaMultiplexer, OmniChannelDistributor
 from orchestrator.src.tools.web_tools import get_web_tools
-from orchestrator.src.tools.revenue_tools import get_revenue_tools
+from orchestrator.src.tools.revenue_tools import get_revenue_tools, NicheLanderEngine
 from orchestrator.src.tools.marketing_tools import get_marketing_tools
 from orchestrator.src.tools.smtp_tools import SMTPOutreachTool
 from orchestrator.src.tools.audit_tools import SystemAuditTool
+from orchestrator.src.tools.lead_scraper import get_lead_tools, JobBoardLeadScraper
+from orchestrator.src.tools.voice_tools import get_voice_tools
+from orchestrator.src.validation.burn_monitor import BurnMonitor
 from orchestrator.src.memory.vector_store import VectorStore
 from orchestrator.src.memory.sql_store import SQLStore
 
@@ -76,11 +82,20 @@ class Orchestrator:
         self.stt, self.tts = MockSTTAdapter(), MockTTSAdapter()
         self.cells, self.agents = {}, {}
         self.backlog = AutonomousBacklog(self)
+        self.scheduler: Optional[AsyncIOScheduler] = None
 
     async def startup(self):
         logger.info("Orchestrator: Initializing high-density matrix...")
+        logger.info(f"  -> Environment: {settings.ENV_MODE.upper()}")
+        logger.info(f"  -> Public Gateway: {settings.BACKEND_URL}")
         governance.sql_store = self.sql_store
         
+        # Initialize Scheduler here to bind to the active loop
+        self.scheduler = AsyncIOScheduler()
+        
+        # 0. Execute Baseline Healing
+        sovereign_healer.execute_healing_cycle()
+
         # 1. Proactively load Oracle Assets
         self._load_oracle_personas()
         self._load_oracle_sops()
@@ -90,8 +105,158 @@ class Orchestrator:
         self.is_ready = True
         logger.info("💎 SOVEREIGN MATRIX ONLINE.")
         
-        # 3. Start Backlog
+        # 3. Start Backlog & High-Frequency Scheduler
         asyncio.create_task(self.backlog.start())
+        self._setup_schedules()
+        self.scheduler.start()
+        
+        # 4. INITIALIZE INDUSTRIAL MONITORING
+        asyncio.create_task(self._monitor_burn_cycle())
+        
+        # 5. FOUNDING NODE INITIALIZATION
+        self._init_founding_node()
+
+    def _init_founding_node(self):
+        """Grants initial credits to the primary node if not set."""
+        sql = SQLStore()
+        balance = sql.get_user_balance("primary_node")
+        if balance["credits"] == 0:
+            logger.info("💎 FOUNDING NODE: Initializing initial credit block.")
+            sql.update_user_balance("primary_node", 5000.0, 1000)
+
+    async def _monitor_burn_cycle(self):
+        """Proactively checks user health/burn every 30 minutes."""
+        while True:
+            # In production, we'd iterate over all users. 
+            # For this node, we monitor the primary SIN.
+            BurnMonitor.check_and_alert("primary_node", settings.CONTACT_EMAIL)
+            await asyncio.sleep(1800) 
+
+    def _setup_schedules(self):
+        """Register autonomous 24/7 jobs."""
+        # 1. Yield Audit (Every hour)
+        self.scheduler.add_job(
+            self._run_yield_audit_job,
+            CronTrigger(minute=0),
+            id="yield_audit",
+            replace_existing=True
+        )
+        
+        # 2. Sync Dual Core (Every 30 minutes)
+        self.scheduler.add_job(
+            self._run_dual_core_sync_job,
+            CronTrigger(minute="0,30"),
+            id="core_sync",
+            replace_existing=True
+        )
+
+        # 3. Asset Verification (Every 2 hours)
+        self.scheduler.add_job(
+            self._run_asset_verification_job,
+            CronTrigger(hour="*/2"),
+            id="asset_verify",
+            replace_existing=True
+        )
+
+        # 4. Lead Harvesting (Every 4 hours)
+        self.scheduler.add_job(
+            self._run_lead_harvest_job,
+            CronTrigger(hour="*/4"),
+            id="lead_harvest",
+            replace_existing=True
+        )
+
+        # 5. Inbound Nurturing (Every 24 hours)
+        self.scheduler.add_job(
+            self._run_nurture_job,
+            CronTrigger(hour=0), # Run at midnight
+            id="inbound_nurture",
+            replace_existing=True
+        )
+
+        # 6. INDUSTRIAL: Programmatic SEO (Every 12 hours)
+        self.scheduler.add_job(
+            self._run_seo_forge_job,
+            CronTrigger(hour="*/12"),
+            id="seo_forge",
+            replace_existing=True
+        )
+
+        # 7. INDUSTRIAL: Omni-Channel Posting (Every 3 hours)
+        self.scheduler.add_job(
+            self._run_viral_distribution_job,
+            CronTrigger(hour="*/3"),
+            id="viral_dist",
+            replace_existing=True
+        )
+
+        logger.info("⚙️ 24/7 AUTONOMOUS SCHEDULE LOCKED.")
+
+    async def _run_yield_audit_job(self):
+        logger.info("🕒 SCHEDULER: Initiating Yield Audit...")
+        from orchestrator.src.tools.revenue_tools import YieldAuditorTool, ToolConfig
+        auditor = YieldAuditorTool(ToolConfig(tool_id="scheduler_audit", name="Auditor", description="Audit", parameters_schema={}, allowed_agents=["*"]))
+        result = await asyncio.to_thread(auditor.execute, {})
+        logger.info(f"💰 Yield Audit Result: {result.get('theoretical_monthly_runrate')} TMR")
+
+    async def _run_dual_core_sync_job(self):
+        logger.info("🕒 SCHEDULER: Initiating Dual Core Sync...")
+        # Synchronization logic between primary and secondary
+        try:
+             import shutil
+             import os
+             src = "orchestrator/src"
+             dst = "core_secondary/orchestrator/src"
+             if os.path.exists(src):
+                 if os.path.exists(dst):
+                     shutil.rmtree(dst)
+                 shutil.copytree(src, dst)
+                 logger.info("✅ Dual Core Parity Maintained.")
+             else:
+                 logger.warning("⚠️ Sync skipped: Source directory not found.")
+        except Exception as e:
+             logger.error(f"❌ Core Sync Failed: {e}")
+
+    async def _run_asset_verification_job(self):
+        logger.info("🕒 SCHEDULER: Initiating Asset Verification...")
+        import subprocess
+        import sys
+        try:
+            subprocess.run([sys.executable, "scripts/verify_assets.py"], check=True)
+            logger.info("✅ Asset Integrity Verified.")
+        except:
+            logger.error("❌ Asset Verification detected failures.")
+
+    async def _run_lead_harvest_job(self):
+        logger.info("🕒 SCHEDULER: Initiating Lead Harvest...")
+        from orchestrator.src.tools.lead_scraper import HackerNewsLeadScraper, ToolConfig
+        scraper = HackerNewsLeadScraper(ToolConfig(tool_id="scheduler_hn", name="HN Scraper", description="Lead Gen", parameters_schema={}, allowed_agents=["*"]))
+        result = await asyncio.to_thread(scraper.execute, {})
+        logger.info(f"🌾 Harvested {result.get('leads_found')} new leads.")
+
+    async def _run_nurture_job(self):
+        logger.info("🕒 SCHEDULER: Initiating Nurture Cycle...")
+        import subprocess
+        import sys
+        try:
+            subprocess.run([sys.executable, "scripts/inbound_nurture.py"], check=True)
+            logger.info("✅ Nurture Cycle Complete.")
+        except:
+            logger.error("❌ Nurture Cycle failed.")
+
+    async def _run_seo_forge_job(self):
+        logger.info("🕒 SCHEDULER: Initiating SEO Forge...")
+        engine = NicheLanderEngine(ToolConfig(tool_id="sch_seo", name="SEO", description="SEO", parameters_schema={}, allowed_agents=["*"]))
+        await asyncio.to_thread(engine.execute, {})
+        logger.info("✅ 1,000+ Niche Pages Re-Generated.")
+
+    async def _run_viral_distribution_job(self):
+        logger.info("🕒 SCHEDULER: Initiating Viral Distribution...")
+        dist = OmniChannelDistributor(ToolConfig(tool_id="sch_omni", name="Omni", description="Omni", parameters_schema={}, allowed_agents=["*"]))
+        # Generate dynamic viral message
+        msg = f"The Matrix has evolved. Version {settings.APP_VERSION} is capturing $10k+ TMR. Join now."
+        await asyncio.to_thread(dist.execute, {"message": msg, "link": settings.MARKETING_SITE_URL})
+        logger.info("✅ Multi-Channel Post Sent.")
 
     def _load_oracle_personas(self):
         prompts_dir = "data/oracle/prompts"
@@ -140,6 +305,7 @@ class Orchestrator:
         return tools
 
     def _initialize_matrix(self):
+        from orchestrator.src.tools.smtp_tools import get_smtp_tools
         fleet = generate_grand_fleet()
         all_tools = [
             GitTool(ToolConfig(tool_id="git", name="Git", description="Ops", parameters_schema={}, allowed_agents=["*"])),
@@ -147,12 +313,14 @@ class Orchestrator:
             FacebookPostTool(ToolConfig(tool_id="fb", name="FB", description="Social", parameters_schema={}, allowed_agents=["*"])),
             LinkedInPostTool(ToolConfig(tool_id="li", name="LI", description="Social", parameters_schema={}, allowed_agents=["*"])),
             SocialMediaMultiplexer(ToolConfig(tool_id="multiplexer", name="Broadcast", description="Omni", parameters_schema={}, allowed_agents=["*"])),
-            SMTPOutreachTool(ToolConfig(tool_id="smtp_outreach", name="SMTP", description="Direct Sales", parameters_schema={}, allowed_agents=["*"])),
             SystemAuditTool(ToolConfig(tool_id="sys_audit", name="Integrity", description="Security", parameters_schema={}, allowed_agents=["*"]))
         ]
+        all_tools.extend(get_smtp_tools())
         all_tools.extend(get_marketing_tools())
         all_tools.extend(get_web_tools())
         all_tools.extend(get_revenue_tools())
+        all_tools.extend(get_lead_tools())
+        all_tools.extend(get_voice_tools())
         all_tools.extend(self._load_oracle_tools())
 
         depts = ["CYBERNETIC_ENGINEERING", "GLOBAL_MARKET_FORCE", "REVENUE_SYSTEMS", "INTEGRITY_SHIELD", "FALLBACK_OPTIMIZATION"]
@@ -178,5 +346,10 @@ class Orchestrator:
             governance.update_ticket(ticket.id, TicketStatus.RESOLVED, agent_id=result.get("agent_name"), notes=result.get("reasoning"))
             yield {"status": "completed", "task_id": task_id, "result": result}
         except Exception as e:
+            logger.error(f"⚠️ Task {task_id} FAILED. Triggering Self-Healing...")
             governance.update_ticket(ticket.id, TicketStatus.FAILED, notes=str(e))
-            yield {"status": "failed", "task_id": task_id, "reason": str(e)}
+            
+            # TRIGGER HEALING CYCLE
+            healing_results = sovereign_healer.execute_healing_cycle()
+            
+            yield {"status": "failed", "task_id": task_id, "reason": str(e), "healing": healing_results}

@@ -8,7 +8,7 @@ import time
 sys.path.append(os.getcwd())
 
 class TestSovereignSystem(unittest.TestCase):
-    BASE_URL = "http://localhost:8000"
+    BASE_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
     NGROK_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
 
     def setUp(self):

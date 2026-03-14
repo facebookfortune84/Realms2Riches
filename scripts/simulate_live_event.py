@@ -2,53 +2,54 @@ import requests
 import json
 import time
 import os
+import sys
+
+# Ensure project root is in path
+sys.path.append(os.getcwd())
+
+from orchestrator.src.core.config import settings
 
 def simulate_payment():
-    print("💳 SIMULATING LIVE STRIPE PAYMENT...")
+    print("💳 SIMULATING LIVE STRIPE PAYMENT (HDRB Mode)...")
     
-    webhook_url = "http://localhost:8000/api/webhooks/stripe"
+    # Target Live Backend for direct verification
+    webhook_url = f"{settings.BACKEND_URL}/api/v1/monetization/webhook"
     
-    # Mock Event Payload
     payload = {
         "id": f"evt_sim_{int(time.time())}",
         "object": "event",
-        "api_version": "2023-10-16",
-        "created": int(time.time()),
+        "type": "checkout.session.completed",
         "data": {
             "object": {
-                "id": f"cs_test_{int(time.time())}",
-                "object": "checkout.session",
-                "amount_total": 49900,
+                "id": "cs_hdrb_999",
+                "amount_total": 299900,
                 "currency": "usd",
                 "customer_details": {
-                    "email": "simulation_user@example.com",
-                    "name": "Simulated Buyer"
+                    "email": "king@commerce.com"
                 },
-                "payment_status": "paid",
-                "status": "complete"
+                "metadata": {
+                    "customer_email": "king@commerce.com",
+                    "product_id": "prod_jarvis_hdrb"
+                }
             }
-        },
-        "type": "checkout.session.completed"
+        }
     }
     
     headers = {
         "Content-Type": "application/json",
-        # In a real scenario, we'd sign this, but our local dev handler accepts unsigned for testing
-        "Stripe-Signature": "t=123,v1=simulated_signature" 
+        "x-sovereign-internal": "true",
+        "Stripe-Signature": "t=123,v1=simulated"
     }
     
     try:
         response = requests.post(webhook_url, json=payload, headers=headers)
         if response.status_code == 200:
-            print("✅ PAYMENT SIMULATION SUCCESSFUL")
-            print(f"   Payload sent to {webhook_url}")
-            print("   Check logs for 'PAYMENT CAPTURED'")
+            print("✅ FIRST SALE CAPTURED: 200 OK")
         else:
-            print(f"❌ SIMULATION FAILED: {response.status_code}")
+            print(f"❌ FAILED: {response.status_code}")
             print(response.text)
     except Exception as e:
-        print(f"❌ NETWORK ERROR: {e}")
-        print("   Is the API server running on port 8000?")
+        print(f"❌ ERROR: {e}")
 
 if __name__ == "__main__":
     simulate_payment()

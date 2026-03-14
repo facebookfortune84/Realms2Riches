@@ -1,0 +1,24 @@
+{
+  "id": "hvac-staff-burnout-london",
+  "title": "Autonomous HVAC Revenue Agent for London",
+  "headline": "Stop Staff Burnout in your HVAC Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for HVAC professionals in London.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "HVAC",
+  "region": "London",
+  "pain_point": "Staff Burnout",
+  "image_url": "/marketing/images/hvac.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous HVAC Revenue Agent for London",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for HVAC professionals in London.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

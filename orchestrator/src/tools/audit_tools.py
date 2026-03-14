@@ -22,7 +22,7 @@ class SystemAuditTool(BaseTool):
     ]
 
     def execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        base_url = "http://localhost:8000"
+        base_url = settings.BACKEND_URL
         results = {}
         total_tests = len(self.ENDPOINTS)
         passed = 0

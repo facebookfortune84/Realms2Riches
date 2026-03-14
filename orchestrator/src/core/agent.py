@@ -82,22 +82,13 @@ class Agent:
             context_docs = self.memory.search(task.description, limit=5)
             context_text = "\n".join([f"- {doc['text']}" for doc in context_docs if "SOP:" not in doc['text']])
             
-            # 2. PLAN FORMULATION (The No-Escape Loop)
+            # 2. PLAN FORMULATION
             plan = self._formulate_plan(task.description, context_text, f"{effective_system_prompt}\n{active_sop}")
             steps = plan.get("steps", [])
             
             if not steps:
-                logger.warning(f"Agent {self.agent_name} L1 skip. Triggering L2...")
-                retry_prompt = f"RE-EXECUTE: Use tools to complete this: {task.description}"
-                plan = self._formulate_plan(retry_prompt, context_text, f"{effective_system_prompt}\n{active_sop}")
-                steps = plan.get("steps", [])
-                
-            if not steps:
-                logger.warning(f"Agent {self.agent_name} L2 skip. Triggering L3 Force...")
                 if "lander" in task.description.lower() or "verify" in task.description.lower():
                     steps = [{"tool_id": "sales_funnel", "inputs": {"product_name": "Jarvis 3.5"}}, {"tool_id": "ui_tester", "inputs": {"url": "projects/generated/landers/jarvis_3.5_lander.html"}}]
-                elif "outreach" in task.description.lower() or "pitch" in task.description.lower():
-                    steps = [{"tool_id": "smtp_outreach", "inputs": {"target_email": settings.CONTACT_EMAIL, "html_body": "Sovereign Pitch"}}]
 
             # 3. EXECUTION
             results, artifacts = [], []
@@ -125,15 +116,12 @@ class Agent:
             return {"status": "failed", "error": str(e)}
 
     def _formulate_plan(self, prompt: str, context: str, system_prompt: str) -> Dict[str, Any]:
-        format_instructions = "CRITICAL: Response MUST be a SINGLE VALID JSON object. NO preamble.\nFormat: {\"reasoning\": \"...\", \"steps\": [{\"tool_id\": \"...\", \"inputs\": {...}}]}"
-        full_prompt = f"IDENTITY: {self.agent_name} (Tax ID: {self.dossier.tax_id})\n{system_prompt}\n\nCONTEXT:\n{context}\n\n{format_instructions}"
-        
-        for attempt in range(3):
-            response = self.llm_provider.generate_response([{"role": "system", "content": full_prompt}, {"role": "user", "content": prompt}])
-            try: return json.loads(response.strip())
-            except:
-                match = re.search(r'(\{.*\})', response, re.DOTALL)
-                if match:
-                    try: return json.loads(re.sub(r',\s*\}', '}', re.sub(r',\s*\]', ']', match.group(1))))
-                    except: pass
+        full_prompt = f"IDENTITY: {self.agent_name}\n{system_prompt}\n\nCONTEXT:\n{context}"
+        response = self.llm_provider.generate_response([{"role": "system", "content": full_prompt}, {"role": "user", "content": prompt}])
+        try: return json.loads(response.strip())
+        except:
+            match = re.search(r'(\{.*\})', response, re.DOTALL)
+            if match:
+                try: return json.loads(match.group(1))
+                except: pass
         return {"reasoning": "Heuristic fallback.", "steps": []}

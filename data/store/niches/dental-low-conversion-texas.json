@@ -1,0 +1,24 @@
+{
+  "id": "dental-low-conversion-texas",
+  "title": "Autonomous Dental Revenue Agent for Texas",
+  "headline": "Stop Low Conversion in your Dental Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for Dental professionals in Texas.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "Dental",
+  "region": "Texas",
+  "pain_point": "Low Conversion",
+  "image_url": "/marketing/images/dental.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous Dental Revenue Agent for Texas",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for Dental professionals in Texas.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

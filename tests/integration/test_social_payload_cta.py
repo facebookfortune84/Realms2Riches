@@ -9,10 +9,13 @@ from orchestrator.src.tools.social_tools import FacebookPostTool, LinkedInPostTo
 
 class TestSocialPayloadCTA(unittest.TestCase):
 
-    def test_facebook_cta_payload(self):
+    @patch('orchestrator.src.tools.social_tools.settings')
+    def test_facebook_cta_payload(self, mock_settings):
         """Verify the Facebook payload contains the SHOP_NOW call_to_action."""
+        mock_settings.FACEBOOK_PAGE_ACCESS_TOKEN = "valid_token"
+        mock_settings.FACEBOOK_PAGE_ID = "123"
+        
         tool = FacebookPostTool(ToolConfig(tool_id="t", name="t", description="d", parameters_schema={}, allowed_agents=["*"]))
-        tool.access_token = "valid_token"
         
         with patch('requests.post') as mock_post:
             mock_post.return_value.status_code = 200

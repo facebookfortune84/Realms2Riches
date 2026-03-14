@@ -1,6 +1,9 @@
 import os
 import json
 import logging
+import uuid
+import time
+from datetime import datetime
 from typing import List, Dict, Any, Optional
 from abc import ABC, abstractmethod
 from orchestrator.src.core.config import settings
@@ -11,6 +14,11 @@ class BaseLLMProvider(ABC):
     @abstractmethod
     def generate_response(self, messages: List[Dict[str, str]], **kwargs) -> str:
         pass
+
+    def generate_text(self, prompt: str, **kwargs) -> str:
+        """Convenience method for single-prompt generation."""
+        messages = [{"role": "user", "content": prompt}]
+        return self.generate_response(messages, **kwargs)
 
 class GroqProvider(BaseLLMProvider):
     def __init__(self, model: Optional[str] = None):
@@ -34,6 +42,7 @@ class GroqProvider(BaseLLMProvider):
         if self.is_mock:
             return self._mock_respond(messages)
         
+        start_time = time.time()
         try:
             params = {
                 "messages": messages,
@@ -43,6 +52,21 @@ class GroqProvider(BaseLLMProvider):
                 **{k: v for k, v in kwargs.items() if k not in ["max_tokens", "temperature"]}
             }
             chat_completion = self.client.chat.completions.create(**params)
+            
+            # Record Profit Expense (Estimate: $0.0001 per call as a baseline)
+            try:
+                from orchestrator.src.memory.sql_store import SQLStore
+                sql = SQLStore()
+                sql.add_profit_entry({
+                    "id": str(uuid.uuid4()),
+                    "type": "expense",
+                    "category": "api_cost",
+                    "amount": 0.0001,
+                    "timestamp": datetime.utcnow(),
+                    "details": {"model": self.model, "duration": time.time() - start_time}
+                })
+            except: pass
+
             return chat_completion.choices[0].message.content
         except Exception as e:
             logger.error(f"Groq API Error: {e}")
@@ -106,8 +130,33 @@ class OpenAIProvider(BaseLLMProvider):
             logger.error(f"OpenAI API Error: {e}")
             return GroqProvider()._mock_respond(messages)
 
+class RouterProvider(BaseLLMProvider):
+    """
+    Intelligent Model Router.
+    Routes tasks to specific models based on complexity.
+    """
+    def __init__(self, groq: GroqProvider, openai: Optional[OpenAIProvider] = None):
+        self.groq = groq
+        self.openai = openai
+
+    def generate_response(self, messages: List[Dict[str, str]], **kwargs) -> str:
+        full_text = " ".join([m["content"] for m in messages])
+        if len(full_text) > 4000 and self.openai and not self.openai.is_mock:
+            logger.info("🧠 ROUTER: Complex task detected. Routing to OpenAI.")
+            return self.openai.generate_response(messages, **kwargs)
+        return self.groq.generate_response(messages, **kwargs)
+
 def get_llm_provider(provider_type: Optional[str] = None) -> BaseLLMProvider:
-    provider_type = provider_type or os.getenv("LLM_PROVIDER", "groq").lower()
-    if provider_type == "openai":
-        return OpenAIProvider()
-    return GroqProvider()
+    provider_type = provider_type or os.getenv("LLM_PROVIDER", "router").lower()
+    
+    groq = GroqProvider()
+    openai = OpenAIProvider()
+    
+    if provider_type == "router":
+        return RouterProvider(groq, openai)
+    elif provider_type == "openai":
+        return openai
+    return groq
+
+# Singleton instance for easy import
+llm_provider = get_llm_provider()

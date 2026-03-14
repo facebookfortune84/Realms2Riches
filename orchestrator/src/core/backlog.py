@@ -34,7 +34,12 @@ class AutonomousBacklog:
                 maintenance = sovereign_healer.get_maintenance_tasks()
                 if maintenance:
                     logger.info(f"🛠️ Backlog: Injected {len(maintenance)} maintenance tasks.")
-                    task_pool.extend(maintenance)
+                    # Ensure we only add strings to the task_pool
+                    for m in maintenance:
+                        if isinstance(m, dict) and "description" in m:
+                            task_pool.append(m["description"])
+                        elif isinstance(m, str):
+                            task_pool.append(m)
                 
                 # 2. Pick a task if the matrix isn't overwhelmed
                 # (Simulated check: in production we'd check cell queue sizes)

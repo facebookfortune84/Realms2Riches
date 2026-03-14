@@ -1,0 +1,24 @@
+{
+  "id": "e-commerce-staff-burnout-texas",
+  "title": "Autonomous E-commerce Revenue Agent for Texas",
+  "headline": "Stop Staff Burnout in your E-commerce Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for E-commerce professionals in Texas.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "E-commerce",
+  "region": "Texas",
+  "pain_point": "Staff Burnout",
+  "image_url": "/marketing/images/e-commerce.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous E-commerce Revenue Agent for Texas",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for E-commerce professionals in Texas.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}
