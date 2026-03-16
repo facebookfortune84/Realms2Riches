@@ -35,6 +35,8 @@ from orchestrator.src.tools.smtp_tools import SMTPOutreachTool
 from orchestrator.src.tools.audit_tools import SystemAuditTool
 from orchestrator.src.tools.lead_scraper import get_lead_tools, JobBoardLeadScraper
 from orchestrator.src.tools.voice_tools import get_voice_tools
+from orchestrator.src.tools.osint_tools import get_osint_tools
+from orchestrator.src.tools.growth_tools import get_growth_tools
 from orchestrator.src.validation.burn_monitor import BurnMonitor
 from orchestrator.src.memory.vector_store import VectorStore
 from orchestrator.src.memory.sql_store import SQLStore
@@ -321,6 +323,8 @@ class Orchestrator:
         all_tools.extend(get_revenue_tools())
         all_tools.extend(get_lead_tools())
         all_tools.extend(get_voice_tools())
+        all_tools.extend(get_osint_tools())
+        all_tools.extend(get_growth_tools())
         all_tools.extend(self._load_oracle_tools())
 
         depts = ["CYBERNETIC_ENGINEERING", "GLOBAL_MARKET_FORCE", "REVENUE_SYSTEMS", "INTEGRITY_SHIELD", "FALLBACK_OPTIMIZATION"]

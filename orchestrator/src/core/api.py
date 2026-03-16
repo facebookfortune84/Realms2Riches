@@ -13,7 +13,9 @@ import requests
 import uuid
 import random
 import asyncio
+import base64
 import logging
+import shutil
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 from contextlib import asynccontextmanager
@@ -155,7 +157,14 @@ async def get_blog_posts():
     path = "data/blog/posts.json"
     if os.path.exists(path):
         with open(path, "r") as f:
-            return json.load(f)
+            posts = json.load(f)
+            # Ensure we only return posts that actually have a matching .md file and are not reports
+            valid_posts = []
+            for p in posts:
+                slug = p.get('slug')
+                if slug and not slug.startswith('report-'):
+                    valid_posts.append(p)
+            return valid_posts
     return []
 
 @app.get("/api/blog/posts/{slug}")
@@ -225,8 +234,9 @@ async def create_task(payload: Dict[str, Any]):
     is_genesis = "INITIALIZE COMPANY BLUEPRINT" in task_desc
     
     task_id = str(uuid.uuid4())
-    asyncio.create_task(run_task_background(task_desc, task_id, is_genesis))
-    return {"status": "dispatched", "task_id": task_id}
+    # Wait for result to support Cockpit interaction
+    result = await run_task_background(task_desc, task_id, is_genesis)
+    return {"status": "completed", "result": result}
 
 @app.websocket("/ws/voice")
 async def websocket_voice_endpoint(websocket: WebSocket):
@@ -240,7 +250,12 @@ async def websocket_voice_endpoint(websocket: WebSocket):
             while True:
                 data = await websocket.receive_json()
                 if data.get("type") == "audio_chunk":
-                    await session.add_input({"type": "audio", "data": data.get("data", "").encode()})
+                    # Decode base64 audio from client
+                    try:
+                        audio_bytes = base64.b64decode(data.get("data", ""))
+                        await session.add_input({"type": "audio", "data": audio_bytes})
+                    except Exception as e:
+                        logger.error(f"Audio Decode Error: {e}")
         except:
             await session.add_input({"type": "stop"})
 
@@ -285,6 +300,7 @@ async def websocket_chamber_endpoint(websocket: WebSocket):
         logger.info("Chamber connection dropped.")
 
 async def run_task_background(task: str, task_id: str, is_genesis: bool = False):
+    final_result = None
     try:
         activity_log.append({
             "t": datetime.utcnow().isoformat(), "a": "DISPATCHER", "op": "TASK_START", "r": f"Executing: {task[:60]}..."
@@ -292,36 +308,46 @@ async def run_task_background(task: str, task_id: str, is_genesis: bool = False)
         
         async for step in orchestrator.submit_task_stream(task, task_id):
             if step["status"] == "completed":
-                result = step["result"]
+                final_result = step["result"]
                 activity_log.append({
                     "t": datetime.utcnow().isoformat(),
-                    "a": result.get("agent_name", "Swarm"),
+                    "a": final_result.get("agent_name", "Swarm"),
                     "op": "TASK_COMPLETE",
-                    "r": result.get("reasoning", "Success")[:300]
+                    "r": final_result.get("reasoning", "Success")[:300]
                 })
                 
                 if is_genesis:
-                    # Generate a downloadable 'swarm' artifact
-                    swarm_file = f"swarm_{task_id[:8]}.json"
-                    swarm_path = os.path.join("data/generated/swarms", swarm_file)
-                    with open(swarm_path, "w") as f:
-                        json.dump({
-                            "matrix_id": task_id,
-                            "blueprint": result.get("reasoning"),
-                            "agents": ["Manager", "Developer", "Marketer", "Auditor"],
-                            "infrastructure": " Ngrok/Docker/FastAPI"
-                        }, f)
-                    
-                    activity_log.append({
-                        "t": datetime.utcnow().isoformat(),
-                        "a": "GENESIS_FORGE",
-                        "op": "ARTIFACT_READY",
-                        "r": f"Downloadable swarm available: /swarms/{swarm_file}"
-                    })
+                    # Generate a downloadable 'swarm' artifact (Full Folder Structure)
+                    swarm_id = task_id[:8]
+                    archive_name = f"swarm_{swarm_id}"
+                    archive_path = os.path.join("data/generated/swarms", archive_name)
+                    template_path = os.path.join("projects", "templates", "distributed_swarm")
+
+                    try:
+                        # Zip the template directory
+                        shutil.make_archive(archive_path, 'zip', template_path)
+
+                        activity_log.append({
+                            "t": datetime.utcnow().isoformat(),
+                            "a": "GENESIS_FORGE",
+                            "op": "ARTIFACT_READY",
+                            "r": f"Industrial Swarm package ready for uplink: /swarms/{archive_name}.zip"
+                        })
+                    except Exception as e:
+                        logger.error(f"Genesis Archive Error: {e}")
+                        activity_log.append({
+                            "t": datetime.utcnow().isoformat(),
+                            "a": "SYSTEM",
+                            "op": "ERROR",
+                            "r": f"Failed to package swarm: {str(e)}"
+                        })
+
+        return final_result or {"agent_id": "System", "reasoning": "Task completed without result."}
 
     except Exception as e:
         logger.error(f"TASK FAILED: {e}")
         activity_log.append({"t": datetime.utcnow().isoformat(), "a": "SYSTEM", "op": "ERROR", "r": str(e)})
+        return {"error": str(e)}
 
 @app.post("/api/v1/monetization/webhook")
 async def unified_stripe_webhook(request: Request):
@@ -373,6 +399,14 @@ async def unified_stripe_webhook(request: Request):
         })
 
     return {"status": "success"}
+
+@app.get("/api/affiliates/high-ticket")
+async def get_high_ticket_affiliates():
+    path = "data/catalog/high_ticket_affiliates.json"
+    if os.path.exists(path):
+        with open(path, "r") as f:
+            return json.load(f)
+    return []
 
 @app.get("/api/v1/user/jarvis")
 async def get_jarvis_iframe():

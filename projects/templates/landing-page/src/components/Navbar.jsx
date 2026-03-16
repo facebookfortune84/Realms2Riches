@@ -8,11 +8,10 @@ export default function Navbar() {
   
   const links = [
     { name: 'Pricing', path: '/pricing' },
-    { name: 'Cockpit', path: '/cockpit' },
+    { name: 'Console', path: '/console' },
     { name: 'Blog', path: '/blog' },
-    { name: 'Dashboard', path: '/dashboard' },
-    { name: 'Chamber', path: '/chamber' },
-    { name: 'Command', path: '/sovereign' }
+    { name: 'Affiliate Hub', path: '/affiliate-hub' },
+    { name: 'Chamber', path: '/chamber' }
   ];
 
   return (
@@ -43,7 +42,7 @@ export default function Navbar() {
             </Link>
           ))}
         </div>
-        <Link to="/cockpit" className="bg-primary text-black px-8 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white transition-all shadow-[0_0_20px_rgba(0,255,136,0.2)]">
+        <Link to="/console" className="bg-primary text-black px-8 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white transition-all shadow-[0_0_20px_rgba(0,255,136,0.2)]">
           LAUNCH_OS
         </Link>
       </div>
