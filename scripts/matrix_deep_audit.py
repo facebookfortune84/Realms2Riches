@@ -46,7 +46,8 @@ class MatrixDeepAudit:
         try:
             print("[*] Test 2: SQL Store & Transactional Integrity...", end=" ")
             test_id = "audit_node_" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
-            self.db.add_user(test_id, "audit@sovereign.xyz", "AUDIT_KEY")
+            # SQLStore uses update_user_balance to ensure user exists
+            self.db.update_user_balance(test_id, 0.0, 100)
             balance = self.db.get_user_balance(test_id)
             if balance['credits'] != 100:
                 raise Exception("Credit initialization failure.")
@@ -61,7 +62,8 @@ class MatrixDeepAudit:
             print("[*] Test 3: Industrial Toolchain Validation...", end=" ")
             osint_found = False
             for agent in self.orchestrator.agents.values():
-                for tool in agent.tools:
+                # agent.tools is a dictionary {tool_id: tool_object}
+                for tool in agent.tools.values():
                     if tool.config.tool_id == "osint_recon":
                         osint_found = True
                         break
