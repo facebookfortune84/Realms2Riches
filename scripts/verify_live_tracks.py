@@ -9,8 +9,8 @@ import aiohttp
 sys.path.append(os.getcwd())
 
 # Configuration
-BACKEND_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev" # Remote access to the Docker container via Ngrok
-NGROK_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev" # Expected external URL for assets
+BACKEND_URL = "https://api.realms2riches.com" # Remote access to the Docker container via Ngrok
+NGROK_URL = "https://api.realms2riches.com" # Expected external URL for assets
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("LiveTrackVerification")
@@ -132,3 +132,4 @@ if __name__ == "__main__":
     # For this CLI session, we assume the user will run 'docker-compose up' after this.
     # We can try to hit localhost:8000.
     asyncio.run(run_live_verification())
+

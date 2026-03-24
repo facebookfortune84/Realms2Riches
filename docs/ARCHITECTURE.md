@@ -1,54 +1,104 @@
-# Architecture
+# Architecture Overview
 
-## Overview
+## Mission Critical Objective
+Realms2Riches is designed as a **Sovereign Autonomous Monetization Engine**, aiming to capture verifiable first payments and drive revenue across multiple monetization streams. The core objective is relentless execution and continuous verification of all deployed campaigns and features.
 
-The system is designed as a centralized orchestrator managing a swarm of financial and creative agents.
+## Execution Environment
+-   **Backend:** Python with FastAPI, running asynchronously with `asyncio`.
+-   **Task Queue:** **ARQ** leveraging **Redis** for distributed, persistent, and scalable task management. This replaces direct script execution for many critical paths, ensuring reliability and retries.
+-   **Database:** **PostgreSQL** for robust, relational data storage. Replaces previous file-based systems (`.json`) for leads, logs, and settings, ensuring data integrity and concurrent access.
+-   **AI Core:** Integrated LLM providers (Groq default, OpenAI fallback) for agent reasoning, persona adoption, and dynamic content synthesis. Agents access tools defined in `data/oracle/tools/` and personas from `data/oracle/prompts/`.
+-   **Infrastructure:** Containerized using **Docker Compose** (`infra/docker/docker-
+compose.yml`) for local development and deployment. Services include Orchestrator, Worker, PostgreSQL, Redis, and Adminer, with health checks for reliability and resource limits for optimization.
+-   **Frontend:** React-based interface utilizing `projects/templates/landing-page/` for user interaction, including the improved Genesis Forge for swarm configuration.
 
-### Components
+## Core Components
 
-1.  **Orchestrator Core**: The brain. It receives tasks, decomposes them, and routes them to agents. Uses a provider-agnostic LLM interface.
-2.  **System Integrity Layer**:
-    *   **Cryptographic Hashing**: Every source file, configuration, and task artifact is tracked via SHA-256 hashes.
-    *   **Lineage Tracking**: Hashes are stored in `data/lineage/integrity_manifest.json` and recorded in SQL for auditability.
-    *   **Docker Labeling**: Container images are tagged with build-time hashes.
-3.  **Agents**: Stateless entities that combine a role (System Prompt), a set of Tools, and access to Memory. They interact with LLMs via the `BaseLLMProvider`.
-3.  **LLM Providers**:
-    *   **GroqProvider**: Default provider using Groq's high-speed inference (OpenAI-compatible).
-4.  **Voice & Barge-In**:
-    *   **VoiceRouter**: Manages WebSocket sessions and routes audio.
-    *   **VoiceSession**: Implements a state machine (IDLE -> LISTENING -> THINKING -> SPEAKING).
-    *   **Barge-In Logic**: While SPEAKING, if user audio energy > threshold, the current TTS task is cancelled, output queue is cleared, and new input is processed immediately.
-    *   **Adapters**: Pluggable `STTAdapter` and `TTSAdapter` interfaces.
+### 1. Orchestration Layer
+-   **FastAPI Application (`orchestrator/src/core/api.py`):**
+    -   Central API gateway for all external and internal interactions.
+    -   Manages agent lifecycles and task dispatching.
+    -   Provides WebSocket endpoints for real-time interaction (`/ws/voice`, `/ws/chamber`).
+    -   Hosts `health`, `telemetry`, `activity` endpoints.
+    -   Secured Stripe webhook listener (`/api/v1/monetization/webhook`) with signature verification.
+    *   Exposes `/api/tasks` endpoint to trigger complex operations, including **Genesis Forge** swarm generation, passing detailed configurations (business type, industry, roles, tools, scale).
+    -   Includes `RateLimitMiddleware` for API security.
 
-### Data Flow (Text)
+### 2. Autonomous Workforce
+-   **ARQ Worker (`orchestrator/src/core/worker.py`):**
+    -   Manages background tasks asynchronously, replacing direct script calls for critical paths.
+    -   Executes tasks like `personalized_outreach_task` (LLM-driven email synthesis) and `scrape_enrich_task` (lead processing and enqueuing).
+    -   Connects to Redis for job queuing and PostgreSQL for task state persistence via `TaskResult` model.
+    -   Utilizes `asyncio` for non-blocking operations.
+-   **Agent (`orchestrator/src/core/agent.py`):**
+    -   Represents individual specialized agents.
+    -   Dynamically adopts personas from `PERSONA_LIBRARY` or `data/oracle/prompts/`.
+    *   Executes tasks by selecting and running tools dynamically loaded from `self.tools` (derived from `data/oracle/tools/`).
+    *   Integrates with memory (`VectorStore`) and records contributions via `lineage_registry`.
 
-1.  User submits a `ProjectSpec`.
-2.  Orchestrator creates a `TaskSpec`.
-3.  Orchestrator routes the task to an `Agent`.
-4.  Agent retrieves context from `VectorStore`.
-5.  Agent calls LLM to generate a plan.
-6.  Agent executes `Tools` based on the plan.
-7.  Results are stored in `SQLStore` and returned.
+### 3. Data & Persistence
+-   **PostgreSQL Database (`infra/docker/docker-compose.yml`):**
+    -   Primary data store for `leads`, `outreach_logs`, `smtp_accounts`, `task_results`, `affiliates`, `affiliate_clicks`, and `commissions`.
+    -   Ensured by `orchestrator/src/core/database.py` and `init_db()`.
+-   **Redis:**
+    -   Acts as the message broker for the ARQ task queue.
+    -   Used for caching and ephemeral state management.
 
-### Data Flow (Voice)
+### 4. Monetization & Outreach
+-   **Stripe Integration:**
+    *   Handles `checkout.session.completed` and other critical events via `scripts/stripe_webhook_listener.py`.
+    -   Automates fulfillment, including profit logging, affiliate commission attribution, and Genesis Forge dispatch.
+    -   Secured using `STRIPE_API_KEY` and `STRIPE_WEBHOOK_SECRET` from `.env.prod`.
+-   **Affiliate Program:**
+    *   Models: `Affiliate`, `AffiliateClick`, `Commission` track referrals and revenue.
+    *   `/api/affiliates/track/{affiliate_code}` endpoint logs clicks.
+    *   Offers displayed in frontend (`HighTicketHub.jsx`). Links generated with tracking parameters.
+-   **Outreach Daemon (`scripts/continuous_outreach_daemon.py`):**
+    *   Polls for leads in `LeadStatus.SCRAPED` status.
+    *   Enqueues `scrape_enrich_task` for processing.
+    *   Manages lead status transitions (`SCRAPED` -> `QUEUED`).
 
-1.  Client connects to `/ws/voice`.
-2.  Client streams `audio_chunk` events.
-3.  Server accumulates audio -> triggers VAD.
-4.  Server calls STT -> Text.
-5.  Server calls LLM -> Response Text.
-6.  Server calls TTS -> Audio Stream.
-7.  Server streams audio chunks back to Client.
-8.  **Barge-In**: If Client sends audio during step 7, Server cancels step 7 and jumps to step 3.
+### 5. Genesis Forge - Swarm Provisioning
+-   **Backend (`orchestrator/src/core/genesis_forge.py`):**
+    *   Dynamically generates custom swarm packages (`.zip`) based on user configuration (name, industry, roles, tools, scale).
+    *   Packages include core framework files, custom `README.md`, `swarm_manifest.json`, and `.env.local`.
+-   **Frontend (`projects/templates/landing-page/src/components/CompanyWizard.jsx`):**
+    *   Provides a UI for selecting business type, agent personas (dynamically loaded from `data/oracle/prompts/`), and tools (dynamically loaded from `data/oracle/tools/`).
+    *   Sends configuration to `/api/tasks` to trigger swarm generation.
 
-### Diagram
+### 6. Agent Interoperability & Tooling
+-   **Oracle Directory (`data/oracle/`):** Contains persona prompts (`prompts/`) and tool definitions (`tools/`).
+-   **Tool Integration:** Agents dynamically load and execute tools based on task requirements. `Agent.process_task` selects appropriate steps.
+-   **Lineage Tracking:** `lineage_registry` records agent contributions and task provenance.
 
-```mermaid
-graph TD
-    User -->|Project Spec| Orchestrator
-    Orchestrator -->|Task| Agent
-    Agent -->|Query| VectorStore
-    Agent -->|Execute| Tool
-    Tool -->|Side Effect| System
-    Agent -->|Record| SQLStore
-```
+### 7. Infrastructure & Deployment
+-   **Docker Compose (`infra/docker/docker-compose.yml`):** Manages containerized services (Orchestrator, Worker, DB, Redis, Adminer) with health checks and resource limits for reliability. Generated swarm packages are excluded from version control via `.gitignore`.
+-   **Launch Script (`SOVEREIGN_START.ps1`):** Orchestrates local Docker startup, migrations, worker, API, outreach daemon, and Ngrok tunnel.
+-   **Deployment:** Uses `dev` and `stasis` branches for Vercel staging and production deployments, respectively. Prioritizes `stasis` for production.
+
+## Operational Workflow
+
+1.  **Initiate Swarm:** User configures and provisions a swarm via Genesis Forge frontend.
+2.  **Dispatch Task:** API (`/api/tasks`) receives request, enqueues task via ARQ/Redis.
+3.  **Agent Execution:** Worker picks up task, assigns to agent, which formulates a plan and executes tools.
+4.  **Monetization Loop:**
+    *   Lead Extraction (`scripts/lead_extraction_swarm.py`) populates DB.
+    *   Outreach Daemon polls for `SCRAPED` leads, enqueues `scrape_enrich_task`.
+    *   Worker executes `scrape_enrich_task` (transitions status to `ENRICHED`, enqueues `personalized_outreach_task`).
+    *   Worker executes `personalized_outreach_task` (LLM hook synthesis, email send, updates lead to `CONTACTED`).
+    *   Stripe webhooks process payments, log revenue, attribute commissions, and trigger Genesis Forge if applicable.
+5.  **Verification:** Continuous checks via `/health`, `/api/telemetry/stats`, `/api/activity`, and specific tests (`scripts/test_system_integrity.py`).
+
+## Governance & Security
+
+-   **Configuration:** `.env.prod` is the primary source for production secrets. `.env.example` and `.env.local` provide templates and local overrides. All ~70 variables are utilized.
+-   **Security:** Webhook signature verification, rate limiting, and dependency auditing are implemented.
+-   **Lineage:** Code provenance is tracked via `lineage_registry`.
+-   **Testing:** Comprehensive tests (unit, integration, E2E), security, accessibility, and performance checks are mandatory for production readiness.
+
+## Future Development
+-   Advanced subscription management.
+-   Agent-to-Agent commerce.
+-   Enhanced reporting dashboards.
+-   Automated competitive analysis.
+-   Refined Git workflow with automated staging/production deployment triggers.

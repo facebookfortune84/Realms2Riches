@@ -1,4 +1,7 @@
 import os
+import sys
+sys.path.append(os.getcwd())
+
 import pytest
 import shutil
 from typing import List, Dict, Any, Optional

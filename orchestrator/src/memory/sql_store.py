@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import create_engine, Column, String, DateTime, JSON, Float, Integer
 from sqlalchemy.orm import declarative_base, sessionmaker
 from datetime import datetime
@@ -44,31 +45,58 @@ class UsageRecord(Base):
     cost = Column(Float)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
+class AnalyticsEvent(Base):
+    __tablename__ = 'analytics_events'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    event_type = Column(String, index=True)
+    product_id = Column(String, nullable=True)
+    campaign_id = Column(String, nullable=True)
+    user_id = Column(String, nullable=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    details = Column(JSON)
+
 class SQLStore:
     def __init__(self, db_url: str = None):
-        self.url = db_url or settings.DATABASE_URL
-        if not self.url or ("postgresql" in self.url and "localhost" in self.url):
-             self.url = "sqlite:///./orchestrator.db"
+        # Prefer provided URL, then config setting
+        self.url = db_url or settings.db_config.url
         
-        self.engine = create_engine(self.url)
-        self.Session = sessionmaker(bind=self.engine)
-        Base.metadata.create_all(self.engine)
-        self._manual_migrate() # Ensure columns exist
-        logger.info(f"SQLStore connected to {self.url}")
+        # --- Reliability & Scaling: DB Strictness ---
+        if settings.TEST_MODE:
+            self.url = "sqlite:///./test_orchestrator.db" # Force test DB in test mode
+            logger.info("SQLStore operating in TEST_MODE with dedicated SQLite database.")
+        elif settings.ENV_MODE == "prod":
+            if "sqlite://" in self.url:
+                raise ValueError("CRITICAL: SQLite is not allowed in production environment. Configure PostgreSQL.")
+            logger.info("SQLStore operating in PROD_MODE with PostgreSQL.")
+        elif not self.url or "sqlite://" in self.url:
+             # Critical fallback for initial dev setup only
+             self.url = "sqlite:///./orchestrator.db"
+             logger.warning("SQLStore falling back to SQLite. Ensure POSTGRES_URL is set for production.")
+        
+        # Ensure we use the sync driver for this synchronous class
+        if "postgresql+asyncpg" in self.url:
+            self.url = self.url.replace("postgresql+asyncpg", "postgresql")
+        
+        # Handle Windows local dev vs Docker host naming
+        if "localhost" not in self.url and "127.0.0.1" not in self.url and os.name == "nt":
+            # If running on windows but trying to hit 'db' (docker name), we might need to swap to localhost
+            # But in prod (.env.prod), DATABASE_URL usually points to the docker network 'db'
+            # Settings.db_config already handles this via pydantic properties
+            pass
 
-    def _manual_migrate(self):
-        """Force add columns if they don't exist in the current session."""
-        if "sqlite" in self.url:
-            import sqlite3
-            db_path = self.url.replace("sqlite:///", "")
-            conn = sqlite3.connect(db_path)
-            cursor = conn.cursor()
-            cols = ["tier", "founding_node"]
-            for col in cols:
-                try:
-                    cursor.execute(f"ALTER TABLE user_balances ADD COLUMN {col} TEXT DEFAULT 'BASIC'" if col == "tier" else f"ALTER TABLE user_balances ADD COLUMN {col} INTEGER DEFAULT 0")
-                except: pass
-            conn.close()
+        try:
+            self.engine = create_engine(self.url)
+            self.Session = sessionmaker(bind=self.engine)
+            Base.metadata.create_all(self.engine)
+            logger.info(f"SQLStore connected to {self.url.split('@')[-1]}") # Log host only for security
+        except Exception as e:
+            logger.error(f"Failed to connect to primary DB: {e}")
+            # Fallback to sqlite
+            self.url = "sqlite:///./orchestrator.db"
+            self.engine = create_engine(self.url)
+            self.Session = sessionmaker(bind=self.engine)
+            Base.metadata.create_all(self.engine)
+            logger.warning("SQLStore running in FALLBACK (SQLite) mode.")
 
     def add_run(self, run_data: dict):
         session = self.Session()
@@ -83,6 +111,15 @@ class SQLStore:
         session = self.Session()
         try:
             record = ProfitRecord(**entry)
+            session.add(record)
+            session.commit()
+        finally:
+            session.close()
+
+    def add_analytics_event(self, event_data: dict):
+        session = self.Session()
+        try:
+            record = AnalyticsEvent(**event_data)
             session.add(record)
             session.commit()
         finally:

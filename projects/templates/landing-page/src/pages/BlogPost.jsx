@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
-const API_URL = import.meta.env.VITE_API_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev";
+const API_URL = import.meta.env.VITE_API_URL || "https://api.realms2riches.com";
 
 export default function BlogPost() {
   const { slug } = useParams();
@@ -61,3 +61,4 @@ export default function BlogPost() {
     </div>
   );
 }
+

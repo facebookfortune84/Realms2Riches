@@ -62,7 +62,7 @@ def test_webhook():
     # But we use the live ngrok URL for the primary verification
     url = f"{settings.BACKEND_URL}/api/v1/monetization/webhook"
     
-    headers["ngrok-skip-browser-warning"] = "true"
+    headers[""] = "true"
     headers["x-sovereign-internal"] = "true"
     
     # Fallback removed - Strict Production Verification
@@ -97,3 +97,4 @@ if __name__ == "__main__":
         sys.exit(0)
     else:
         sys.exit(1)
+

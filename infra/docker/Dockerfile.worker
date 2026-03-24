@@ -21,19 +21,22 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Worker needs git and docker cli for tools
+# Worker needs git and docker cli for tools (e.g., to manage child processes if needed)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     docker.io \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy installed packages from builder stage
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
+# Copy the actual application code
 COPY . .
 
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 
-# Worker execution entry point
-CMD ["python", "-m", "orchestrator.src.core.orchestrator"]
+# Worker execution entry point - Start ARQ worker
+# This command assumes arq is installed and worker settings are in orchestrator.src.core.worker
+CMD ["arq", "run", "orchestrator.src.core.worker.WorkerSettings"]

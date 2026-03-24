@@ -26,7 +26,7 @@ async def capture_evidence():
         # 1. Capture the Vercel Frontend (Live Status)
         try:
             logger.info("📸 Shooting Live Frontend...")
-            await page.goto("https://frontend-two-xi-gal9lkptfi.vercel.app/", timeout=20000)
+            await page.goto("https://realms2riches.com", timeout=20000)
             await page.screenshot(path=f"{SCREENSHOT_DIR}/live_frontend.png")
         except:
             logger.error("Frontend Screenshot Failed.")
@@ -52,3 +52,4 @@ async def capture_evidence():
 
 if __name__ == "__main__":
     asyncio.run(capture_evidence())
+

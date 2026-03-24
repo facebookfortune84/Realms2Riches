@@ -50,7 +50,7 @@ def verify_live_webhook_processing():
             "object": {
                 "id": f"cs_prod_verify_{int(time.time())}",
                 "customer_details": {
-                    "email": "robertdemottojr83@gmail.com" # Using user's email for the test
+                    "email": "robert.demotto@realms2riches.com" # Using user's email for the test
                 },
                 "amount_total": 299900, # $2,999.00
                 "currency": "usd",
@@ -72,7 +72,7 @@ def verify_live_webhook_processing():
     headers = {
         "Content-Type": "application/json",
         "stripe-signature": signature,
-        "ngrok-skip-browser-warning": "true",
+        "": "true",
         "x-sovereign-internal": "true"
     }
     
@@ -102,3 +102,4 @@ if __name__ == "__main__":
     else:
         logger.error("❌ PRODUCTION VERIFICATION FAILED.")
         sys.exit(1)
+

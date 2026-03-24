@@ -8,8 +8,8 @@ import time
 sys.path.append(os.getcwd())
 
 class TestSovereignSystem(unittest.TestCase):
-    BASE_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
-    NGROK_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+    BASE_URL = "https://api.realms2riches.com"
+    NGROK_URL = "https://api.realms2riches.com"
 
     def setUp(self):
         pass
@@ -91,3 +91,4 @@ class TestSovereignSystem(unittest.TestCase):
 if __name__ == "__main__":
     print("\n🦅 SOVEREIGN INTEGRATION AUDIT v4.0 🦅")
     unittest.main()
+

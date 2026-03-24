@@ -22,8 +22,8 @@ Run the primary launch commander. This will perform smart Docker rebuilds (only 
 
 ## 📡 Step 2: Connectivity & Gateway
 The system defaults to your production Ngrok gateway:
-- **Backend API:** `https://glowfly-sizeable-lazaro.ngrok-free.dev`
-- **Frontend UI:** `https://frontend-two-xi-gal9lkptfi.vercel.app/`
+- **Backend API:** `https://api.realms2riches.com`
+- **Frontend UI:** `https://realms2riches.com`
 
 Ensure your Ngrok tunnel is authenticated and using the static domain assigned to your account.
 
@@ -55,9 +55,10 @@ git push origin dev --tags
 ```
 
 ## 📊 Step 5: Live Monitoring
-- **Swarm Transparency:** `https://glowfly-sizeable-lazaro.ngrok-free.dev/api/v1/swarm/transparency`
+- **Swarm Transparency:** `https://api.realms2riches.com/api/v1/swarm/transparency`
 - **Profit Dashboard:** `python scripts/profit_dashboard.py`
 - **Container Logs:** `docker-compose -f infra/docker/docker-compose.prod.yml logs -f`
 
 ---
 **Watch the money move. Launch sequence complete.**
+

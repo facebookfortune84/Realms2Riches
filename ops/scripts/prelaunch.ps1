@@ -21,7 +21,7 @@ Write-Host "Using Python: $PYTHON_CMD" -ForegroundColor Gray
 # 2. Start Backend (Local Mode)
 Write-Host "--> Starting Backend (Local Mode)..." -ForegroundColor Yellow
 $backendProcess = Start-Process $PYTHON_CMD -ArgumentList "scripts/run_server.py" -PassThru -NoNewWindow
-$backendUrl = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+$backendUrl = "https://api.realms2riches.com"
 $maxRetries = 30
 $retryCount = 0
 $serverUp = $false
@@ -98,3 +98,4 @@ try {
         Stop-Process -Id $backendProcess.Id -ErrorAction SilentlyContinue
     }
 }
+

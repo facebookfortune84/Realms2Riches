@@ -1,5 +1,8 @@
-import pytest
+import sys
 import os
+sys.path.append(os.getcwd())
+
+import pytest
 import shutil
 import asyncio
 from orchestrator.src.core.orchestrator import Orchestrator

@@ -6,13 +6,13 @@
 - **Orchestration**: `orchestrator/src/core/orchestrator.py`
 - **Configuration**: `.env.prod` (Pydantic settings)
 - **Database**: SQLite (SQLAlchemy) and Vector Store (FAISS/In-memory)
-- **Deployment**: ngrok for local tunneling (https://glowfly-sizeable-lazaro.ngrok-free.dev)
+- **Deployment**: ngrok for local tunneling (https://api.realms2riches.com)
 
 ## 2. Frontend Stack
 - **Framework**: React 18 (Vite, TypeScript)
 - **Main Entry Point**: `projects/templates/landing-page/src/main.tsx`
 - **Styling**: Tailwind CSS, Framer Motion
-- **Deployment**: Vercel (https://frontend-two-xi-gal9lkptfi.vercel.app/)
+- **Deployment**: Vercel (https://realms2riches.com)
 
 ## 3. Test & Quality Infrastructure
 - **Unit/Integration**: `pytest` (invoked via `poetry run pytest`)
@@ -23,3 +23,4 @@
 - **Containers**: `docker-compose.yml` (if present)
 - **Launch Script**: `ops/scripts/launch.ps1` (PowerShell)
 - **Synchronization**: `infra/scripts/sync_cores.py` (Dual-core logic)
+

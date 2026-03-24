@@ -6,7 +6,7 @@
 ---
 
 ## 🟢 PHASE 1: THE MISSION CONTROL (Dashboard)
-**Target:** `https://frontend-two-xi-gal9lkptfi.vercel.app/dashboard`
+**Target:** `https://realms2riches.comdashboard`
 
 1.  **The Matrix Check**
     *   **Action:** Load the Dashboard.
@@ -25,7 +25,7 @@
 ---
 
 ## 🔴 PHASE 2: THE WAR ROOM (Cockpit)
-**Target:** `https://frontend-two-xi-gal9lkptfi.vercel.app/cockpit`
+**Target:** `https://realms2riches.comcockpit`
 
 1.  **Directive Injection**
     *   **Action:** Type `Analyze the 2026 AI Agent market cap`. Press Enter.
@@ -58,7 +58,7 @@
 ---
 
 ## 🟡 PHASE 4: THE PUBLIC FACE (Marketing)
-**Target:** `https://frontend-two-xi-gal9lkptfi.vercel.app/pricing` & `/blog`
+**Target:** `https://realms2riches.compricing` & `/blog`
 
 1.  **Pricing Matrix**
     *   **Action:** Visit `/pricing`.
@@ -84,3 +84,4 @@
 
 **STATUS: ORBIT ACHIEVED.**
 **YOU ARE CLEARED FOR LAUNCH.**
+

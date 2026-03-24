@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.getcwd())
+
 import pytest
 from orchestrator.src.tools.browser_agent import BrowserAgentTool
 from orchestrator.src.validation.schemas import ToolConfig, ToolInvocation

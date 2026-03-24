@@ -7,7 +7,7 @@ logger = logging.getLogger("SEO_Generator")
 
 def generate_sitemap():
     """Generates a dynamic sitemap.xml for all programmatic niches."""
-    base_url = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+    base_url = "https://api.realms2riches.com"
     niche_dir = "data/store/niches"
     
     if not os.path.exists(niche_dir):
@@ -69,3 +69,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     update_niche_schemas()
     generate_sitemap()
+

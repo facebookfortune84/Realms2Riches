@@ -9,12 +9,12 @@ from datetime import datetime
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("VANGUARD_WATCHDOG")
 
-BACKEND_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+BACKEND_URL = "https://api.realms2riches.com"
 CHECK_INTERVAL = 300  # 5 minutes
 
 def check_health():
     try:
-        response = requests.get(f"{BACKEND_URL}/health", timeout=10, headers={"ngrok-skip-browser-warning": "true"})
+        response = requests.get(f"{BACKEND_URL}/health", timeout=10, headers={"": "true"})
         if response.status_code == 200:
             logger.info("✅ System Pulse: SOVEREIGN. All systems operational.")
             return True
@@ -46,3 +46,4 @@ def run_watchdog():
 
 if __name__ == "__main__":
     run_watchdog()
+

@@ -50,7 +50,7 @@ traffic_manager = TrafficManager()
 async def redirect_link(target: str, source: str = "unknown", campaign: str = "general"):
     """
     Redirects traffic to the target URL and logs the click.
-    Usage: https://glowfly-sizeable-lazaro.ngrok-free.dev/r?target=https://stripe.com...&source=tiktok&campaign=viral_v1
+    Usage: https://api.realms2riches.com/r?target=https://stripe.com...&source=tiktok&campaign=viral_v1
     """
     traffic_manager.record_click(source, campaign)
     return RedirectResponse(url=target)
@@ -67,3 +67,4 @@ async def root():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+

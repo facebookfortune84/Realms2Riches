@@ -46,7 +46,7 @@ if ($LASTEXITCODE -ne 0) {
 
 # 5. VERIFY LIVE STATUS
 Write-Host "--> Verifying Production Endpoints..." -ForegroundColor Yellow
-$prodUrl = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+$prodUrl = "https://api.realms2riches.com"
 # In a real setup, we might wait for the ngrok URL to be reachable
 $maxRetries = 15
 $retryCount = 0
@@ -72,6 +72,7 @@ if (-not $live) {
 }
 
 Write-Host "🏆 LAUNCH SEQUENCE COMPLETE. SYSTEM IS LIVE." -ForegroundColor Green
-Write-Host "Backend: https://glowfly-sizeable-lazaro.ngrok-free.dev" -ForegroundColor Gray
-Write-Host "Frontend: https://frontend-two-xi-gal9lkptfi.vercel.app/" -ForegroundColor Gray
-Write-Host "Transparency: https://glowfly-sizeable-lazaro.ngrok-free.dev/api/v1/swarm/transparency" -ForegroundColor Gray
+Write-Host "Backend: https://api.realms2riches.com" -ForegroundColor Gray
+Write-Host "Frontend: https://realms2riches.com" -ForegroundColor Gray
+Write-Host "Transparency: https://api.realms2riches.com/api/v1/swarm/transparency" -ForegroundColor Gray
+

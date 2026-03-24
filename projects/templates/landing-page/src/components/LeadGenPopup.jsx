@@ -9,7 +9,7 @@ export default function LeadGenPopup() {
   const [guideUrl, setGuideUrl] = useState('');
 
   // Use the verified ngrok backend as fallback
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev";
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
 
   useEffect(() => {
     const isClosed = localStorage.getItem('leadGenClosed');
@@ -115,3 +115,4 @@ export default function LeadGenPopup() {
     </AnimatePresence>
   );
 }
+

@@ -85,8 +85,8 @@ class MarketingConfig(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
     brand_name: str = Field(default="Realms2Riches", alias="BRAND_NAME")
     product_name: str = Field(default="Sovereign Swarm", alias="PRODUCT_NAME")
-    website_url: str = Field(default="https://frontend-two-xi-gal9lkptfi.vercel.app/", alias="MARKETING_SITE_URL")
-    contact_email: str = Field(default="robertdemottojr83@gmail.com", alias="CONTACT_EMAIL")
+    website_url: str = Field(default="https://realms2riches.com", alias="MARKETING_SITE_URL")
+    contact_email: str = Field(default="robert.demotto@realms2riches.com", alias="CONTACT_EMAIL")
     twitter_handle: str = Field(default="@Realms2Riches", alias="SOCIAL_TWITTER_HANDLE")
     linkedin_url: str = Field(default="https://linkedin.com/company/realms2riches", alias="SOCIAL_LINKEDIN_URL")
     youtube_url: str = Field(default="https://youtube.com/c/realms2riches", alias="SOCIAL_YOUTUBE_URL")
@@ -119,3 +119,4 @@ class ProjectSpec(BaseEntity):
     requirements: List[str]
     constraints: List[str] = Field(default_factory=list)
     status: Literal["draft", "active", "archived"] = "draft"
+

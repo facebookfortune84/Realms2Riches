@@ -20,15 +20,28 @@ AFFILIATE_LINKS = {
     "vidiq": "https://vidiq.com/realmstoriches",
 }
 
-STRIPE_MONETIZATION = {
-    "jarvis_basic": "https://buy.stripe.com/7sY7sLeY1aw1cEWcJJ8so0e",
-    "jarvis_custom": "https://buy.stripe.com/eVqeVd17b5bHfR87pp8so0d",
-    "jarvis_premium": "https://buy.stripe.com/28E6oHbLP33z6gyaBB8so0c",
-    "business_consultation": "https://buy.stripe.com/eVqbJ13fj5bH48q9xx8so0b",
-    "brand_kit": "https://buy.stripe.com/28E00jaHLgUp20i5hh8so0a",
-    "elite_support": "https://buy.stripe.com/5kQ4gzcPTbA57kCcJJ8so09",
-    "startup_accelerator": "https://buy.stripe.com/bJe4gz9DH33z5cu2558so08"
-}
+STRIPE_MONETIZATION = {}
+try:
+    with open("data/catalog/products.json", "r", encoding="utf-8") as f:
+        catalog = json.load(f)
+        for p in catalog:
+            link = p.get('checkout_url') or p.get('payment_link')
+            if link:
+                STRIPE_MONETIZATION[p['id']] = link
+except Exception as e:
+    logger.warning(f"Failed to load catalog for monetization: {e}")
+
+# Fallback / Default Stripe Links if catalog load fails or keys missing
+if not STRIPE_MONETIZATION:
+    STRIPE_MONETIZATION = {
+        "jarvis_basic": "https://buy.stripe.com/7sY7sLeY1aw1cEWcJJ8so0e",
+        "jarvis_custom": "https://buy.stripe.com/eVqeVd17b5bHfR87pp8so0d",
+        "jarvis_premium": "https://buy.stripe.com/28E6oHbLP33z6gyaBB8so0c",
+        "business_consultation": "https://buy.stripe.com/eVqbJ13fj5bH48q9xx8so0b",
+        "brand_kit": "https://buy.stripe.com/28E00jaHLgUp20i5hh8so0a",
+        "elite_support": "https://buy.stripe.com/5kQ4gzcPTbA57kCcJJ8so09",
+        "startup_accelerator": "https://buy.stripe.com/bJe4gz9DH33z5cu2558so08"
+    }
 
 class BaseStream:
     def __init__(self, name: str, links: List[str]):
@@ -43,7 +56,7 @@ class BaseStream:
                     leads = json.load(f)
                     if leads: return random.choice(leads)
         except: pass
-        return {"email": "robertdemottojr83@gmail.com", "name": "Innovation Team"}
+        return {"email": "robert.demotto@realms2riches.com", "name": "Innovation Team"}
 
     def generate_task(self) -> str:
         raise NotImplementedError
@@ -146,21 +159,47 @@ class FastDeployMonetizationStream(BaseStream):
 
 class MonetizationEngine:
     def __init__(self):
+        self._products = []
+        self._load_catalog()
         self.streams = [
             AffiliateArbitrageStream("AffiliateArbitrage", [AFFILIATE_LINKS["clickfunnels"]]),
-            APISaaSBillingStream("APISaaSBilling", [STRIPE_MONETIZATION["jarvis_basic"]]),
+            APISaaSBillingStream("APISaaSBilling", [STRIPE_MONETIZATION.get("jarvis_basic", "")]),
             LeadGenBrokerStream("LeadGenBroker", [AFFILIATE_LINKS["pollo_ai"]]),
-            DigitalProductStoreStream("DigitalProductStore", [STRIPE_MONETIZATION["business_consultation"], STRIPE_MONETIZATION["brand_kit"]]),
+            DigitalProductStoreStream("DigitalProductStore", [STRIPE_MONETIZATION.get("business_consultation", ""), STRIPE_MONETIZATION.get("brand_kit", "")]),
             NewsletterSponsorshipStream("NewsletterSponsorship", [AFFILIATE_LINKS["brand_push"]]),
             PrintOnDemandStream("PrintOnDemand", [AFFILIATE_LINKS["capcut"]]),
             ProgrammaticAdsStream("ProgrammaticAds", [AFFILIATE_LINKS["tiktok_shop"], AFFILIATE_LINKS["vidiq"]]),
-            CryptoYieldFarmingStream("CryptoYieldFarming", [STRIPE_MONETIZATION["startup_accelerator"]]),
-            PaidCommunityStream("PaidCommunity", [STRIPE_MONETIZATION["elite_support"]]),
-            DataLicensingAPIStream("DataLicensingAPI", [STRIPE_MONETIZATION["jarvis_custom"]]),
-            SEOTrafficStream("SEOTraffic", [STRIPE_MONETIZATION["jarvis_basic"]]),
-            ColdOutreachStream("ColdOutreach", [STRIPE_MONETIZATION["jarvis_custom"]]),
-            FastDeployMonetizationStream("FastDeploy", [STRIPE_MONETIZATION["startup_accelerator"]])
+            CryptoYieldFarmingStream("CryptoYieldFarming", [STRIPE_MONETIZATION.get("startup_accelerator", "")]),
+            PaidCommunityStream("PaidCommunity", [STRIPE_MONETIZATION.get("elite_support", "")]),
+            DataLicensingAPIStream("DataLicensingAPI", [STRIPE_MONETIZATION.get("jarvis_custom", "")]),
+            SEOTrafficStream("SEOTraffic", [STRIPE_MONETIZATION.get("jarvis_basic", "")]),
+            ColdOutreachStream("ColdOutreach", [STRIPE_MONETIZATION.get("jarvis_custom", "")]),
+            FastDeployMonetizationStream("FastDeploy", [STRIPE_MONETIZATION.get("startup_accelerator", "")])
         ]
+
+    def _load_catalog(self):
+        try:
+            with open("data/catalog/products.json", "r", encoding="utf-8") as f:
+                self._products = json.load(f)
+        except Exception as e:
+            logger.warning(f"Failed to load catalog for recommendations: {e}")
+            self._products = []
+
+    def get_products_by_stage(self, stage: str) -> List[Dict[str, Any]]:
+        return [p for p in self._products if p.get("funnel_stage") == stage]
+
+    def get_recommendations(self, product_id: str) -> Dict[str, List[Dict[str, Any]]]:
+        current = next((p for p in self._products if p["id"] == product_id), None)
+        if not current:
+            return {"upsells": [], "cross_sells": []}
+        
+        upsells = [p for p in self._products if p["id"] in current.get("upsell_to", [])]
+        cross_sells = [p for p in self._products if p["id"] in current.get("cross_sell_with", [])]
+        
+        return {"upsells": upsells, "cross_sells": cross_sells}
+
+    def get_entry_offers(self) -> List[Dict[str, Any]]:
+        return [p for p in self._products if p.get("primary_entry_offer")]
 
     async def run_all_streams(self, orchestrator) -> List[Dict[str, Any]]:
         logger.info("⚡ INITIATING 13-VECTOR MONETIZATION BLITZ ⚡")

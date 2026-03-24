@@ -8,8 +8,8 @@ import time
 sys.path.append(os.getcwd())
 
 class SovereignIntegrityAudit(unittest.TestCase):
-    BASE_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
-    NGROK_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+    BASE_URL = "https://api.realms2riches.com"
+    NGROK_URL = "https://api.realms2riches.com"
 
     def test_01_health_and_rag_count(self):
         """Verify API Health and non-zero RAG vector count."""
@@ -78,3 +78,4 @@ class SovereignIntegrityAudit(unittest.TestCase):
 if __name__ == "__main__":
     print("\n👑 SOVEREIGN GRAND WIZARD MASTER AUDIT v4.1 👑")
     unittest.main()
+

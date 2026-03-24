@@ -1,0 +1,10 @@
+{
+  "fingerprint": "c47a9360a843c2e4111b58ec9d35a93ccae1e64936da6f07f5f3997147a50161",
+  "agent_id": "test_agent_123",
+  "tax_id": "SIN-972F55C6F3",
+  "timestamp": "2026-03-21T10:48:21.217730",
+  "action": "echo hello",
+  "artifacts": [],
+  "accrued_wage": 0.0,
+  "status": "VERIFIED"
+}

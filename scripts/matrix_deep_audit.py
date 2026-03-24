@@ -78,7 +78,7 @@ class MatrixDeepAudit:
         # 4. API GATEWAY & STATIC ASSET MAPPING
         try:
             print("[*] Test 4: API Gateway & Static Asset Mapping...", end=" ")
-            backend_url = "https://glowfly-sizeable-lazaro.ngrok-free.dev" # Use prod URL
+            backend_url = "https://api.realms2riches.com" # Use prod URL
             # Note: This might fail if the server isn't running yet in the launch sequence
             # We check the filesystem instead for asset parity
             if not os.path.exists("data/catalog/products.csv") or not os.path.exists("data/assets/products"):
@@ -122,3 +122,4 @@ if __name__ == "__main__":
     success = asyncio.run(audit.run_audit())
     if not success:
         sys.exit(1)
+

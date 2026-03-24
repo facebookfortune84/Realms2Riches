@@ -14,7 +14,7 @@ async def run_master_deployment_audit():
     print("\n👑 SOVEREIGN GRAND WIZARD MASTER DEPLOYMENT AUDIT v5.3 👑")
     print("-" * 60)
     
-    BASE_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+    BASE_URL = "https://api.realms2riches.com"
     
     # 1. Physical Integrity Scan
     print("[1/5] Physical Integrity Scan...")
@@ -92,3 +92,4 @@ async def run_master_deployment_audit():
 if __name__ == "__main__":
     success = asyncio.run(run_master_deployment_audit())
     if not success: sys.exit(1)
+

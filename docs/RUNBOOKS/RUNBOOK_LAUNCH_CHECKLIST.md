@@ -13,7 +13,7 @@
     vercel --prod
     ```
 - [ ] **Verify Platform**:
-    - Visit `https://frontend-two-xi-gal9lkptfi.vercel.app/`.
+    - Visit `https://realms2riches.com`.
     - **Pricing**: Click "Select Plan" to test Stripe checkout flow.
     - **Cockpit**: Test Voice interaction.
     - **Store/Affiliates**: Verify data loading.
@@ -27,3 +27,4 @@
 
 - [ ] **Content Automation**: Set up cron job to generate blog posts.
 - [ ] **Analytics**: Add Google Analytics ID to `index.html`.
+

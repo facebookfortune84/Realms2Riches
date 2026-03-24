@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.getcwd())
+
 import os
 import pytest
 from orchestrator.src.core.config import Settings

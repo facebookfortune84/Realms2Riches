@@ -14,7 +14,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env.prod') });
 dotenv.config(); 
 
 const program = new Command();
-const BACKEND_URL = process.env.R2R_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev";
+const BACKEND_URL = process.env.R2R_BACKEND_URL || "https://api.realms2riches.com";
 const LICENSE_KEY = process.env.SOVEREIGN_LICENSE_KEY || "mock_dev_key";
 
 const api = axios.create({
@@ -22,7 +22,7 @@ const api = axios.create({
     headers: {
         'X-License-Key': LICENSE_KEY,
         'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
+        '': 'true'
     }
 });
 
@@ -163,3 +163,4 @@ program.command('shell')
   });
 
 program.parse();
+

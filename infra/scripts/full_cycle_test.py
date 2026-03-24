@@ -4,7 +4,7 @@ import os
 import hashlib
 from datetime import datetime
 
-BACKEND_URL = os.getenv("BACKEND_URL", "https://glowfly-sizeable-lazaro.ngrok-free.dev")
+BACKEND_URL = os.getenv("BACKEND_URL", "https://api.realms2riches.com")
 
 def print_banner(msg):
     print(f"\n{'='*60}\n{msg}\n{'='*60}")
@@ -88,3 +88,4 @@ def run_full_cycle():
 
 if __name__ == "__main__":
     run_full_cycle()
+
