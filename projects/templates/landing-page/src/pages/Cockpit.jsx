@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff, Send, XCircle, Terminal, Cpu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
 
 export default function Cockpit() {
   const [messages, setMessages] = useState([{ sender: 'system', text: 'Sovereign Neural Link Established. Awaiting directive.' }]);
@@ -213,3 +213,4 @@ export default function Cockpit() {
     </div>
   );
 }
+

@@ -2,7 +2,7 @@ import requests
 import json
 import time
 
-BASE_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+BASE_URL = "https://api.realms2riches.com"
 
 def audit_endpoints():
     print("💎 STARTING COMPREHENSIVE API AUDIT 💎")
@@ -48,3 +48,4 @@ def audit_endpoints():
 
 if __name__ == "__main__":
     audit_endpoints()
+

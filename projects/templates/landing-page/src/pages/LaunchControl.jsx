@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
 
 export default function LaunchControl() {
   const [status, setStatus] = useState('idle'); 
@@ -120,3 +120,4 @@ export default function LaunchControl() {
     </div>
   );
 }
+

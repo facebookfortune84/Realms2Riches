@@ -18,7 +18,7 @@ from orchestrator.src.tools.seo_tools import SEOTool, ToolConfig
 
 logger = get_logger("REVENUE_DAEMON")
 
-TRAFFIC_MANAGER_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+TRAFFIC_MANAGER_URL = "https://api.realms2riches.com"
 
 class AutonomousRevenueDaemon:
     def __init__(self):
@@ -86,7 +86,7 @@ class AutonomousRevenueDaemon:
         target_leads = random.sample(self.leads, min(batch_size, len(self.leads)))
         
         for lead in target_leads:
-            email = lead.get("email") or "robertdemottojr83@gmail.com"
+            email = lead.get("email") or "robert.demotto@realms2riches.com"
             product_link = "https://buy.stripe.com/7sY7sLeY1aw1cEWcJJ8so0e" # Jarvis Basic
             tracked_link = self.get_tracking_link(product_link, "email", "cold_outreach_v1")
             
@@ -163,3 +163,4 @@ if __name__ == "__main__":
         asyncio.run(daemon.start())
     except KeyboardInterrupt:
         pass
+

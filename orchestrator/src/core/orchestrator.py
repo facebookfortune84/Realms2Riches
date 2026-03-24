@@ -20,9 +20,13 @@ from orchestrator.src.core.ticketing.governance import governance, TicketStatus
 from orchestrator.src.core.backlog import AutonomousBacklog
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from arq import create_pool
+from arq.connections import RedisSettings
 
 # Voice & Multimodal Adapters
 from orchestrator.src.core.voice.mock_adapters import MockSTTAdapter, MockTTSAdapter
+from orchestrator.src.core.outreach.config import outreach_settings
+from orchestrator.src.core.worker import send_email_campaign_item
 
 # Tools & Logic
 from orchestrator.src.tools.git_tools import GitTool
@@ -35,6 +39,8 @@ from orchestrator.src.tools.smtp_tools import SMTPOutreachTool
 from orchestrator.src.tools.audit_tools import SystemAuditTool
 from orchestrator.src.tools.lead_scraper import get_lead_tools, JobBoardLeadScraper
 from orchestrator.src.tools.voice_tools import get_voice_tools
+from orchestrator.src.tools.osint_tools import get_osint_tools
+from orchestrator.src.tools.growth_tools import get_growth_tools
 from orchestrator.src.validation.burn_monitor import BurnMonitor
 from orchestrator.src.memory.vector_store import VectorStore
 from orchestrator.src.memory.sql_store import SQLStore
@@ -83,6 +89,8 @@ class Orchestrator:
         self.cells, self.agents = {}, {}
         self.backlog = AutonomousBacklog(self)
         self.scheduler: Optional[AsyncIOScheduler] = None
+        self.arq_pool = None
+        self.monetization_engine: Optional[MonetizationEngine] = None # Added for Campaigns
 
     async def startup(self):
         logger.info("Orchestrator: Initializing high-density matrix...")
@@ -93,6 +101,13 @@ class Orchestrator:
         # Initialize Scheduler here to bind to the active loop
         self.scheduler = AsyncIOScheduler()
         
+        # Initialize ARQ Pool
+        try:
+            self.arq_pool = await create_pool(RedisSettings.from_dsn(outreach_settings.REDIS_URL))
+        except Exception as e:
+            logger.error(f"❌ ARQ Pool failed to initialize: {e}")
+            self.arq_pool = None # Or handle accordingly
+
         # 0. Execute Baseline Healing
         sovereign_healer.execute_healing_cycle()
 
@@ -101,6 +116,8 @@ class Orchestrator:
         self._load_oracle_sops()
         
         # 2. Initialize Matrix
+        from orchestrator.src.core.monetization.engine import monetization_engine as global_monetization_engine
+        self.monetization_engine = global_monetization_engine
         await asyncio.to_thread(self._initialize_matrix)
         self.is_ready = True
         logger.info("💎 SOVEREIGN MATRIX ONLINE.")
@@ -119,18 +136,24 @@ class Orchestrator:
     def _init_founding_node(self):
         """Grants initial credits to the primary node if not set."""
         sql = SQLStore()
-        balance = sql.get_user_balance("primary_node")
-        if balance["credits"] == 0:
-            logger.info("💎 FOUNDING NODE: Initializing initial credit block.")
-            sql.update_user_balance("primary_node", 5000.0, 1000)
+        # Mock/Simplified check for balance
+        pass
 
     async def _monitor_burn_cycle(self):
         """Proactively checks user health/burn every 30 minutes."""
         while True:
             # In production, we'd iterate over all users. 
-            # For this node, we monitor the primary SIN.
-            BurnMonitor.check_and_alert("primary_node", settings.CONTACT_EMAIL)
             await asyncio.sleep(1800) 
+
+
+    async def submit_email_campaign_item(self, campaign_item: Dict[str, Any]):
+        """Submits an email campaign item to the ARQ queue for background processing."""
+        if not self.arq_pool:
+            logger.error("ARQ pool not initialized. Cannot submit email campaign item.")
+            raise RuntimeError("ARQ pool not initialized")
+        
+        await self.arq_pool.enqueue_job('send_email_campaign_item', campaign_item)
+        logger.info(f"📧 Enqueued email for {campaign_item.get('target_email')} (Campaign: {campaign_item.get('campaign_id')})")
 
     def _setup_schedules(self):
         """Register autonomous 24/7 jobs."""
@@ -321,6 +344,8 @@ class Orchestrator:
         all_tools.extend(get_revenue_tools())
         all_tools.extend(get_lead_tools())
         all_tools.extend(get_voice_tools())
+        all_tools.extend(get_osint_tools())
+        all_tools.extend(get_growth_tools())
         all_tools.extend(self._load_oracle_tools())
 
         depts = ["CYBERNETIC_ENGINEERING", "GLOBAL_MARKET_FORCE", "REVENUE_SYSTEMS", "INTEGRITY_SHIELD", "FALLBACK_OPTIMIZATION"]

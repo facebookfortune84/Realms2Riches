@@ -1,0 +1,184 @@
+import json
+import os
+import sys
+
+# Ensure data/catalog exists
+os.makedirs("data/catalog", exist_ok=True)
+
+products = [
+    # --- Scraped Products (11 selected) ---
+    {
+        "id": "business_consultation",
+        "name": "Business Management Consultation",
+        "description": "Strategic guidance to streamline business operations and growth.",
+        "price": 300,
+        "interval": "once",
+        "checkout_url": "https://buy.stripe.com/eVqbJ13fj5bH48q9xx8so0b",
+        "image_url": "/assets/branding/forge_logo.png" 
+    },
+    {
+        "id": "brand_kit",
+        "name": "Basic Brand Kit",
+        "description": "Essential branding elements including logo design, color palette, and typography.",
+        "price": 450,
+        "interval": "once",
+        "checkout_url": "https://buy.stripe.com/28E00jaHLgUp20i5hh8so0a",
+        "image_url": "/assets/branding/forge_logo.png"
+    },
+    {
+        "id": "marketing_campaign",
+        "name": "Marketing Campaign Management",
+        "description": "Expert setup and initial management of marketing campaigns.",
+        "price": 700,
+        "interval": "once",
+        "checkout_url": "https://buy.stripe.com/test_link_marketing", 
+        "image_url": "/assets/branding/forge_logo.png"
+    },
+    {
+        "id": "website_basic",
+        "name": "Website Design (Basic)",
+        "description": "Professional, responsive website design for small businesses.",
+        "price": 1500,
+        "interval": "once",
+        "checkout_url": "https://buy.stripe.com/test_link_web_basic",
+        "image_url": "/assets/branding/forge_logo.png"
+    },
+    {
+        "id": "website_advanced",
+        "name": "Website Design (Advanced)",
+        "description": "Advanced website design with custom features and integrations.",
+        "price": 3000,
+        "interval": "once",
+        "checkout_url": "https://buy.stripe.com/test_link_web_adv",
+        "image_url": "/assets/branding/forge_logo.png"
+    },
+    {
+        "id": "ecommerce_dev",
+        "name": "E-commerce Website Development",
+        "description": "Full-featured online store development with payment gateway integration.",
+        "price": 5000,
+        "interval": "once",
+        "checkout_url": "https://buy.stripe.com/test_link_ecom",
+        "image_url": "/assets/branding/forge_logo.png"
+    },
+    {
+        "id": "seo_package",
+        "name": "SEO Optimization Package",
+        "description": "Comprehensive search engine optimization to improve online visibility.",
+        "price": 800,
+        "interval": "once",
+        "checkout_url": "https://buy.stripe.com/test_link_seo",
+        "image_url": "/assets/branding/forge_logo.png"
+    },
+    {
+        "id": "social_media_mgmt",
+        "name": "Social Media Management",
+        "description": "Professional management of social media presence to engage your audience.",
+        "price": 600,
+        "interval": "month", 
+        "checkout_url": "https://buy.stripe.com/test_link_smm",
+        "image_url": "/assets/branding/forge_logo.png"
+    },
+    {
+        "id": "elite_support",
+        "name": "Realms to Riches Elite Support",
+        "description": "Priority support, monthly coaching, and a curated resource library.",
+        "price": 250,
+        "interval": "month",
+        "checkout_url": "https://buy.stripe.com/5kQ4gzcPTbA57kCcJJ8so09",
+        "image_url": "/assets/branding/forge_logo.png"
+    },
+    {
+        "id": "startup_accelerator",
+        "name": "Startup Accelerator Bundle",
+        "description": "Strategic guidance, essential branding, and a professional basic website.",
+        "price": 1999,
+        "interval": "once",
+        "checkout_url": "https://buy.stripe.com/bJe4gz9DH33z5cu2558so08",
+        "image_url": "/assets/branding/forge_logo.png"
+    },
+    {
+        "id": "digital_domination",
+        "name": "Digital Domination Package",
+        "description": "Advanced website, comprehensive marketing, SEO, and social media strategies.",
+        "price": 4499,
+        "interval": "once",
+        "checkout_url": "https://buy.stripe.com/test_link_domination",
+        "image_url": "/assets/branding/forge_logo.png"
+    },
+
+    # --- Jarvis Products (3) ---
+    {
+        "id": "jarvis_basic",
+        "name": "Jarvis 3.5 Basic",
+        "description": "Standard AI management features for small businesses.",
+        "price": 29,
+        "interval": "month",
+        "checkout_url": "https://buy.stripe.com/7sY7sLeY1aw1cEWcJJ8so0e",
+        "image_url": "/assets/branding/forge_logo.png"
+    },
+    {
+        "id": "jarvis_custom",
+        "name": "Jarvis 3.5 Custom",
+        "description": "Pre-trained with industry/company-specific datasets.",
+        "price": 299,
+        "interval": "month",
+        "checkout_url": "https://buy.stripe.com/eVqeVd17b5bHfR87pp8so0d",
+        "image_url": "/assets/branding/forge_logo.png"
+    },
+    {
+        "id": "jarvis_premium",
+        "name": "Jarvis 3.5 Signature",
+        "description": "Premium service with a Gang of Symbiotic AI Managers.",
+        "price": 999,
+        "interval": "month",
+        "checkout_url": "https://buy.stripe.com/28E6oHbLP33z6gyaBB8so0c",
+        "image_url": "/assets/branding/forge_logo.png"
+    },
+
+    # --- Enterprise Products (4) ---
+    {
+        "id": "ai_workflow",
+        "name": "AI Workflow Integration",
+        "description": "Full-scale neural workflow automation and optimization.",
+        "price": 999,
+        "interval": "month",
+        "checkout_url": "https://buy.stripe.com/test_link_ai_workflow",
+        "image_url": "/assets/branding/forge_logo.png"
+    },
+    {
+        "id": "biz_automation",
+        "name": "Business Automation Suite",
+        "description": "End-to-end industrial automation for all business operations.",
+        "price": 2499,
+        "interval": "month",
+        "checkout_url": "https://buy.stripe.com/test_link_biz_auto",
+        "image_url": "/assets/branding/forge_logo.png"
+    },
+    {
+        "id": "custom_dev",
+        "name": "Custom Software Development",
+        "description": "Bespoke cybernetic software solutions engineered for scale.",
+        "price": 4999,
+        "interval": "once",
+        "checkout_url": "https://buy.stripe.com/test_link_custom_dev",
+        "image_url": "/assets/branding/forge_logo.png"
+    },
+    {
+        "id": "infra_setup",
+        "name": "Enterprise Infrastructure Setup",
+        "description": "Industrial-grade secure infrastructure and cloud orchestration.",
+        "price": 7500,
+        "interval": "once",
+        "checkout_url": "https://buy.stripe.com/test_link_infra",
+        "image_url": "/assets/branding/forge_logo.png"
+    }
+]
+
+print(f"Total Products: {len(products)}")
+
+output_path = "data/catalog/products.json"
+with open(output_path, "w") as f:
+    json.dump(products, f, indent=2)
+
+print(f"Catalog generated at {output_path}")

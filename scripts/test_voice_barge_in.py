@@ -5,53 +5,76 @@ import os
 
 sys.path.append(os.getcwd())
 
-from orchestrator.src.core.voice.real_adapters import OpenAIWhisperAdapter, ElevenLabsAdapter
+from orchestrator.src.core.voice.session import VoiceSession, VoiceSessionState
+from orchestrator.src.core.voice.mock_adapters import MockSTTAdapter, MockTTSAdapter
+from orchestrator.src.core.orchestrator import Orchestrator
 
 # Setup Logger
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger("BARGE_IN_TEST")
 
-async def mock_audio_stream():
-    """Simulates a user talking (interrupting)."""
-    logger.info("🎤 User: [Silence]...")
-    yield b'\x00' * 1000 # Silence
-    await asyncio.sleep(1)
+async def test_barge_in_session():
+    logger.info("🎧 TESTING VOICE SESSION BARGE-IN...")
     
-    logger.info("🎤 User: 'Wait, stop! How much does it cost?' (BARGE-IN EVENT)")
-    # In a real scenario, this would be valid audio bytes. 
-    # The adapter mocks the transcription if it can't handle raw bytes without keys.
-    yield b'\x01' * 1000 
-    await asyncio.sleep(1)
-
-async def test_barge_in():
-    logger.info("🎧 INITIALIZING VOICE BARGE-IN SYSTEM...")
+    # We need to mock Orchestrator init to avoid DB connections
+    class MockOrchestrator:
+        pass
     
-    # Initialize Adapters (Mock keys if needed, logic handles failure gracefully)
-    stt = OpenAIWhisperAdapter(api_key="placeholder")
-    tts = ElevenLabsAdapter(api_key="placeholder")
+    stt = MockSTTAdapter()
+    tts = MockTTSAdapter()
+    orch = MockOrchestrator()
     
-    logger.info("🤖 Agent: 'Welcome to Sovereign Swarm. I am explaining the features now...'")
-    agent_speaking = True
+    session = VoiceSession("test-session", stt, tts, orch)
     
-    # Simulate processing the user stream
-    async for text_chunk in stt.transcribe_stream(mock_audio_stream()):
-        # Mocking the transcription result for the test since we don't have real audio/keys
-        # In a real integration test, we'd use a mock adapter class. 
-        # Here we simulate the logic flow.
+    # 1. Simulate User Speech (Trigger Turn)
+    logger.info("🎤 User speaks (Triggering turn)...")
+    # VoiceSession triggers VAD on > 1000 bytes accumulated
+    await session.add_input({"type": "audio", "data": b"x" * 1100}) 
+    
+    # 2. Wait for Agent to start SPEAKING
+    logger.info("... Waiting for Agent to speak ...")
+    while True:
+        event = await session.get_output()
+        logger.info(f"OUT: {event.get('type')} {event.get('state', '')}")
+        if event.get("type") == "state" and event.get("state") == "speaking":
+            logger.info("🤖 Agent started SPEAKING.")
+            break
         
-        # Simulating detection of user speech
-        transcribed_text = "Wait stop" # Simulated detection
+    # 3. Interrupt!
+    logger.info("🎤 User interrupts (BARGE-IN)...")
+    # VoiceSession interrupts if SPEAKING and chunk > 100 bytes
+    await session.add_input({"type": "audio", "data": b"y" * 200}) 
+    
+    # 4. Expect STOP command
+    stop_received = False
+    try:
+        # We expect it relatively quickly
+        event = await asyncio.wait_for(session.get_output(), timeout=2.0)
+        logger.info(f"OUT: {event}")
+        if event.get("type") == "control" and event.get("action") == "stop_audio":
+            logger.info("✅ RECEIVED STOP COMMAND. Barge-in successful.")
+            stop_received = True
+        else:
+            # Check next few events
+            for _ in range(5):
+                 event = await asyncio.wait_for(session.get_output(), timeout=1.0)
+                 logger.info(f"OUT: {event}")
+                 if event.get("type") == "control" and event.get("action") == "stop_audio":
+                     logger.info("✅ RECEIVED STOP COMMAND. Barge-in successful.")
+                     stop_received = True
+                     break
+    except asyncio.TimeoutError:
+        logger.error("❌ Timeout waiting for stop command.")
+    except Exception as e:
+        logger.error(f"❌ Error: {e}")
         
-        if transcribed_text:
-            logger.info(f"👂 HEARD USER: '{transcribed_text}'")
-            if agent_speaking:
-                logger.warning("🛑 BARGE-IN DETECTED! INTERRUPTING AGENT TTS.")
-                agent_speaking = False
-                logger.info("🤖 Agent: [Stops Speaking Immediately]")
-                logger.info("🤖 Agent: 'I heard you ask about cost. It is $2999/mo.'")
-                break
-
-    logger.info("✅ BARGE-IN TEST COMPLETE. System successfully interrupted.")
-
+    if not stop_received:
+        logger.error("❌ Failed to receive stop command.")
+    else:
+        logger.info("🏆 TEST PASSED.")
+        
+    # Cleanup
+    await session.add_input({"type": "stop"})
+    
 if __name__ == "__main__":
-    asyncio.run(test_barge_in())
+    asyncio.run(test_barge_in_session())

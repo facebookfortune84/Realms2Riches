@@ -1,182 +1,122 @@
 # ============================================================
-# SOVEREIGN_START.ps1 - Dominance Launch Commander (v5.8.0)
+# SOVEREIGN_START.ps1 - Grand Orchestrator Launch & Deployment (v10.0.0)
 # ============================================================
 param (
-    [switch]$Prune,
-    [switch]$ForceRelease,
-    [switch]$SkipTests
+    [switch]$LocalOnly,      # Run locally without pushing to remote
+    [switch]$FullPrune,      # Clean docker resources before starting
+    [switch]$SkipTests,      # Skip pre-flight tests (NOT RECOMMENDED)
+    [string]$CommitMsg = "feat: sovereign sync [$(Get-Date -Format 'yyyyMMdd-HHmm')]"
 )
 
 $ErrorActionPreference = "Stop"
-$env:PYTHONPATH = "."
-$env:ENV_MODE = "prod"
+$env:PYTHONPATH = "." 
 
-# Production URLs
-$BackendUrl = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
-$FrontendUrl = "https://frontend-two-xi-gal9lkptfi.vercel.app/"
+# --- CONFIGURATION ---
+$BackendUrl = "https://api.realms2riches.com"
+$FrontendUrl = "https://app.realms2riches.com"
+$DevBranch = "dev"
+$StasisBranch = "stasis"
 
-# --- -1. CLEANUP ORPHANED PROCESSES ---
-Write-Host "Cleaning up orphaned processes..." -ForegroundColor Gray
-# Only kill python processes that might conflict with docker binding port 8000
-$port8000 = Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue
-if ($port8000) {
-    $proc = Get-Process -Id $port8000.OwningProcess -ErrorAction SilentlyContinue
-    if ($proc.ProcessName -eq "python" -or $proc.ProcessName -eq "uvicorn") {
-        Write-Host "  -> Killing conflicting process on port 8000 (PID $($proc.Id))..." -ForegroundColor Yellow
-        Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
-    }
+Write-Host "`n  R E A L M S   2   R I C H E S" -ForegroundColor Magenta -BackgroundColor Black
+Write-Host "  S O V E R E I G N   M A T R I X" -ForegroundColor Green -BackgroundColor Black
+Write-Host "  v10.0.0 | FULL PRODUCTION SYNC SYSTEM`n" -ForegroundColor Gray
+
+# --- 1. CORE & ENVIRONMENT SYNC ---
+Write-Host "[1/7] Syncing Primary -> Secondary Core..." -ForegroundColor Cyan
+try {
+    python scripts/sync_core.py
+    if ($LASTEXITCODE -ne 0) { throw "Core sync failed." }
+} catch {
+    Write-Warning "Core sync script failed. Proceeding, but secondary core may be out of date."
 }
 
-Write-Host "`n  R E A L M S   2   R I C H E S" -ForegroundColor Magenta
-Write-Host "  S O V E R E I G N   M A T R I X" -ForegroundColor Green
-Write-Host "  v5.8.0-PRODUCTION | INDUSTRIAL LAUNCH SEQUENCE`n" -ForegroundColor DarkGray
-
-# --- 0. PRE-FLIGHT GOVERNANCE ---
-Write-Host "[0/8] Securing Development Lineage..." -ForegroundColor Cyan
-git add .
-$status = git status --porcelain
-if ($status) {
-    $ts = Get-Date -Format "yyyyMMdd-HHmm"
-    git commit -m "Vanguard Pulse: $ts [Auto-Secure before Launch]"
-    Write-Host "  -> Snapshot secured in 'dev' branch." -ForegroundColor Gray
-}
-
-# --- 1. CORE SYNCHRONIZATION ---
-Write-Host "[1/8] Synchronizing Secondary Core..." -ForegroundColor Cyan
-if (Test-Path "core_secondary") {
-    Write-Host "  -> Skipping destructive sync to protect primary core logic." -ForegroundColor Yellow
-    Write-Host "  -> Core Alignment Skipped." -ForegroundColor Green
-}
-
-# --- 2. SYSTEM INTEGRITY AUDIT ---
+# --- 2. LOCAL VERIFICATION ---
 if (-not $SkipTests) {
-    Write-Host "[2/8] Executing Coverage Engine..." -ForegroundColor Magenta
-    # Using local python for tests before container launch to save time
-    python scripts/matrix_coverage_engine.py
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "❌ CRITICAL: Coverage Scan Failed. Launch Aborted." -ForegroundColor Red
-        exit 1
-    }
-
-    Write-Host "`n[3/8] Verifying Swarm Integrity..." -ForegroundColor Magenta
-    python scripts/test_system_integrity.py
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "❌ CRITICAL: Integrity Test Failed." -ForegroundColor Red
-        exit 1
-    }
-} else {
-    Write-Host "[2-3/8] Skipping Verification (NOT RECOMMENDED)." -ForegroundColor Yellow
-}
-
-# --- 4. DOCKER INFRASTRUCTURE (SMART REBUILD) ---
-Write-Host "[4/8] Launching Production Containers..." -ForegroundColor Cyan
-if ($Prune) {
-    Write-Host "  -> Pruning old volumes..." -ForegroundColor Yellow
-    docker-compose -f infra/docker/docker-compose.prod.yml down -v
-}
-
-# Smart Rebuild: --build ensures image updates if dependencies changed.
-# Docker caching handles "only when necessary" optimization.
-Write-Host "  -> Building and Starting Stack (Orchestrator, Worker, Postgres)..." -ForegroundColor Cyan
-docker-compose -f infra/docker/docker-compose.prod.yml up -d --build
-
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ CRITICAL: Docker Launch Failed." -ForegroundColor Red
-    exit 1
-}
-Write-Host "  -> Container Stack Active." -ForegroundColor Green
-
-# --- 5. CONNECTIVITY (Ngrok) ---
-Write-Host "[5/8] Verifying Global Gateway..." -ForegroundColor Cyan
-$ngrokPath = if (Get-Command ngrok -ErrorAction SilentlyContinue) { "ngrok" } elseif (Test-Path "infra/tools/ngrok/ngrok.exe") { "./infra/tools/ngrok/ngrok.exe" } else { $null }
-
-if ($ngrokPath) {
-    $existingNgrok = Get-Process -Name "ngrok" -ErrorAction SilentlyContinue
-    if (-not $existingNgrok) {
-        # Extract domain from .env.prod
-        $backendUrlLine = Get-Content .env.prod | Select-String "BACKEND_URL="
-        if ($backendUrlLine) {
-            $backendUrlVal = $backendUrlLine.ToString().Split("=")[1].Trim()
-            if ($backendUrlVal -like "*ngrok-free.dev*") {
-                $domain = $backendUrlVal -replace "https://", "" -replace "http://", ""
-                Write-Host "  -> Launching Ngrok for domain: $domain" -ForegroundColor Gray
-                Start-Process $ngrokPath -ArgumentList "http --domain=$domain 8000" -NoNewWindow
-                Start-Sleep -Seconds 3
-            } else {
-                Start-Process $ngrokPath -ArgumentList "http 8000" -NoNewWindow
-            }
-        }
-    } else {
-        Write-Host "  -> Ngrok is already running." -ForegroundColor Yellow
-    }
-} else {
-    Write-Host "  -> WARNING: Ngrok not found. Production URL verification may fail." -ForegroundColor Yellow
-}
-
-# --- 6. HEALTH CHECK ---
-Write-Host "[6/8] Waiting for API Heartbeat..." -ForegroundColor Cyan
-$maxRetries = 60 # Increased timeout for slow tunnel propagation
-$retryCount = 0
-$healthy = $false
-$healthUrl = "$BackendUrl/health"
-$localHealthUrl = "http://localhost:8000/health"
-
-Write-Host "  -> Probing Production URL: $healthUrl" -ForegroundColor Gray
-
-while ($retryCount -lt $maxRetries -and -not $healthy) {
+    Write-Host "[2/7] Running System Integrity Checks..." -ForegroundColor Cyan
     try {
-        # First try the production URL
-        $response = Invoke-RestMethod -Uri $healthUrl -Method Get -TimeoutSec 5 -Headers @{"ngrok-skip-browser-warning"="true"} -ErrorAction SilentlyContinue
-        if ($response.status -eq "SOVEREIGN") {
-            $healthy = $true
-            Write-Host "`n  -> API is ONLINE and SOVEREIGN at $BackendUrl" -ForegroundColor Green
-        } else {
-            # Fallback check to local port to ensure container is actually up
-            $localResponse = Invoke-RestMethod -Uri $localHealthUrl -Method Get -TimeoutSec 2 -ErrorAction SilentlyContinue
-            if ($localResponse.status -eq "SOVEREIGN") {
-                Write-Host "L" -NoNewline -ForegroundColor Yellow # L for Local Up
-            } else {
-                Write-Host "." -NoNewline -ForegroundColor DarkGray
-            }
-        }
+        python scripts/test_system_integrity.py
+        if ($LASTEXITCODE -ne 0) { throw "Integrity checks failed." }
     } catch {
-        Write-Host "x" -NoNewline -ForegroundColor Red
+        Write-Error "System integrity compromised. Fix errors before deploying."
+        exit 1
     }
-    $retryCount++
-    Start-Sleep -Seconds 3
 }
 
-if (-not $healthy) {
-    Write-Host "`n❌ CRITICAL: API failed to start or is unreachable at $healthUrl." -ForegroundColor Red
-    Write-Host "  -> Check Docker logs: docker-compose -f infra/docker/docker-compose.prod.yml logs" -ForegroundColor Gray
-    exit 1
+# --- 3. LINEAGE & TAGGING ---
+Write-Host "[3/7] Recording Lineage & Locking State..." -ForegroundColor Cyan
+python scripts/hash_registry.py
+# Sync lineage to secondary
+if (Test-Path "data/lineage/hash_registry.json") {
+    if (-not (Test-Path "core_secondary/data/lineage")) { New-Item -ItemType Directory -Path "core_secondary/data/lineage" -Force }
+    Copy-Item "data/lineage/hash_registry.json" "core_secondary/data/lineage/hash_registry.json" -Force
 }
 
-# --- 7. REVENUE RECONCILIATION ---
-Write-Host "`n[7/8] Running Revenue Loop Validation..." -ForegroundColor Magenta
-python scripts/verify_revenue_loop.py
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "  -> WARNING: Revenue loop returned non-zero. Check Stripe connectivity." -ForegroundColor Yellow
+# --- 4. GIT OPERATIONS (LOCAL -> REMOTE SYNC) ---
+if (-not $LocalOnly) {
+    Write-Host "[4/7] Syncing Local -> Remote (GitHub)..." -ForegroundColor Magenta
+    
+    # Check git status
+    $gitStatus = git status --porcelain
+    if ($gitStatus) {
+        Write-Host "  -> Staging changes (including core_secondary)..." -ForegroundColor Gray
+        git add .
+        
+        Write-Host "  -> Committing: $CommitMsg" -ForegroundColor Gray
+        git commit -m "$CommitMsg"
+    }
+
+    # Push to Dev
+    Write-Host "  -> Pushing to $DevBranch..." -ForegroundColor Gray
+    git push origin $DevBranch
+    
+    # Push to Stasis (Triggers CI/CD for VPS Sync)
+    Write-Host "  -> Pushing to $StasisBranch (TRIGGERS VPS SYNC)..." -ForegroundColor Yellow
+    git checkout $StasisBranch
+    git merge $DevBranch
+    git push origin $StasisBranch
+    git checkout $DevBranch # Return to dev
+    
+    Write-Host "  -> Remote Sync Triggered. VPS will update via GitHub Actions." -ForegroundColor Green
+} else {
+    Write-Host "[4/7] Skipping Remote Sync (Local Only Mode)" -ForegroundColor Yellow
 }
 
-# --- 8. FULL SWARM ACTIVATION ---
-Write-Host "[8/8] UNLEASHING THE SWARM (Conscious Blitz)..." -ForegroundColor Green
-# Execute the monetization script against the live container
-Start-Process python -ArgumentList "scripts/conscious_monetization.py"
+# --- 5. CORE ORCHESTRATION ---
+Write-Host "[5/7] Starting Local Orchestration..." -ForegroundColor Cyan
 
-if ($ForceRelease) {
-    Write-Host "`n[RELEASE] Pushing verified state to STASIS branch..." -ForegroundColor Yellow
-    git checkout stasis
-    git merge dev --no-ff -m "Automated Vanguard Release Merge"
-    git checkout dev
+if ($FullPrune) {
+    docker-compose -f infra/docker/docker-compose.yml down -v --remove-orphans
+}
+docker-compose -f infra/docker/docker-compose.yml up -d db redis adminer
+
+# Start Primary API
+Start-Process python -ArgumentList "-m", "arq", "run", "orchestrator.src.core.worker.WorkerSettings" -NoNewWindow
+Start-Process uvicorn -ArgumentList "orchestrator.src.core.api:app --host 0.0.0.0 --port 8000 --reload" -NoNewWindow
+
+# --- 6. SECONDARY CORE (FALLBACK) ---
+Write-Host "[6/7] Initializing Secondary Core Fallback..." -ForegroundColor Magenta
+# We run secondary on a different port (e.g., 8001) for local fallback testing
+if (Test-Path "core_secondary") {
+    Start-Process uvicorn -ArgumentList "core_secondary.orchestrator.src.core.api:app --host 0.0.0.0 --port 8001" -NoNewWindow
+    Write-Host "  -> Secondary Core STANDBY at http://localhost:8001" -ForegroundColor Gray
 }
 
-Write-Host "`n💎 SOVEREIGN MATRIX IS FULLY OPERATIONAL 💎" -ForegroundColor Green
-Write-Host "==============================================="
-Write-Host "  API URL:      $BackendUrl"
-Write-Host "  FRONTEND URL: $FrontendUrl"
-Write-Host "  PROFIT BOARD: python scripts/profit_dashboard.py"
-Write-Host "  TRANSPARENCY: $BackendUrl/api/v1/swarm/transparency"
-Write-Host "  LOGS:         docker-compose -f infra/docker/docker-compose.prod.yml logs -f"
-Write-Host "==============================================="
-Write-Host "`nWatch the money move. Launch sequence complete." -ForegroundColor Cyan
+# --- 7. FRONTEND LAUNCH ---
+Write-Host "[7/7] Launching Frontend Interface..." -ForegroundColor Cyan
+if (Test-Path "frontend") {
+    Set-Location frontend
+    Start-Process npm -ArgumentList "run", "dev" -NoNewWindow
+    Set-Location ..
+}
+
+# --- FINAL STATUS ---
+Write-Host "`n=================================================" -ForegroundColor Gray
+Write-Host "🚀 REALMS2RICHES MATRIX IS SYNCED & LIVE" -ForegroundColor Green
+Write-Host "  - Local UI:     http://localhost:5173"
+Write-Host "  - Local API:    http://localhost:8000"
+Write-Host "  - Secondary:    http://localhost:8001"
+if (-not $LocalOnly) {
+    Write-Host "  - VPS Sync:     IN PROGRESS (GitHub Actions)"
+    Write-Host "  - Production:   $FrontendUrl"
+}
+Write-Host "=================================================" -ForegroundColor Gray

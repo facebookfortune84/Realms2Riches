@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Terminal, Cpu, HardDrive, Download, AlertCircle } from 'lucide-react';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
 
 export default function Chamber() {
   const [logs, setLogs] = useState([]);
@@ -170,3 +170,4 @@ export default function Chamber() {
     </div>
   );
 }
+

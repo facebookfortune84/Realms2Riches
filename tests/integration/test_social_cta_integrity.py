@@ -31,7 +31,7 @@ class TestSocialCTAIntegrity(unittest.TestCase):
 
     def test_validator_accepts_ngrok_deep_link(self):
         """Verify ngrok deep links pass (for dev/production hybrid)."""
-        link = "https://glowfly-sizeable-lazaro.ngrok-free.dev/api/checkout/session?id=1"
+        link = "https://api.realms2riches.com/api/checkout/session?id=1"
         result, _ = SocialPostValidator.validate("Buy now", link)
         self.assertTrue(result)
         print("✅ Validator accepted ngrok checkout link.")
@@ -48,3 +48,4 @@ class TestSocialCTAIntegrity(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

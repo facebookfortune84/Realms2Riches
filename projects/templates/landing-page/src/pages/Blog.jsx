@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
 
 export default function Blog() {
   const [posts, setPosts] = useState([]);
@@ -9,7 +9,7 @@ export default function Blog() {
   useEffect(() => {
     const headers = { 
         'X-License-Key': import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || 'mock_dev_key',
-        'ngrok-skip-browser-warning': 'true'
+        '': 'true'
     };
     fetch(`${BACKEND_URL}/api/blog/posts`, { headers })
       .then(res => res.json())
@@ -34,3 +34,4 @@ export default function Blog() {
     </div>
   );
 }
+

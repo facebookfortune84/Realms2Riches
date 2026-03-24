@@ -2,9 +2,9 @@ name: Sovereign CI/CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "dev", "stasis" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "dev", "stasis" ]
   schedule:
     - cron: '0 0 * * *' # Daily integrity scan
 
@@ -70,8 +70,58 @@ jobs:
     - name: Build Worker
       run: docker build -t sovereign-worker -f infra/docker/Dockerfile.worker .
 
+  deploy-production:
+    needs: [build-and-test, docker-build]
+    runs-on: ubuntu-latest
+    # Only deploy when pushing to 'stasis' (Production)
+    if: github.ref == 'refs/heads/stasis'
+    
+    steps:
+    - name: Deploy to VPS via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          # Constants
+          TARGET_ROOT="/var/www/vhosts/realms2riches.com/httpdocs"
+          REPO_DIR="$TARGET_ROOT/api"
+          
+          echo "🚀 Starting Production Deployment..."
+          
+          # 1. Update Codebase
+          if [ -d "$REPO_DIR" ]; then
+            cd $REPO_DIR
+            echo "Drafting latest code from stasis..."
+            git fetch origin
+            git checkout stasis
+            git pull origin stasis
+          else
+            echo "❌ Repo not found at $REPO_DIR. Please clone the repo first."
+            exit 1
+          fi
+          
+          # 2. Backend Deployment (Docker)
+          echo "🛠 Rebuilding Backend Services..."
+          # Ensure env vars are loaded or present in .env.prod on server
+          docker-compose -f infra/docker/docker-compose.yml up -d --build --remove-orphans
+          
+          # 3. Frontend Deployment (Build on Server)
+          echo "🎨 Building Frontend..."
+          cd frontend
+          npm install
+          npm run build
+          
+          echo "📦 Syncing Frontend to Web Root ($TARGET_ROOT)..."
+          # Sync dist content to httpdocs
+          # CRITICAL: Exclude 'api' folder to prevent deleting the repo itself
+          rsync -av --delete --exclude 'api' dist/ $TARGET_ROOT/
+          
+          echo "✅ Deployment Cycle Complete. Live at https://realms2riches.com"
+
   autonomous-verification:
-    needs: docker-build
+    needs: deploy-production
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule'
     

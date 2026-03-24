@@ -15,7 +15,7 @@ logger = logging.getLogger("mcp-swarm")
 # Initialize FastMCP Server
 mcp = FastMCP("Realms2Riches Swarm Server")
 
-API_BASE_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+API_BASE_URL = "https://api.realms2riches.com"
 
 @mcp.tool()
 async def dispatch_swarm_task(task_description: str) -> str:
@@ -56,3 +56,4 @@ async def get_integrations_status() -> str:
 
 if __name__ == "__main__":
     mcp.run()
+

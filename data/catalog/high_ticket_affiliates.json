@@ -1,0 +1,167 @@
+[
+  {
+    "id": "ht_001",
+    "name": "Authority Hacker",
+    "creator": "Gael Breton & Mark Webster",
+    "niche": "SEO & Authority Sites",
+    "price": "$1,997+",
+    "commission": "$1,000+",
+    "description": "The gold standard for building high-authority content sites.",
+    "link": "https://www.authorityhacker.com",
+    "status": "active"
+  },
+  {
+    "id": "ht_002",
+    "name": "Amazing Selling Machine",
+    "creator": "Matt Clark",
+    "niche": "Amazon FBA",
+    "price": "$4,997",
+    "commission": "$1,000 - $2,000",
+    "description": "High-volume training for private label Amazon sellers.",
+    "link": "https://www.amazingsellingmachine.com",
+    "status": "active"
+  },
+  {
+    "id": "ht_003",
+    "name": "Cardone University",
+    "creator": "Grant Cardone",
+    "niche": "Sales & Real Estate",
+    "price": "$5,000+",
+    "commission": "20% - 50% ($1k+)",
+    "description": "Aggressive sales training and real estate investing masterclasses.",
+    "link": "https://grantcardone.com",
+    "status": "active"
+  },
+  {
+    "id": "ht_004",
+    "name": "Subto Real Estate",
+    "creator": "Pace Morby",
+    "niche": "Real Estate Investing",
+    "price": "$7,800+",
+    "commission": "$1,000+",
+    "description": "Creative financing and 'Subject To' real estate strategies.",
+    "link": "https://www.subto.com",
+    "status": "active"
+  },
+  {
+    "id": "ht_005",
+    "name": "7th Level / NEPQ",
+    "creator": "Jeremy Miner",
+    "niche": "High-Ticket Sales",
+    "price": "$2,500+",
+    "commission": "30%+",
+    "description": "Neuro-Emotional Persuasion Questioning for modern sales closing.",
+    "link": "https://7thlevelhq.com",
+    "status": "active"
+  },
+  {
+    "id": "ht_006",
+    "name": "Closers.io",
+    "creator": "Cole Gordon",
+    "niche": "Sales Hiring & Training",
+    "price": "$10,000+",
+    "commission": "$1,500+",
+    "description": "Building sales teams for high-ticket coaching programs.",
+    "link": "https://closers.io",
+    "status": "active"
+  },
+  {
+    "id": "ht_007",
+    "name": "Agency Navigator",
+    "creator": "Iman Gadzhi",
+    "niche": "SMMA",
+    "price": "$1,500+",
+    "commission": "$500 - $1,000",
+    "description": "The definitive guide to starting and scaling a social media marketing agency.",
+    "link": "https://www.educate.io",
+    "status": "active"
+  },
+  {
+    "id": "ht_008",
+    "name": "Genius Network",
+    "creator": "Joe Polish",
+    "niche": "Mastermind / Networking",
+    "price": "$25,000+",
+    "commission": "High Referral Payouts",
+    "description": "The world's highest-level mastermind for entrepreneurs.",
+    "link": "https://geniusnetwork.com",
+    "status": "active"
+  },
+  {
+    "id": "ht_009",
+    "name": "Goldco IRA",
+    "creator": "Goldco",
+    "niche": "Financial / Precious Metals",
+    "price": "N/A (Investment)",
+    "commission": "$10,000+ Average",
+    "description": "Precious metals IRAs for retirement protection.",
+    "link": "https://goldco.com",
+    "status": "active"
+  },
+  {
+    "id": "ht_010",
+    "name": "Villiers Private Jets",
+    "creator": "Villiers",
+    "niche": "Luxury Travel",
+    "price": "$10,000+ (Charter)",
+    "commission": "30% Profit Share",
+    "description": "Private jet charter network with high-intent luxury leads.",
+    "link": "https://www.villiersjets.com",
+    "status": "active"
+  },
+  {
+    "id": "ht_011",
+    "name": "Shopify Plus",
+    "creator": "Shopify",
+    "niche": "Enterprise E-commerce",
+    "price": "$2,000/mo+",
+    "commission": "Up to $2,000",
+    "description": "Enterprise-grade commerce solutions for global brands.",
+    "link": "https://www.shopify.com/plus",
+    "status": "active"
+  },
+  {
+    "id": "ht_012",
+    "name": "HubSpot Enterprise",
+    "creator": "HubSpot",
+    "niche": "SaaS / CRM",
+    "price": "$3,000/mo+",
+    "commission": "Up to $3,200",
+    "description": "The leading CRM and growth platform for mid-market/enterprise.",
+    "link": "https://www.hubspot.com",
+    "status": "active"
+  },
+  {
+    "id": "ht_013",
+    "name": "WP Engine",
+    "creator": "WP Engine",
+    "niche": "Premium Hosting",
+    "price": "$1,000+ (Annual)",
+    "commission": "$200 - $7,500",
+    "description": "Managed WordPress hosting for high-traffic enterprises.",
+    "link": "https://wpengine.com",
+    "status": "active"
+  },
+  {
+    "id": "ht_014",
+    "name": "Inner Circle",
+    "creator": "Russell Brunson",
+    "niche": "Marketing Funnels",
+    "price": "$25,000",
+    "commission": "$2,500+",
+    "description": "Direct coaching from the creator of ClickFunnels.",
+    "link": "https://www.innercircle.com",
+    "status": "active"
+  },
+  {
+    "id": "ht_015",
+    "name": "Strategic Coach",
+    "creator": "Dan Sullivan",
+    "niche": "Business Coaching",
+    "price": "$10,000+",
+    "commission": "Referral Credits/Payouts",
+    "description": "The premier coaching program for successful entrepreneurs.",
+    "link": "https://www.strategiccoach.com",
+    "status": "active"
+  }
+]

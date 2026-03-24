@@ -19,7 +19,6 @@ services:
       - POSTGRES_HOST=postgres
       - PYTHONUNBUFFERED=1
     volumes:
-      - ../../orchestrator:/app/orchestrator
       - ../../data:/app/data
       - ../../projects:/app/projects
       - /var/run/docker.sock:/var/run/docker.sock
@@ -37,7 +36,6 @@ services:
     environment:
       - POSTGRES_HOST=postgres
     volumes:
-      - ../../orchestrator:/app/orchestrator
       - ../../data:/app/data
       - ../../projects:/app/projects
       - /var/run/docker.sock:/var/run/docker.sock

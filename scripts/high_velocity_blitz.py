@@ -17,7 +17,7 @@ from orchestrator.src.validation.schemas import ToolInvocation
 
 logger = get_logger("HIGH_VELOCITY_BLITZ")
 
-TRAFFIC_MANAGER_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+TRAFFIC_MANAGER_URL = "https://api.realms2riches.com"
 
 # --- CONFIGURATION FOR MAXIMUM REAL SCALE ---
 SEO_BATCH_SIZE = 50        # MAX: 50 Real Articles
@@ -104,7 +104,7 @@ class BlitzCommander:
         logger.info(f"📧 [Email-Command] TARGETING {len(self.leads)} PROSPECTS.")
         
         for lead in self.leads:
-            email = lead.get("email") or "robertdemottojr83@gmail.com"
+            email = lead.get("email") or "robert.demotto@realms2riches.com"
             link = self.get_tracking_link("https://buy.stripe.com/7sY7sLeY1aw1cEWcJJ8so0e", "email", "blitz_v1")
             
             logger.info(f"🔥 [Email-Command] ENGAGING: {email}")
@@ -191,3 +191,4 @@ if __name__ == "__main__":
         asyncio.run(commander.launch())
     except KeyboardInterrupt:
         logger.info("Blitz Aborted.")
+

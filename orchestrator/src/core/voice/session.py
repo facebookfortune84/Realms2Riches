@@ -12,7 +12,10 @@ class VoiceSessionState(Enum):
     IDLE = auto()
     LISTENING = auto()
     THINKING = auto()
+    QUALIFYING = auto()
+    RECOMMENDING = auto()
     SPEAKING = auto()
+    CLOSING = auto()
 
 class VoiceSession:
     def __init__(self, session_id: str, stt: STTAdapter, tts: TTSAdapter, orchestrator: Orchestrator):
@@ -56,17 +59,19 @@ class VoiceSession:
                     chunk = event.get("data", b"")
                     
                     # 1. Barge-in Check
-                    if self.state == VoiceSessionState.SPEAKING:
+                    if self.state in [VoiceSessionState.SPEAKING, VoiceSessionState.THINKING]:
                         # Simple energy/length check for interruption
                         if len(chunk) > 100: 
                             logger.info("Barge-in detected! Interrupting...")
                             await self._handle_interruption()
-                            continue # Skip processing this chunk as part of old turn, or treat as new?
-                                     # Usually treat as start of new turn.
+                            # Clear buffer to start fresh with this new chunk
+                            audio_buffer.clear()
+                            self.state = VoiceSessionState.LISTENING
 
                     # 2. Accumulate
                     audio_buffer.extend(chunk)
-                    self.state = VoiceSessionState.LISTENING
+                    if self.state == VoiceSessionState.IDLE:
+                        self.state = VoiceSessionState.LISTENING
                     
                     # 3. VAD / End-of-Speech Trigger (Mock: > 1000)
                     if len(audio_buffer) > 1000:
@@ -124,25 +129,39 @@ class VoiceSession:
             
             # STT
             transcript = await self.stt.transcribe_chunk(audio_data)
+            if not transcript: return
+            
             await self.output_queue.put({"type": "transcript", "text": transcript, "is_final": True})
             
-            # LLM
-            # Mocking the Orchestrator call
-            response_text = f"I heard {len(audio_data)} bytes. You said: {transcript}"
+            # --- SALES LOGIC MAPPER ---
+            response_text = ""
+            prompt = transcript.lower()
+            
+            if "price" in prompt or "cost" in prompt or "how much" in prompt:
+                self.state = VoiceSessionState.RECOMMENDING
+                response_text = "Our entry node, Jarvis Basic, is just $29 per month. For industrial scale, our Enterprise suite starts at $2499. Which scale are you looking for?"
+            elif "cheapest" in prompt or "lowest" in prompt:
+                self.state = VoiceSessionState.RECOMMENDING
+                response_text = "The most accessible entry point is Jarvis Basic at $29 per month. It includes essential AI management features."
+            elif "send" in prompt and ("link" in prompt or "email" in prompt):
+                self.state = VoiceSessionState.CLOSING
+                response_text = "I am dispatching the secure acquisition link to your registered email now. Please check your inbox."
+                # Trigger real tool action (linked to SMTP tool in future)
+            else:
+                # Default fallback (Mocking Orchestrator LLM call)
+                response_text = f"I heard you say: {transcript}. How can I assist with your revenue fabrication today?"
+
             await self.output_queue.put({"type": "text", "text": response_text})
             
             # TTS
             self.state = VoiceSessionState.SPEAKING
             await self.output_queue.put({"type": "state", "state": "speaking"})
             
-            # Synthesize Stream
             async def text_gen():
                 yield response_text
             
             async for audio_chunk in self.tts.synthesize_stream(text_gen()):
                 await self.output_queue.put({"type": "audio", "data": audio_chunk.hex()})
-                # Check for cancellation implicitly via the loop, but since we are in a task,
-                # if the task is cancelled, this loop aborts automatically.
 
             self.state = VoiceSessionState.IDLE
             await self.output_queue.put({"type": "state", "state": "idle"})

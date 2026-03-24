@@ -1,122 +1,227 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Check, Zap, ShoppingCart } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Check, Zap, ShoppingCart, Info, ShieldAlert, Filter } from 'lucide-react';
+import { trackEvent } from '../lib/analytics';
+import { CMS_COPY } from '../lib/cms';
+import { Testimonials, TrustBadges } from '../components/TrustElements';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
+
+const TABS = [
+  { id: 'all', label: 'ALL_MATRIX' },
+  { id: 'entry', label: 'ENTRY_NODES' },
+  { id: 'foundation', label: 'FOUNDATION' },
+  { id: 'growth', label: 'GROWTH' },
+  { id: 'scale', label: 'SCALE' },
+  { id: 'enterprise', label: 'ENTERPRISE' }
+];
 
 export default function Pricing() {
-  const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [activeTab, setActiveTab] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    trackEvent('page_view', { page: 'pricing' });
+    
     const headers = { 
         'X-License-Key': import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || 'mock_dev_key',
-        'ngrok-skip-browser-warning': 'true'
+        '': 'true'
     };
-    fetch(`${BACKEND_URL}/products`, { headers })
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch pricing');
-        return res.json();
-      })
-      .then(data => {
-        if (data && data.length > 0) {
-            setProducts(data);
-        } else {
-            setError("No products available.");
+    
+    const fetchCatalog = async () => {
+        try {
+            const res = await fetch(`${BACKEND_URL}/products`, { headers });
+            if (!res.ok) throw new Error('Failed to fetch pricing');
+            const data = await res.json();
+            if (data && data.length > 0) {
+                setAllProducts(data);
+            } else {
+                setError("No products available.");
+            }
+        } catch (err) {
+            console.error("Pricing Load Error:", err);
+            setError("Catalog Offline.");
+        } finally {
+            setLoading(false);
         }
-      })
-      .catch(err => {
-        console.error("Pricing Load Error:", err);
-        setError("Catalog Offline.");
-      })
-      .finally(() => setLoading(false));
+    };
+
+    fetchCatalog();
   }, []);
 
+  const filteredProducts = useMemo(() => {
+    if (activeTab === 'all') return allProducts;
+    return allProducts.filter(p => p.funnel_stage === activeTab);
+  }, [allProducts, activeTab]);
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    trackEvent('tab_switch', { tab: tabId });
+  };
+
+  const handleAcquisition = (product) => {
+    trackEvent('start_checkout', { product_id: product.id, price: product.price });
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { staggerChildren: 0.05 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } }
+  };
+
   return (
-    <div className="py-20 max-w-7xl mx-auto px-4 font-mono bg-black">
-      <div className="text-center mb-20">
-        <motion.h2 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-6xl font-black tracking-tighter uppercase italic mb-4 text-white"
+    <div className="py-32 max-w-7xl mx-auto px-6 font-mono bg-black min-h-screen">
+      <div className="text-center mb-24">
+        <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="inline-block p-6 bg-primary/5 rounded-[2.5rem] border-2 border-primary/20 mb-8"
         >
-          Pricing <span className="text-primary drop-shadow-[0_0_15px_rgba(0,255,136,0.5)]">Matrix</span>
+            <img src={`${BACKEND_URL}/assets/branding/forge_logo.png`} alt="Forge" className="h-24 w-auto" />
+        </motion.div>
+        <motion.h2 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-7xl md:text-8xl font-black tracking-tighter uppercase italic mb-6 text-white"
+        >
+          {CMS_COPY.pricing.title} <span className="text-primary">Matrix</span>
         </motion.h2>
-        <p className="text-gray-500 uppercase tracking-widest text-xs">Direct Neural Acquisition Channels</p>
+        <p className="text-primary/40 uppercase tracking-[0.8em] text-[11px] font-black mb-8">{CMS_COPY.pricing.tagline}</p>
+        <p className="max-w-2xl mx-auto text-gray-500 text-sm leading-relaxed uppercase font-bold tracking-widest opacity-80">
+          {CMS_COPY.pricing.description}
+        </p>
+      </div>
+
+      <TrustBadges />
+
+      {/* Tabs */}
+      <div className="flex flex-wrap justify-center gap-2 mb-20" role="tablist" aria-label="Offer categories">
+        {TABS.map(tab => (
+          <button
+            key={tab.id}
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            onClick={() => handleTabChange(tab.id)}
+            className={`px-6 py-3 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all duration-300 border-2 ${
+              activeTab === tab.id 
+                ? 'bg-primary text-black border-primary' 
+                : 'bg-white/5 text-gray-500 border-white/5 hover:border-white/10'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
       
       {loading && (
-        <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-            <div className="text-primary text-xs uppercase tracking-[0.3em] animate-pulse">Synchronizing Catalog...</div>
+        <div className="flex flex-col items-center justify-center py-32 gap-8" aria-live="polite">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            <div className="text-primary text-[10px] font-black uppercase tracking-widest animate-pulse">Decrypting Economics...</div>
         </div>
       )}
       
-      {error && <div className="text-center text-red-500 bg-red-500/10 p-4 rounded-xl border border-red-500/20">{error}</div>}
+      {error && (
+        <div className="max-w-md mx-auto text-center border-2 border-red-500/30 bg-red-500/5 p-12 rounded-[3rem]" role="alert">
+            <ShieldAlert size={48} className="text-red-500 mx-auto mb-6" />
+            <div className="text-red-500 font-black uppercase tracking-widest">{error}</div>
+            <p className="text-gray-600 text-[10px] mt-4 uppercase tracking-widest text-center">Uplink verification failed. Engage local bypass.</p>
+        </div>
+      )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
-        {!loading && products.map((p, i) => {
-           const priceValue = p.price ?? "Contact";
-           const intervalValue = p.interval ?? 'once';
-           const checkoutUrl = p.checkout_url || "https://buy.stripe.com/fZu9ATdSzcVM3459ezgYU06?locale=en";
-           
-           return (
-            <motion.div 
-              key={p.id || i} 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.05 }}
-              className="bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden hover:border-primary/50 transition-all flex flex-col group shadow-[0_0_30px_rgba(0,0,0,0.8)] hover:shadow-[0_0_40px_rgba(0,255,136,0.1)] h-full relative"
-            >
-              {/* Product Image / Header */}
-              <div className="h-56 bg-[#111] border-b border-white/5 relative flex items-center justify-center overflow-hidden transition-all duration-700">
-                <img 
-                    src={p.image_url.startsWith('http') ? p.image_url : `${BACKEND_URL}${p.image_url}`} 
-                    alt={p.name}
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
-                    onError={(e) => e.target.src = "https://www.realmstoriches.xyz/img/bannerimage(3)-600.webp"}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent opacity-60" />
-                <span className="absolute bottom-4 left-6 text-primary/90 text-4xl font-black italic uppercase tracking-tighter z-10 drop-shadow-lg">
-                    {p.name.split(' ')[0]}
-                </span>
-              </div>
+      <motion.div 
+        layout
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+      >
+        <AnimatePresence mode='popLayout'>
+          {filteredProducts.map((p) => {
+             const priceValue = p.price ?? "0.00";
+             const intervalValue = p.interval ?? 'once';
+             
+             return (
+              <motion.div 
+                layout
+                key={p.id} 
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                whileHover={{ scale: 1.02 }}
+                className="bg-[#030303] border-2 border-white/5 rounded-[2.5rem] overflow-hidden hover:border-primary/30 transition-all duration-500 flex flex-col group relative"
+              >
+                {p.primary_entry_offer && (
+                  <div className="absolute top-6 right-6 z-20 bg-primary text-black px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase flex items-center gap-1 shadow-[0_0_15px_rgba(0,255,136,0.4)]">
+                    <Zap size={8} fill="currentColor" /> RECOMMENDED
+                  </div>
+                )}
 
-              <div className="p-8 flex flex-col flex-grow relative z-10">
-                <div className="mb-6">
-                    <h3 className="text-xl font-bold mb-1 uppercase text-white tracking-tight">{p.name}</h3>
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-primary">${priceValue}</span>
-                        <span className="text-gray-600 text-[10px] uppercase font-bold">
-                            /{intervalValue === 'one_time' || intervalValue === 'once' ? 'once' : intervalValue}
-                        </span>
-                    </div>
+                <div className="aspect-[16/10] bg-[#080808] border-b-2 border-white/5 flex items-center justify-center p-6">
+                  <img 
+                      src={p.image_url.startsWith('http') ? p.image_url : `${BACKEND_URL}${p.image_url}`} 
+                      alt={p.name}
+                      className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-700"
+                      onError={(e) => e.target.src = "https://www.realmstoriches.xyz/img/bannerimage(3)-600.webp"}
+                  />
                 </div>
 
-                <p className="text-gray-400 text-xs mb-8 flex-grow leading-relaxed italic border-l-2 border-primary/20 pl-4">
-                    {p.description}
-                </p>
+                <div className="p-10 flex flex-col flex-grow">
+                  <div className="mb-8">
+                      <h3 className="text-xl font-black text-white tracking-tighter uppercase italic mb-4">{p.name}</h3>
+                      <div className="flex items-baseline gap-2">
+                          <span className="text-4xl font-black text-primary italic">${priceValue}</span>
+                          <span className="text-gray-700 text-[10px] font-black uppercase tracking-widest">
+                              {intervalValue === 'one_time' || intervalValue === 'once' ? '/SECURE' : `/${intervalValue.toUpperCase()}`}
+                          </span>
+                      </div>
+                  </div>
 
-                <div className="space-y-3">
-                    <a 
-                      href={checkoutUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full bg-primary text-black py-4 rounded-xl font-black text-[10px] uppercase hover:bg-white transition-all text-center flex items-center justify-center gap-2 shadow-[0_5px_15px_rgba(0,255,136,0.2)]"
-                    >
-                      <ShoppingCart size={14} />
-                      Initialize Acquisition
-                    </a>
-                    <div className="text-[9px] text-center text-gray-600 uppercase tracking-widest font-bold">
-                        Verified: {p.id}
-                    </div>
+                  <p className="text-gray-500 text-[10px] mb-10 flex-grow leading-relaxed font-bold uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-all">
+                      {p.description}
+                  </p>
+
+                  <div className="mt-auto pt-6 border-t border-white/5">
+                      <motion.a 
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        href={p.checkout_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => handleAcquisition(p)}
+                        aria-label={`Acquire ${p.name} for ${priceValue} dollars`}
+                        className="w-full bg-primary text-black py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-white transition-all shadow-xl shadow-primary/10"
+                      >
+                        <ShoppingCart size={14} strokeWidth={3} />
+                        INITIATE_ACQUISITION
+                      </motion.a>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          );
-        })}
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </motion.div>
+
+      <Testimonials />
+
+      <div className="mt-32 p-12 border-2 border-dashed border-white/10 rounded-[3rem] text-center bg-white/[0.01]">
+        <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-4">{CMS_COPY.pricing.risk_reversal}</h3>
+        <p className="text-gray-600 text-[9px] font-bold uppercase tracking-[0.3em] max-w-xl mx-auto leading-relaxed">
+          All digital assets are cryptographically signed and delivered instantly upon confirmation of industrial transaction.
+        </p>
       </div>
     </div>
   );
 }
+

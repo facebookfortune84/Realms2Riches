@@ -54,7 +54,7 @@ python scripts/yolo_mode_monetization.py
 ```
 
 ## 4. Verification
-1. **Health Check:** Visit `https://glowfly-sizeable-lazaro.ngrok-free.dev/health`. Status should be `ok`.
+1. **Health Check:** Visit `https://api.realms2riches.com/health`. Status should be `ok`.
 2. **Payment Monitoring:**
    ```powershell
    $env:PYTHONPATH="."
@@ -71,3 +71,4 @@ python scripts/yolo_mode_monetization.py
 - Monitor `data/logs` for agent activity.
 - Review `LINEAGE.md` for architecture details.
 - Commit changes to `dev` branch only. `stasis` is locked.
+

@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Home from './pages/Home';
 import Pricing from './pages/Pricing';
-import Cockpit from './pages/Cockpit';
-import Dashboard from './pages/Dashboard';
+import UnifiedConsole from './pages/UnifiedConsole';
+import HighTicketHub from './pages/HighTicketHub';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 import Affiliates from './pages/Affiliates';
@@ -28,8 +28,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/pricing" element={<Pricing />} />
-            <Route path="/cockpit" element={<Cockpit />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/console" element={<UnifiedConsole />} />
+            <Route path="/affiliate-hub" element={<HighTicketHub />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/affiliates" element={<Affiliates />} />

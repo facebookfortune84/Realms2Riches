@@ -20,7 +20,7 @@ The system operates 13 distinct income streams, categorized by revenue model.
 | FastDeploy | Direct (SaaS) | [Startup Accelerator](https://buy.stripe.com/bJe4gz9DH33z5cu2558so08) | Stripe Checkout |
 
 ## 2. Webhook Fulfillment
-- **Endpoint**: `https://glowfly-sizeable-lazaro.ngrok-free.dev/api/v1/monetization/webhook`
+- **Endpoint**: `https://api.realms2riches.com/api/v1/monetization/webhook`
 - **Handled Events**:
   - `checkout.session.completed`: Provisions access and triggers onboarding.
   - `customer.subscription.created`: Updates subscription status in DB.
@@ -30,3 +30,4 @@ The system operates 13 distinct income streams, categorized by revenue model.
 - `STRIPE_API_KEY`: Configured in `.env.prod`.
 - `STRIPE_WEBHOOK_SECRET`: Configured in `.env.prod`.
 - `ENV_MODE`: Set to `prod` for live capture.
+

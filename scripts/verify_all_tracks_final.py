@@ -42,7 +42,7 @@ def check_infrastructure():
 async def check_endpoints():
     """Verify local API health and telemetry."""
     # Assuming the user runs this AFTER docker-compose up
-    base_url = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+    base_url = "https://api.realms2riches.com"
     
     try:
         # 1. Health
@@ -110,3 +110,4 @@ async def run_final_pass():
 
 if __name__ == "__main__":
     asyncio.run(run_final_pass())
+

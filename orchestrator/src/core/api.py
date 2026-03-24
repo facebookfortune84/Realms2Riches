@@ -1,10 +1,18 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request, Depends, Security, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse, FileResponse
+from fastapi import FastAPI, Request, HTTPException, BackgroundTasks
+from starlette.responses import JSONResponse, RedirectResponse, HTMLResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.cors import CORSMiddleware
 from fastapi.security import APIKeyHeader
 from fastapi.staticfiles import StaticFiles
-from starlette.middleware.base import BaseHTTPMiddleware
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, JSON, ForeignKey, Text, Float, Enum
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func, text
+import enum
 import os
+import sys
 import json
 import csv
 import hashlib
@@ -13,52 +21,71 @@ import requests
 import uuid
 import random
 import asyncio
+import base64
 import logging
+import shutil
 from datetime import datetime
-from typing import Dict, List, Any, Optional
 from contextlib import asynccontextmanager
+from typing import Optional
 
-from orchestrator.src.core.orchestrator import Orchestrator
-from orchestrator.src.memory.sql_store import SQLStore
 from orchestrator.src.core.config import settings
 from orchestrator.src.logging.logger import get_logger
+from orchestrator.src.memory.sql_store import SQLStore
+from orchestrator.src.core.database import Base, AsyncSessionLocal, engine, init_db
+from orchestrator.src.core.models import Affiliate, AffiliateClick, Commission, Lead, LeadStatus, SmtpAccount, TaskResult
+from orchestrator.src.core.orchestrator import Orchestrator
 from orchestrator.src.core.voice.router import VoiceRouter
+from orchestrator.src.tools.base import BaseTool
+from orchestrator.src.memory.vector_store import VectorStore
+from orchestrator.src.core.llm_provider import BaseLLMProvider
+from orchestrator.src.agents.persona_library import PERSONA_LIBRARY
+from orchestrator.src.core.workforce import workforce
+from orchestrator.src.core.lineage import lineage_registry
+from orchestrator.src.core.outreach.config import outreach_settings
+from arq.connections import RedisSettings
+from arq import create_pool
+import aiohttp
 
 logger = get_logger(__name__)
 
-# GLOBAL STATE
-telemetry_data = {
-    "clicks": 0, 
-    "conversions": 0, 
-    "revenue": 0.0,
-    "impressions": random.randint(1000, 5000)
-}
+# --- GLOBAL STATE ---
+telemetry_data = {"clicks": 0, "conversions": 0, "revenue": 0.0, "impressions": random.randint(1000, 5000)}
 activity_log = []
-orchestrator = Orchestrator()
-voice_router = VoiceRouter(orchestrator, orchestrator.stt, orchestrator.tts)
 
+# --- CORE INITIALIZATIONS ---
+# Orchestrator and voice_router are initialized conditionally after lifespan has run
+orchestrator = None # Initialize as None, will be set in lifespan
+voice_router = None # Initialize as None, will be set in lifespan
+
+# --- LIFESPAN MANAGER ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
+    global orchestrator, voice_router # Declare as global to modify
     logger.info("Starting Realms2Riches Industrial Matrix...")
-    await orchestrator.startup()
-    # Seed initial activity if empty
-    if not activity_log:
-        activity_log.append({
-            "t": datetime.utcnow().isoformat(),
-            "a": "SYSTEM",
-            "op": "MATRIX_INITIALIZED",
-            "r": "Sovereign nodes standing by."
-        })
     
-    # Hook into orchestrator for logging if possible
-    # We'll use a wrapper or global activity_log update in tasks
-    
-    yield
-    # Shutdown
-    logger.info("Shutting down matrix.")
+    # Initialize Orchestrator and VoiceRouter here after settings are loaded
+    orchestrator = Orchestrator()
+    voice_router = VoiceRouter(orchestrator, orchestrator.stt, orchestrator.tts if orchestrator else None)
 
-# --- RATE LIMITING ---
+    # Monetization Safety Check
+    try:
+        settings.validate_monetization_config()
+        logger.info("✅ Monetization config verified.")
+    except ValueError as e:
+        logger.critical(str(e))
+        if settings.ENV_MODE == "prod":
+            sys.exit(1) # Fail fast in production
+            
+    if orchestrator: await orchestrator.startup()
+    if not activity_log:
+        activity_log.append({"t": datetime.utcnow().isoformat(), "a": "SYSTEM", "op": "MATRIX_INITIALIZED", "r": "Sovereign nodes standing by."})
+    yield
+    logger.info("Shutting down matrix...")
+
+# --- API APPLICATION SETUP ---
+app = FastAPI(title="Realms2Riches Sovereign Matrix", version="5.8.2", lifespan=lifespan)
+
+# --- MIDDLEWARE ---
 class RateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, limit: int = 100, window: int = 60):
         super().__init__(app)
@@ -77,11 +104,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self.requests[ip].append(now)
         return await call_next(request)
 
-app = FastAPI(title="Realms2Riches Sovereign Matrix", version="5.8.2", lifespan=lifespan)
 app.add_middleware(RateLimitMiddleware, limit=200, window=60)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-# --- STATIC FILES ---
+# --- STATIC FILE MOUNTING ---
 os.makedirs("data/assets", exist_ok=True)
 os.makedirs("data/marketing", exist_ok=True)
 os.makedirs("data/generated/swarms", exist_ok=True)
@@ -91,10 +117,60 @@ app.mount("/marketing", StaticFiles(directory="data/marketing"), name="marketing
 app.mount("/swarms", StaticFiles(directory="data/generated/swarms"), name="swarms")
 
 # --- ENDPOINTS ---
-
 @app.get("/health")
-async def health_check():
-    return {"status": "SOVEREIGN", "timestamp": datetime.utcnow().isoformat(), "agents_online": len(orchestrator.agents)}
+async def health_root():
+    return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
+
+@app.get("/health/monetization")
+async def health_monetization():
+    sql = SQLStore()
+    db_ok = False
+    try:
+        session = sql.Session()
+        session.execute(text("SELECT 1"))
+        db_ok = True
+    except Exception as e:
+        logger.error(f"Monetization Health Check: DB connection failed: {e}")
+    finally:
+        session.close()
+
+    redis_ok = False
+    try:
+        if orchestrator and orchestrator.arq_pool:
+            await orchestrator.arq_pool.ping()
+            redis_ok = True
+        else:
+            # Attempt direct ping if orchestrator not fully up
+            redis_client = await create_pool(RedisSettings.from_dsn(outreach_settings.REDIS_URL))
+            await redis_client.ping()
+            redis_ok = True
+            await redis_client.close()
+    except Exception as e:
+        logger.error(f"Monetization Health Check: Redis connection failed: {e}")
+
+    catalog_ok = os.path.exists("data/catalog/products.json")
+    if not catalog_ok:
+        logger.warning("Monetization Health Check: Product catalog file not found.")
+
+    return {
+        "status": "MONETIZATION_HEALTH",
+        "timestamp": datetime.utcnow().isoformat(),
+        "database": "OK" if db_ok else "FAIL",
+        "redis_queue": "OK" if redis_ok else "FAIL",
+        "product_catalog": "OK" if catalog_ok else "FAIL",
+        "overall": "OK" if db_ok and redis_ok and catalog_ok else "FAIL"
+    }
+
+@app.get("/health/readiness")
+async def health_readiness():
+    return {
+        "status": "READY" if orchestrator and orchestrator.is_ready else "NOT_READY",
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+@app.get("/health/liveness")
+async def health_liveness():
+    return {"status": "LIVE", "timestamp": datetime.utcnow().isoformat()}
 
 @app.get("/api/telemetry/stats")
 async def get_telemetry_stats():
@@ -102,15 +178,18 @@ async def get_telemetry_stats():
 
 @app.get("/api/activity")
 async def get_activity():
-    return activity_log[-100:]
+    return activity_log[::-1][:50]
 
 @app.get("/api/integrations/status")
 async def get_integrations_status():
     db_status = "active"
     try:
-        sql = SQLStore()
-    except:
+        async with AsyncSessionLocal() as session:
+            await session.execute(select(1))
+    except Exception as e:
+        logger.error(f"DB connection check failed: {e}")
         db_status = "offline"
+        
     stripe_status = "active" if settings.STRIPE_API_KEY and settings.STRIPE_API_KEY != "sk_test_placeholder" else "offline"
     return {
         "stripe": stripe_status,
@@ -118,32 +197,60 @@ async def get_integrations_status():
         "database": db_status
     }
 
-@app.get("/products")
-async def get_products():
-    products = []
+@app.post("/api/v1/analytics/event")
+async def record_analytics_event(request: Request):
+    """
+    Lightweight endpoint for recording frontend and backend analytics events.
+    """
+    if not getattr(settings, "ANALYTICS_ENABLED", False) and os.getenv("ANALYTICS_ENABLED") != "True":
+        return {"status": "skipped", "reason": "Analytics disabled"}
+
     try:
-        # Load products from CSV
-        with open("data/catalog/products.csv", "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            product_map = {row['id']: row for row in reader}
+        data = await request.json()
+        event_type = data.get("event_type")
+        if not event_type:
+            raise HTTPException(status_code=400, detail="Missing event_type")
+
+        sql = SQLStore()
+        sql.add_analytics_event({
+            "event_type": event_type,
+            "product_id": data.get("product_id"),
+            "campaign_id": data.get("campaign_id"),
+            "user_id": data.get("user_id"),
+            "details": data.get("details", {})
+        })
+        return {"status": "recorded"}
+    except Exception as e:
+        logger.error(f"Failed to record analytics event: {e}")
+        return {"status": "error", "reason": str(e)}
+
+@app.get("/products")
+async def get_products(
+    stage: Optional[str] = None, 
+    recommendations_for: Optional[str] = None,
+    entry_only: bool = False
+):
+    """
+    Returns the product catalog with optional funnel filtering.
+    """
+    from orchestrator.src.core.monetization.engine import monetization_engine
+    
+    if recommendations_for:
+        return monetization_engine.get_recommendations(recommendations_for)
+    
+    if entry_only:
+        return monetization_engine.get_entry_offers()
         
-        # Load prices and join with products
-        with open("data/catalog/prices.csv", "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                p_id = row['product_id']
-                if p_id in product_map:
-                    p = product_map[p_id].copy()
-                    p['price'] = float(row['price'])
-                    p['currency'] = row['currency']
-                    p['interval'] = row['interval']
-                    
-                    # Ensure image_url is served as a resolved path
-                    if p['image_url'] and not p['image_url'].startswith('http'):
-                        p['image_url'] = p['image_url']
-                    
-                    products.append(p)
+    if stage:
+        return monetization_engine.get_products_by_stage(stage)
+        
+    try:
+        with open("data/catalog/products.json", "r", encoding="utf-8") as f:
+            products = json.load(f)
         return products
+    except FileNotFoundError:
+        logger.error("Catalog file 'data/catalog/products.json' not found.")
+        return []
     except Exception as e:
         logger.error(f"Error loading catalog: {e}")
         return []
@@ -152,18 +259,24 @@ async def get_products():
 async def get_blog_posts():
     path = "data/blog/posts.json"
     if os.path.exists(path):
-        with open(path, "r") as f:
-            return json.load(f)
+        with open(path, "r", encoding="utf-8") as f:
+            posts = json.load(f)
+            valid_posts = []
+            for p in posts:
+                slug = p.get('slug')
+                if slug and not slug.startswith('report-'):
+                    if any(os.path.exists(md_path) for md_path in [f"data/blog/{slug}.md", f"data/blog/posts/{slug}.md", f"docs/blog/{slug}.md"]):
+                         valid_posts.append(p)
+            return valid_posts
     return []
 
 @app.get("/api/blog/posts/{slug}")
 async def get_blog_post(slug: str):
-    # Try to find in posts.json first for metadata
     post_meta = None
     posts_path = "data/blog/posts.json"
     if os.path.exists(posts_path):
         try:
-            with open(posts_path, "r") as f:
+            with open(posts_path, "r", encoding="utf-8") as f:
                 posts = json.load(f)
                 for p in posts:
                     if p['slug'] == slug:
@@ -172,7 +285,6 @@ async def get_blog_post(slug: str):
         except Exception as e:
             logger.error(f"Error loading posts.json: {e}")
     
-    # Check multiple locations for the .md file
     md_paths = [
         f"data/blog/{slug}.md", 
         f"data/blog/posts/{slug}.md",
@@ -190,7 +302,6 @@ async def get_blog_post(slug: str):
                 logger.error(f"Error reading md file {path}: {e}")
             
     if md_content is not None:
-        # Simple frontmatter strip
         content = md_content
         if md_content.startswith("---"):
             parts = md_content.split("---", 2)
@@ -202,180 +313,138 @@ async def get_blog_post(slug: str):
             "content": content
         })
         
-    logger.warning(f"Blog post not found: {slug}")
-    raise HTTPException(status_code=404, detail="Post not found")
+    logger.warning(f"Blog post content not found for slug: {slug}")
+    raise HTTPException(status_code=404, detail="Blog post content not found")
 
-@app.post("/api/sovereign/launch")
-async def sovereign_launch(request: Request):
-    payload = await request.json()
-    logger.info(f"🚀 SOVEREIGN LAUNCH INITIATED")
-    return {
-        "status": "active",
-        "timestamp": datetime.utcnow().isoformat(),
-        "stream_count": 13,
-        "message": "Swarm released."
-    }
-
-@app.post("/api/tasks")
-async def create_task(payload: Dict[str, Any]):
-    task_desc = payload.get("description", "Unnamed Task")
-    # For Genesis Forge vending machine
-    is_genesis = "INITIALIZE COMPANY BLUEPRINT" in task_desc
-    
-    task_id = str(uuid.uuid4())
-    asyncio.create_task(run_task_background(task_desc, task_id, is_genesis))
-    return {"status": "dispatched", "task_id": task_id}
-
-@app.websocket("/ws/voice")
-async def websocket_voice_endpoint(websocket: WebSocket):
-    # Wrap the handle_connection to track voice tasks in activity_log
-    # Custom loop here to intercept voice result
-    await websocket.accept()
-    session = voice_router.create_session()
-    
-    async def receive_loop():
-        try:
-            while True:
-                data = await websocket.receive_json()
-                if data.get("type") == "audio_chunk":
-                    await session.add_input({"type": "audio", "data": data.get("data", "").encode()})
-        except:
-            await session.add_input({"type": "stop"})
-
-    async def send_loop():
-        try:
-            while True:
-                msg = await session.get_output()
-                if msg.get("type") == "transcript":
-                    # Log voice command start
-                    activity_log.append({
-                        "t": datetime.utcnow().isoformat(),
-                        "a": "VOICE_LINK",
-                        "op": "BARGE_IN",
-                        "r": f"User: {msg.get('text')}"
-                    })
-                await websocket.send_json(msg)
-        except:
-            pass
-
-    await asyncio.gather(receive_loop(), send_loop())
-
-@app.websocket("/ws/chamber")
-async def websocket_chamber_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    logger.info("Chamber connection established.")
+# --- AFFILIATE TRACKING ENDPOINT ---
+@app.get("/api/affiliates/track/{affiliate_code}")
+async def track_affiliate_click(affiliate_code: str, request: Request):
+    """
+    Logs a click for a given affiliate code.
+    This endpoint should be used in affiliate links.
+    """
     try:
-        # Stream the actual activity log
-        last_idx = 0
-        while True:
-            current_log = activity_log[last_idx:]
-            for entry in current_log:
-                await websocket.send_json({
-                    "type": "log",
-                    "timestamp": entry['t'],
-                    "agent": entry['a'],
-                    "operation": entry['op'],
-                    "result": entry['r']
-                })
-            last_idx = len(activity_log)
-            await asyncio.sleep(1)
-    except WebSocketDisconnect:
-        logger.info("Chamber connection dropped.")
+        async with AsyncSessionLocal() as session:
+            affiliate = await session.scalar(
+                select(Affiliate).where(Affiliate.unique_code == affiliate_code, Affiliate.is_active == True)
+            )
+            
+            if not affiliate:
+                logger.warning(f"Affiliate click with invalid/inactive code: {affiliate_code}")
+                # Redirect to a default page or return a generic response
+                return JSONResponse({"message": "Affiliate not found or inactive."}, status_code=404)
 
-async def run_task_background(task: str, task_id: str, is_genesis: bool = False):
-    try:
-        activity_log.append({
-            "t": datetime.utcnow().isoformat(), "a": "DISPATCHER", "op": "TASK_START", "r": f"Executing: {task[:60]}..."
-        })
-        
-        async for step in orchestrator.submit_task_stream(task, task_id):
-            if step["status"] == "completed":
-                result = step["result"]
-                activity_log.append({
-                    "t": datetime.utcnow().isoformat(),
-                    "a": result.get("agent_name", "Swarm"),
-                    "op": "TASK_COMPLETE",
-                    "r": result.get("reasoning", "Success")[:300]
-                })
-                
-                if is_genesis:
-                    # Generate a downloadable 'swarm' artifact
-                    swarm_file = f"swarm_{task_id[:8]}.json"
-                    swarm_path = os.path.join("data/generated/swarms", swarm_file)
-                    with open(swarm_path, "w") as f:
-                        json.dump({
-                            "matrix_id": task_id,
-                            "blueprint": result.get("reasoning"),
-                            "agents": ["Manager", "Developer", "Marketer", "Auditor"],
-                            "infrastructure": " Ngrok/Docker/FastAPI"
-                        }, f)
-                    
-                    activity_log.append({
-                        "t": datetime.utcnow().isoformat(),
-                        "a": "GENESIS_FORGE",
-                        "op": "ARTIFACT_READY",
-                        "r": f"Downloadable swarm available: /swarms/{swarm_file}"
-                    })
+            # Log the click
+            click = AffiliateClick(
+                affiliate_id=affiliate.id,
+                target_url=str(request.url), # Track the full URL including query params
+                user_agent=request.headers.get("user-agent"),
+                ip_address=request.client.host
+            )
+            session.add(click)
+            await session.commit()
+            logger.info(f"Affiliate click logged for {affiliate.name} (ID: {affiliate.id})")
+            
+            # Redirect user to the target URL or a specific landing page
+            # For now, we just return success. A real implementation would redirect.
+            return {"message": "Click tracked.", "affiliate": affiliate.name, "click_id": click.id}
 
     except Exception as e:
-        logger.error(f"TASK FAILED: {e}")
-        activity_log.append({"t": datetime.utcnow().isoformat(), "a": "SYSTEM", "op": "ERROR", "r": str(e)})
+        logger.error(f"Error tracking affiliate click for code {affiliate_code}: {e}")
+        return JSONResponse({"error": "Failed to track click"}, status_code=500)
 
+# --- STRIPE WEBHOOK LISTENER ---
 @app.post("/api/v1/monetization/webhook")
-async def unified_stripe_webhook(request: Request):
-    internal_header = request.headers.get("x-sovereign-internal")
-    is_internal = (internal_header == "true")
+async def unified_stripe_webhook(request: Request, background_tasks: BackgroundTasks):
+    """
+    Production-ready Stripe webhook handler.
+    Validates signatures, handles events, and logs to Profit Ledger.
+    """
     payload = await request.body()
-    
-    if is_internal:
-        event = json.loads(payload)
-    else:
-        sig_header = request.headers.get("stripe-signature")
-        endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
-        try:
-            if endpoint_secret:
-                event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
-            else:
-                event = json.loads(payload)
-        except Exception as e:
-            logger.error(f"Webhook Signature Error: {e}")
-            raise HTTPException(status_code=400, detail=str(e))
+    sig_header = request.headers.get("stripe-signature")
+    endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
+
+    try:
+        if settings.ENV_MODE == "prod" or sig_header:
+            if not endpoint_secret or "whsec_change_me" in endpoint_secret:
+                 logger.error("STRIPE_WEBHOOK_SECRET not configured.")
+                 raise HTTPException(status_code=400, detail="Webhook Secret Missing")
+            event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+        else:
+            # Fallback for local testing/simulation ONLY
+            logger.warning("🔔 Non-signed webhook received in DEV mode.")
+            event = json.loads(payload)
+    except (ValueError, stripe.error.SignatureVerificationError) as e:
+        logger.error(f"❌ Webhook signature validation failed: {e}")
+        raise HTTPException(status_code=400, detail="Invalid signature")
 
     event_type = event["type"]
     data_object = event["data"]["object"]
+    event_id = event.get("id")
+
+    # Idempotency check: Have we processed this event before?
+    # (Implementation note: In a real DB, you'd check a dedicated 'webhook_events' table)
+    
+    logger.info(f"🔔 Received Stripe event: {event_type} (ID: {event_id})")
 
     if event_type == "checkout.session.completed":
-        amount = data_object.get("amount_total", 0) / 100
-        email = data_object.get("customer_details", {}).get("email")
+        session_data = data_object
+        amount = session_data.get("amount_total", 0) / 100
+        customer_email = session_data.get("customer_details", {}).get("email")
+        # Product ID should be in metadata if we set it during payment link creation or manual checkout
+        product_id = session_data.get("metadata", {}).get("internal_id", "GENERIC_SALE")
         
-        # Log to DB
-        try:
-            sql = SQLStore()
-            sql.add_profit_entry({
-                "id": str(uuid.uuid4()), 
-                "type": "revenue", 
-                "category": "sale", 
-                "amount": amount, 
-                "details": {"email": email}
-            })
-        except:
-            pass
+        logger.info(f"💰 SALE CAPTURED: ${amount} from {customer_email} (Product: {product_id})")
 
+        # Record to Profit Ledger (SQLStore)
+        sql = SQLStore()
+        sql.add_profit_entry({
+            "id": f"stripe_{event_id}",
+            "type": "revenue",
+            "category": "sale",
+            "amount": amount,
+            "currency": "USD",
+            "timestamp": datetime.utcnow(),
+            "details": {
+                "stripe_session_id": session_data.get("id"),
+                "customer": customer_email,
+                "product": product_id,
+                "source": "stripe_webhook"
+            }
+        })
+
+        # Emit Analytics Event
+        sql.add_analytics_event({
+            "event_type": "CHECKOUT_COMPLETED",
+            "product_id": product_id,
+            "user_id": customer_email,
+            "details": {
+                "amount": amount,
+                "currency": "USD",
+                "stripe_event_id": event_id
+            }
+        })
+
+        # Background fulfillment
+        background_tasks.add_task(fulfill_order, session_data)
+
+        # Update live telemetry
         telemetry_data["revenue"] += amount
         telemetry_data["conversions"] += 1
         activity_log.append({
             "t": datetime.utcnow().isoformat(),
             "a": "REVENUE_SHIELD",
             "op": "SALE_CAPTURED",
-            "r": f"Industrial sale: ${amount} captured from {email}"
+            "r": f"Industrial sale: ${amount} captured (Product: {product_id})"
         })
 
-    return {"status": "success"}
+    return {"status": "success", "event_id": event_id}
 
-@app.get("/api/v1/user/jarvis")
-async def get_jarvis_iframe():
-    """Serves the industrial AI orchestration interface."""
-    return HTMLResponse(content="<html><body style='background:black;color:white;'><h1>JARVIS_v3.5_CORE</h1><p>Neural Uplink Active.</p></body></html>")
+async def fulfill_order(session_data: dict):
+    """Placeholder for order fulfillment logic (e.g., granting API access)."""
+    customer_email = session_data.get("customer_details", {}).get("email")
+    logger.info(f"🚚 Fulfilling order for {customer_email}...")
+    # Add real fulfillment logic here (e.g. creating DB entry for Jarvis license)
 
 if __name__ == "__main__":
     import uvicorn

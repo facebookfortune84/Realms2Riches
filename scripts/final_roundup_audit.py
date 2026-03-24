@@ -9,7 +9,7 @@ import socket
 sys.path.append(os.getcwd())
 
 class SovereignFinalAudit(unittest.TestCase):
-    BASE_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+    BASE_URL = "https://api.realms2riches.com"
 
     def setUp(self):
         print("   -> Waiting for API Port (localhost:8000)...")
@@ -76,3 +76,4 @@ class SovereignFinalAudit(unittest.TestCase):
 if __name__ == "__main__":
     print("\n👑 SOVEREIGN MASTER AUDIT v6.3 👑")
     unittest.main()
+

@@ -96,7 +96,7 @@ class SocialScheduler:
                                   glob.glob("data/marketing/images/*.jpg")
                         if visuals:
                             choice = random.choice(visuals)
-                            media_url = f"https://glowfly-sizeable-lazaro.ngrok-free.dev/marketing/{'videos' if '.mp4' in choice else 'images'}/{os.path.basename(choice)}"
+                            media_url = f"https://api.realms2riches.com/marketing/{'videos' if '.mp4' in choice else 'images'}/{os.path.basename(choice)}"
                     except: pass
 
                     # Dispatch
@@ -120,3 +120,4 @@ class SocialScheduler:
         return {"status": "error", "reason": "Max attempts reached."}
 
 social_scheduler = SocialScheduler()
+

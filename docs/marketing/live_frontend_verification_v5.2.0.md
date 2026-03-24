@@ -22,7 +22,7 @@ The following routes were discovered and verified during the live crawl:
 | Legal Pages | `/privacy`, `/terms` | Page Load | SUCCESS |
 
 ## 3. Backend Integration
-- **Health Check**: `https://glowfly-sizeable-lazaro.ngrok-free.dev/health`
+- **Health Check**: `https://api.realms2riches.com/health`
 - **Status**: **OFFLINE/ERROR** (During test run).
 - **Note**: The live frontend is active, but the local ngrok tunnel was not responding at the time of verification.
 
@@ -33,3 +33,4 @@ Screenshots captured in `data/marketing/evidence/`:
 - `verified_cockpit_*.png`
 - `cockpit_initial_cockpit_*.png`
 - ... (and 7 others)
+

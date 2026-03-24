@@ -22,7 +22,7 @@ class TestSovereignTracks(unittest.TestCase):
         data = response.json()
         
         # Verify the URL is exactly what the user provided
-        expected_url = "https://glowfly-sizeable-lazaro.ngrok-free.dev/assets/sovereign_strategy_guide_v3.txt"
+        expected_url = "https://api.realms2riches.com/assets/sovereign_strategy_guide_v3.txt"
         self.assertEqual(data["guide_url"], expected_url)
         print(f"✅ Track 1 Passed: Guide URL is {data['guide_url']}")
 
@@ -58,3 +58,4 @@ class TestSovereignTracks(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

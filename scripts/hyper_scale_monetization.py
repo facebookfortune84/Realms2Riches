@@ -105,7 +105,7 @@ async def hyper_scale_loop():
         smtp_sender = smtp_tools["smtp_outreach"]
         
         for lead in target_leads:
-            email_addr = lead.get("email") or "robertdemottojr83@gmail.com" # Fallback to user
+            email_addr = lead.get("email") or "robert.demotto@realms2riches.com" # Fallback to user
             
             # Generate personalized content
             logger.info(f"📧 Generating Email for {email_addr}...")

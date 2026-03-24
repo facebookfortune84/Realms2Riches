@@ -21,7 +21,7 @@ from orchestrator.src.validation.schemas import ToolInvocation
 from orchestrator.src.core.monetization.engine import AFFILIATE_LINKS, STRIPE_MONETIZATION
 
 logger = get_logger("GRAND_ORCHESTRATOR")
-TRAFFIC_MANAGER_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+TRAFFIC_MANAGER_URL = "https://api.realms2riches.com"
 
 # --- CONFIGURATION ---
 POSTS_PER_STREAM = 5     # Generate 5 unique pieces of content per stream per cycle
@@ -85,7 +85,7 @@ class GrandMonetizationOrchestrator:
         
         targets = random.sample(self.leads, min(5, len(self.leads)))
         for lead in targets:
-            email = lead.get("email") or "robertdemottojr83@gmail.com"
+            email = lead.get("email") or "robert.demotto@realms2riches.com"
             tracked = self.get_tracking_link(STRIPE_MONETIZATION["jarvis_custom"], "email", "saas_outreach")
             
             logger.info(f"📧 [Stream 3: SaaS] Pitching API to {email}")
@@ -168,3 +168,4 @@ if __name__ == "__main__":
         asyncio.run(orchestrator.run_cycle())
     except KeyboardInterrupt:
         pass
+

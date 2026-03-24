@@ -11,8 +11,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("LIVE_TEST_V520")
 
 # Configuration
-FRONTEND_URL = "https://frontend-two-xi-gal9lkptfi.vercel.app/"
-BACKEND_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+FRONTEND_URL = "https://realms2riches.com"
+BACKEND_URL = "https://api.realms2riches.com"
 EVIDENCE_DIR = "data/marketing/evidence"
 PAGES_INDEX_FILE = "docs/marketing/live_pages_index_v5.2.0.md"
 
@@ -109,3 +109,4 @@ async def crawl_and_verify():
 
 if __name__ == "__main__":
     asyncio.run(crawl_and_verify())
+

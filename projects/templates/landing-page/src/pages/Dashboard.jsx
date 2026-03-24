@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Shield, Zap, Users, Globe, Database, Cpu, Terminal, Layers, Radio, BarChart3 } from 'lucide-react';
 import CompanyWizard from '../components/CompanyWizard';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://glowfly-sizeable-lazaro.ngrok-free.dev";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
 
 export default function Dashboard() {
   const [metrics, setMetrics] = useState(null);
@@ -16,7 +16,7 @@ export default function Dashboard() {
   const fetchStats = async () => {
     const headers = { 
         'X-License-Key': import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || 'mock_dev_key',
-        'ngrok-skip-browser-warning': 'true'
+        '': 'true'
     };
     try {
       const [mRes, aRes, iRes, tRes] = await Promise.all([
@@ -158,3 +158,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

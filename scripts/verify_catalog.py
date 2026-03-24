@@ -2,10 +2,10 @@ import requests
 import json
 import os
 
-BACKEND_URL = "https://glowfly-sizeable-lazaro.ngrok-free.dev"
+BACKEND_URL = "https://api.realms2riches.com"
 HEADERS = {
     "X-License-Key": "mock_dev_key", # Should match env
-    "ngrok-skip-browser-warning": "true"
+    "": "true"
 }
 
 def test_catalog_integrity():
@@ -45,3 +45,4 @@ def test_catalog_integrity():
 
 if __name__ == "__main__":
     test_catalog_integrity()
+
