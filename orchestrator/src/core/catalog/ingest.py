@@ -1,5 +1,4 @@
 import pandas as pd
-from sqlalchemy.orm import Session
 from orchestrator.src.memory.sql_store import SQLStore
 from orchestrator.src.core.catalog.models import ProductModel, PriceModel
 from orchestrator.src.logging.logger import get_logger

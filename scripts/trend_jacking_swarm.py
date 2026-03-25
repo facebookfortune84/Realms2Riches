@@ -1,10 +1,8 @@
 import asyncio
-import json
 import logging
 import sys
 import os
 from playwright.async_api import async_playwright
-from datetime import datetime
 
 # Ensure orchestrator is in path
 sys.path.append(os.getcwd())
@@ -78,7 +76,7 @@ class TrendJackingSwarm:
                 logger.info(f"🔥 HOT TAKE GENERATED FOR '{trend}':\n{content[:100]}...")
                 
                 # We also turn this into a Blog Post
-                logger.info(f"📝 CONVERTING TO LONG-FORM ASSET...")
+                logger.info("📝 CONVERTING TO LONG-FORM ASSET...")
                 self.seo_tool.execute({
                     "action": "generate_and_publish",
                     "keywords": [trend, "Tech News", "Analysis"],

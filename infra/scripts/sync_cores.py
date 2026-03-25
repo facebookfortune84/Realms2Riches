@@ -1,7 +1,6 @@
 import os
 import shutil
 import logging
-from typing import List
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("CORE_SYNC")

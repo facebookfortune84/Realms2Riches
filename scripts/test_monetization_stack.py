@@ -2,8 +2,6 @@ import pytest
 import os
 import sys
 import json
-import asyncio
-import httpx # For async http requests
 from unittest.mock import patch, MagicMock
 
 # Ensure project root is in path

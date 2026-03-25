@@ -3,7 +3,6 @@ from cryptography.hazmat.primitives import serialization
 import json
 import base64
 import time
-import sys
 
 def generate_keys():
     private_key = ed25519.Ed25519PrivateKey.generate()

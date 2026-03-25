@@ -1,7 +1,6 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.responses import RedirectResponse, JSONResponse
 import logging
-import time
 import os
 import json
 from collections import defaultdict

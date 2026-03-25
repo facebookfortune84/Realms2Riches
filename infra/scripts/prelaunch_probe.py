@@ -1,6 +1,5 @@
 import os
 import requests
-import sys
 from sqlalchemy import create_engine, text
 from groq import Groq
 
@@ -94,7 +93,7 @@ except Exception as e:
 
 # 5. Voice Probe (ElevenLabs)
 xi_key = config.get("ELEVENLABS_API_KEY")
-print(f"\n[Voice] Probing ElevenLabs...")
+print("\n[Voice] Probing ElevenLabs...")
 try:
     headers = {"xi-api-key": xi_key}
     resp = requests.get("https://api.elevenlabs.io/v1/voices", headers=headers, timeout=5)

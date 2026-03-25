@@ -2,13 +2,11 @@ import asyncio
 import os
 import sys
 import json
-import random
 
 sys.path.append(os.getcwd())
 
 from orchestrator.src.core.orchestrator import Orchestrator
 from orchestrator.src.logging.logger import get_logger
-from orchestrator.src.core.config import settings
 
 logger = get_logger("YC_SWARM")
 

@@ -1,7 +1,3 @@
-import asyncio
-import logging
-import smtplib
-from arq import create_pool
 from arq.connections import RedisSettings
 
 # Ensure project root is in path for imports
@@ -10,7 +6,6 @@ import sys
 sys.path.append(os.getcwd())
 
 from orchestrator.src.core.outreach.config import outreach_settings
-from orchestrator.src.core.config import settings
 from orchestrator.src.logging.logger import get_logger
 from orchestrator.src.tools.smtp_tools import SMTPOutreachTool
 from orchestrator.src.memory.sql_store import SQLStore # For analytics events

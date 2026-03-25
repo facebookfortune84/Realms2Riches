@@ -3,6 +3,16 @@
 ## Mission Statement
 Empowering businesses with industrial-grade autonomous agent swarms, designed for verifiable monetization and self-scaling operations. We aim to transform complex operational tasks into fully automated revenue streams.
 
+## 🛡️ Audit & Compliance (v5.8.0)
+**Last Audit:** 2026-03-23 | **Score:** 65/100
+A comprehensive system audit was conducted, resulting in the **Sovereign Upgrade v5.8.0**.
+- **Audit Report:** [docs/AUDIT_REPORT_20260323.md](docs/AUDIT_REPORT_20260323.md)
+- **Deployment Protocol:** [docs/PRODUCTION_LAUNCH_PROTOCOL.md](docs/PRODUCTION_LAUNCH_PROTOCOL.md)
+- **Key Upgrades:**
+    - Full Secrets Cleanup & History Rewrite
+    - Automated VPS Deployment Pipeline (`.github/workflows/deploy.yml`)
+    - Secondary Core 1:1 Fallback Sync (`scripts/sync_core.py`)
+
 ## Architecture Overview
 
 The system is built on a robust, multi-layered architecture comprising:

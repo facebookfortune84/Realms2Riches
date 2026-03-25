@@ -3,7 +3,7 @@ import os
 import hashlib
 import tempfile
 import shutil
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from orchestrator.src.logging.logger import get_logger
 
 logger = get_logger(__name__)

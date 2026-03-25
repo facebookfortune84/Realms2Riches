@@ -5,13 +5,10 @@ sys.path.append(os.getcwd())
 import pytest
 import os
 import json
-import asyncio
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
-from orchestrator.src.core.api import app, telemetry_data, activity_log
+from orchestrator.src.core.api import app
 from orchestrator.src.memory.sql_store import SQLStore, AnalyticsEvent
-from orchestrator.src.core.monetization.engine import MonetizationEngine
-from orchestrator.src.core.config import settings
 import orchestrator.src.core.config
 
 # --- Fixtures for clean state ---

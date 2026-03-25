@@ -5,14 +5,12 @@ import random
 import time
 import hashlib
 import json
-from datetime import datetime
-from pydantic import ValidationError
 
 from orchestrator.src.core.agent import Agent
 from orchestrator.src.core.llm_provider import GroqProvider, BaseLLMProvider
 from orchestrator.src.core.config import settings
 from orchestrator.src.core.self_healing import sovereign_healer
-from orchestrator.src.validation.schemas import TaskSpec, AgentConfig, ToolConfig, ToolInvocation
+from orchestrator.src.validation.schemas import TaskSpec, ToolConfig, ToolInvocation
 from orchestrator.src.tools.base import BaseTool
 from orchestrator.src.logging.logger import get_logger
 from orchestrator.src.agents.fleet import generate_grand_fleet
@@ -26,7 +24,6 @@ from arq.connections import RedisSettings
 # Voice & Multimodal Adapters
 from orchestrator.src.core.voice.mock_adapters import MockSTTAdapter, MockTTSAdapter
 from orchestrator.src.core.outreach.config import outreach_settings
-from orchestrator.src.core.worker import send_email_campaign_item
 
 # Tools & Logic
 from orchestrator.src.tools.git_tools import GitTool
@@ -35,13 +32,11 @@ from orchestrator.src.tools.social_tools import FacebookPostTool, LinkedInPostTo
 from orchestrator.src.tools.web_tools import get_web_tools
 from orchestrator.src.tools.revenue_tools import get_revenue_tools, NicheLanderEngine
 from orchestrator.src.tools.marketing_tools import get_marketing_tools
-from orchestrator.src.tools.smtp_tools import SMTPOutreachTool
 from orchestrator.src.tools.audit_tools import SystemAuditTool
-from orchestrator.src.tools.lead_scraper import get_lead_tools, JobBoardLeadScraper
+from orchestrator.src.tools.lead_scraper import get_lead_tools
 from orchestrator.src.tools.voice_tools import get_voice_tools
 from orchestrator.src.tools.osint_tools import get_osint_tools
 from orchestrator.src.tools.growth_tools import get_growth_tools
-from orchestrator.src.validation.burn_monitor import BurnMonitor
 from orchestrator.src.memory.vector_store import VectorStore
 from orchestrator.src.memory.sql_store import SQLStore
 

@@ -1,11 +1,10 @@
 import asyncio
 import os
 import sys
-import time
 import random
 import requests
 import json
-from typing import List, Dict
+from typing import Dict
 
 # Ensure we can import from orchestrator
 sys.path.append(os.getcwd())

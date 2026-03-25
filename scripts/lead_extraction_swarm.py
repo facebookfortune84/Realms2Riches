@@ -172,7 +172,7 @@ async def run_extraction():
         await browser.close()
         
     await redis.close()
-    logger.info(f"🏆 EXTRACTION COMPLETE.")
+    logger.info("🏆 EXTRACTION COMPLETE.")
 
 if __name__ == "__main__":
     asyncio.run(run_extraction())

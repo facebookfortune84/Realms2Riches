@@ -3,7 +3,6 @@ import os
 sys.path.append(os.getcwd())
 from fastapi.testclient import TestClient
 from orchestrator.src.core.api import app
-import pytest
 
 def test_voice_session_flow():
     with TestClient(app) as client:

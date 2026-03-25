@@ -1,7 +1,6 @@
 import asyncio
 import os
 import sys
-import json
 
 sys.path.append(os.getcwd())
 

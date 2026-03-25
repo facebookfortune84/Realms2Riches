@@ -3,8 +3,6 @@ import sys
 import asyncio
 import logging
 import smtplib
-import json
-from email.mime.text import MIMEText
 from dotenv import load_dotenv
 
 sys.path.append(os.getcwd())
@@ -45,7 +43,7 @@ async def probe_groq():
             messages=[{"role": "user", "content": "System check."}],
             model=settings.GROQ_MODEL,
         )
-        logger.info(f"✅ GROQ LIVE: Response received.")
+        logger.info("✅ GROQ LIVE: Response received.")
         return True
     except Exception as e:
         logger.error(f"❌ GROQ FAILED: {e}")

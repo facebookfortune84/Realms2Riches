@@ -1,7 +1,6 @@
 import stripe
 import sys
 import os
-import time
 
 # Ensure the project root is in the path for 'orchestrator' imports
 sys.path.append(os.getcwd())
@@ -36,7 +35,7 @@ def verify_payment_flow():
             currency = session.get("currency").upper()
             
             logger.info(f"✅ VERIFIED PAYMENT: {amount} {currency} from {customer_email}")
-            logger.info(f"🚀 MISSION CRITICAL SUCCESS: FIRST PAYMENT CAPTURED.")
+            logger.info("🚀 MISSION CRITICAL SUCCESS: FIRST PAYMENT CAPTURED.")
             return True
             
     except Exception as e:

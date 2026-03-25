@@ -1,9 +1,6 @@
 import asyncio
 import os
 import sys
-import json
-import logging
-from datetime import datetime
 
 sys.path.append(os.getcwd())
 
@@ -39,8 +36,8 @@ async def run_revenue_blitz():
     print("=====================================================")
     stats = telemetry.get_aggregate_stats()
     print(f"Total Traffic Signals: {stats['total_signals']}")
-    print(f"Verified Conversions:  1 (Simulated)")
-    print(f"Total Revenue Captured: $499.00")
+    print("Verified Conversions:  1 (Simulated)")
+    print("Total Revenue Captured: $499.00")
     
     # Check landers
     lander_dir = "projects/generated/landers"

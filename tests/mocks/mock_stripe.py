@@ -1,5 +1,4 @@
 # tests/mocks/mock_stripe.py
-import stripe
 
 class MockStripeProduct:
     def __init__(self, id, name, description, metadata):

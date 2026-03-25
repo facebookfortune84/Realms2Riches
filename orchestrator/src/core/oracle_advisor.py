@@ -1,8 +1,7 @@
 import json
 import os
 import sys
-import logging
-from typing import Dict, List
+from typing import Dict
 
 # Ensure orchestrator is in path
 sys.path.append(os.getcwd())
@@ -58,7 +57,7 @@ class OracleAdvisor:
             with open(STRATEGY_FILE, "w") as f:
                 json.dump(strategy, f, indent=2)
                 
-            logger.info(f"🔮 ORACLE: NEW STRATEGIC DIRECTIVES ISSUED.")
+            logger.info("🔮 ORACLE: NEW STRATEGIC DIRECTIVES ISSUED.")
             return directives
         except Exception as e:
             logger.error(f"Oracle Fail: {e}")

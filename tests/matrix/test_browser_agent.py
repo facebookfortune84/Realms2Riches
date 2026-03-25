@@ -2,9 +2,8 @@ import sys
 import os
 sys.path.append(os.getcwd())
 
-import pytest
 from orchestrator.src.tools.browser_agent import BrowserAgentTool
-from orchestrator.src.validation.schemas import ToolConfig, ToolInvocation
+from orchestrator.src.validation.schemas import ToolConfig
 
 def test_browser_agent_registration():
     """Verify tool registration."""

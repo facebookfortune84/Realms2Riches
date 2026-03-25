@@ -1,11 +1,9 @@
 import smtplib
-import logging
 import re
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Dict, Any, List
 from orchestrator.src.tools.base import BaseTool, ToolConfig
-from orchestrator.src.validation.schemas import ToolInvocation
 from orchestrator.src.core.config import settings
 from orchestrator.src.core.outreach.config import outreach_settings
 from orchestrator.src.memory.sql_store import SQLStore

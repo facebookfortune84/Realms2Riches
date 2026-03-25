@@ -11,7 +11,6 @@ from orchestrator.src.core.orchestrator import Orchestrator
 from orchestrator.src.logging.logger import get_logger
 from orchestrator.src.tools.marketing_tools import get_marketing_tools
 from orchestrator.src.tools.seo_tools import SEOTool, ToolConfig
-from orchestrator.src.tools.social_tools import get_social_tools
 from orchestrator.src.tools.smtp_tools import get_smtp_tools
 from orchestrator.src.validation.schemas import ToolInvocation
 

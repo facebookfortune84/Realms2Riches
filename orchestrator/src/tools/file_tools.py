@@ -1,7 +1,6 @@
 import os
 from typing import Dict, Any
 from orchestrator.src.tools.base import BaseTool
-from orchestrator.src.validation.schemas import ToolConfig, ToolInvocation
 
 class FileTool(BaseTool):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:

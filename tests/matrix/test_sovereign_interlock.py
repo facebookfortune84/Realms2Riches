@@ -1,14 +1,11 @@
 import unittest
-import asyncio
 import os
 import sys
-from datetime import datetime
 
 # Ensure project root is in path for inside-container execution
 sys.path.append(os.getcwd())
 
 from orchestrator.src.core.orchestrator import Orchestrator
-from orchestrator.src.validation.schemas import TaskSpec
 from orchestrator.src.logging.telemetry import telemetry
 
 class SovereignInterlockTest(unittest.IsolatedAsyncioTestCase):
@@ -59,7 +56,6 @@ class SovereignInterlockTest(unittest.IsolatedAsyncioTestCase):
         # Simulate a folder deletion
         test_dir = "data/marketing/images"
         if os.path.exists(test_dir):
-            import shutil
             # We don't delete for real during audit, but we check healer logic
             from orchestrator.src.core.self_healing import sovereign_healer
             repairs = sovereign_healer.execute_healing_cycle()

@@ -1,14 +1,11 @@
 import asyncio
 import os
 import sys
-import json
-import logging
 
 sys.path.append(os.getcwd())
 
 from orchestrator.src.core.orchestrator import Orchestrator
 from orchestrator.src.logging.telemetry import telemetry
-from orchestrator.src.core.ticketing.governance import governance
 
 async def demonstrate_sovereignty():
     print("\n⚔️ INITIATING SOVEREIGN PROOF OF WORK ⚔️")

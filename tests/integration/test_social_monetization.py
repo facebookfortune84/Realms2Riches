@@ -5,7 +5,6 @@ sys.path.append(os.getcwd())
 
 from unittest.mock import MagicMock, patch
 import os
-import json
 from orchestrator.src.tools.social_tools import FacebookPostTool, LinkedInPostTool, SocialMediaMultiplexer
 from orchestrator.src.tools.marketing_check import check_marketing_readiness
 from orchestrator.src.core.alchemy_engine import generate_autonomous_blog_post

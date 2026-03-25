@@ -4,13 +4,13 @@ sys.path.append(os.getcwd())
 
 import pytest
 import shutil
-from typing import List, Dict, Any, Optional
+from typing import Dict, Any
 from orchestrator.src.core.agent import Agent
 from orchestrator.src.validation.schemas import AgentConfig, TaskSpec
 from orchestrator.src.memory.vector_store import VectorStore
 from orchestrator.src.core.llm_provider import GroqProvider
 from orchestrator.src.tools.base import BaseTool
-from orchestrator.src.validation.schemas import ToolConfig, ToolInvocation, ToolResult
+from orchestrator.src.validation.schemas import ToolConfig, ToolInvocation
 
 class MockTool(BaseTool):
     def execute(self, invocation: ToolInvocation) -> Dict[str, Any]:

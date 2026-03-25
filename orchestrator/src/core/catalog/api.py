@@ -13,7 +13,6 @@ class CatalogAPI:
         """Fetch all products dynamically from the modular slots directory."""
         import json
         import glob
-        import os
         
         all_products = []
         slot_path = "data/store/slots/*.json"

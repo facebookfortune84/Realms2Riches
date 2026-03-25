@@ -1,29 +1,15 @@
 from fastapi import FastAPI, Request, HTTPException, BackgroundTasks
-from starlette.responses import JSONResponse, RedirectResponse, HTMLResponse
+from starlette.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
-from fastapi.security import APIKeyHeader
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, JSON, ForeignKey, Text, Float, Enum
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func, text
-import enum
+from sqlalchemy.sql import text
 import os
 import sys
 import json
-import csv
-import hashlib
 import stripe
-import requests
-import uuid
 import random
-import asyncio
-import base64
-import logging
-import shutil
 from datetime import datetime
 from contextlib import asynccontextmanager
 from typing import Optional
@@ -31,20 +17,13 @@ from typing import Optional
 from orchestrator.src.core.config import settings
 from orchestrator.src.logging.logger import get_logger
 from orchestrator.src.memory.sql_store import SQLStore
-from orchestrator.src.core.database import Base, AsyncSessionLocal, engine, init_db
-from orchestrator.src.core.models import Affiliate, AffiliateClick, Commission, Lead, LeadStatus, SmtpAccount, TaskResult
+from orchestrator.src.core.database import AsyncSessionLocal
+from orchestrator.src.core.models import Affiliate, AffiliateClick
 from orchestrator.src.core.orchestrator import Orchestrator
 from orchestrator.src.core.voice.router import VoiceRouter
-from orchestrator.src.tools.base import BaseTool
-from orchestrator.src.memory.vector_store import VectorStore
-from orchestrator.src.core.llm_provider import BaseLLMProvider
-from orchestrator.src.agents.persona_library import PERSONA_LIBRARY
-from orchestrator.src.core.workforce import workforce
-from orchestrator.src.core.lineage import lineage_registry
 from orchestrator.src.core.outreach.config import outreach_settings
 from arq.connections import RedisSettings
 from arq import create_pool
-import aiohttp
 
 logger = get_logger(__name__)
 

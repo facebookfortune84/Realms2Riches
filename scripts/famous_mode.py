@@ -46,14 +46,14 @@ async def run_builder(prompt: str):
             await session.commit()
             
             print("\n" + "="*50)
-            print(f"🚀 APP GENERATED SUCCESSFULLY")
+            print("🚀 APP GENERATED SUCCESSFULLY")
             print("="*50)
             print(f"Name: {new_project.name}")
             print(f"Path: {path}")
             print(f"Stack: {new_project.tech_stack}")
             print("\nTo launch:")
             print(f"  cd {path}")
-            print(f"  docker-compose up --build")
+            print("  docker-compose up --build")
             print("="*50 + "\n")
             
         except Exception as e:

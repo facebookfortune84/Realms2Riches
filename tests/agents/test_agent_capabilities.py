@@ -4,10 +4,8 @@ sys.path.append(os.getcwd())
 
 import pytest
 import os
-import json
 import yaml
 from orchestrator.src.core.orchestrator import Orchestrator
-from orchestrator.src.core.config import settings
 
 @pytest.fixture
 def orchestrator():

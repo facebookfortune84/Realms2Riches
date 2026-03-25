@@ -3,7 +3,6 @@ import os
 sys.path.append(os.getcwd())
 
 import os
-import pytest
 from orchestrator.src.core.config import Settings
 
 def test_settings_load():

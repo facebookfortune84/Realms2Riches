@@ -1,13 +1,9 @@
 import pytest
 import os
-import json
-import asyncio
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from orchestrator.src.tools.smtp_tools import SMTPOutreachTool
 from orchestrator.src.validation.schemas import ToolInvocation, ToolConfig
 from orchestrator.src.core.outreach.config import outreach_settings
-from orchestrator.src.core.config import settings
-import smtplib
 
 @pytest.fixture(autouse=True)
 def setup_outreach_test_env():

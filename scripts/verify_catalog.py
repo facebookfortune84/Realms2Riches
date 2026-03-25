@@ -1,6 +1,4 @@
 import requests
-import json
-import os
 
 BACKEND_URL = "https://api.realms2riches.com"
 HEADERS = {

@@ -3,7 +3,7 @@ import os
 sys.path.append(os.getcwd())
 
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from orchestrator.src.core.orchestrator import Orchestrator
 from orchestrator.src.core.llm_provider import BaseLLMProvider
 

@@ -1,7 +1,7 @@
 import subprocess
 from typing import Dict, Any
 from orchestrator.src.tools.base import BaseTool
-from orchestrator.src.validation.schemas import ToolConfig, ToolInvocation
+from orchestrator.src.validation.schemas import ToolInvocation
 
 class DockerTool(BaseTool):
     def execute(self, invocation: ToolInvocation) -> Dict[str, Any]:

@@ -1,5 +1,5 @@
 import requests
-from typing import Dict, List
+from typing import Dict
 
 # From orchestrator/src/core/monetization/engine.py
 AFFILIATE_LINKS = {

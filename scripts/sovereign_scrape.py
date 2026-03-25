@@ -2,7 +2,6 @@ import asyncio
 import json
 import os
 import re
-import sys
 from playwright.async_api import async_playwright
 
 # Setup logging

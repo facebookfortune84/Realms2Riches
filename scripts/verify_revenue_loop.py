@@ -1,9 +1,7 @@
 import asyncio
 import os
 import sys
-import json
 import requests
-import time
 
 sys.path.append(os.getcwd())
 

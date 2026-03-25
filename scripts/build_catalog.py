@@ -1,6 +1,5 @@
 import json
 import os
-import sys
 
 # Ensure data/catalog exists
 os.makedirs("data/catalog", exist_ok=True)

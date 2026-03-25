@@ -3,7 +3,6 @@ import os
 sys.path.append(os.getcwd())
 
 import pytest
-import shutil
 import asyncio
 from orchestrator.src.core.orchestrator import Orchestrator
 from orchestrator.src.core.self_healing import sovereign_healer

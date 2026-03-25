@@ -1,7 +1,6 @@
 import requests
 import json
 import os
-import hashlib
 from datetime import datetime
 
 BACKEND_URL = os.getenv("BACKEND_URL", "https://api.realms2riches.com")
