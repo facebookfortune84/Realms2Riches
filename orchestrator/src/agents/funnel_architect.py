@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any
 from orchestrator.src.core.agent import Agent
 from orchestrator.src.validation.schemas import TaskSpec
 

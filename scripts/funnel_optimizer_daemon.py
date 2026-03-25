@@ -1,11 +1,9 @@
 import asyncio
-import json
 import logging
 import random
 from orchestrator.src.agents.funnel_architect import FunnelArchitectAgent
 from orchestrator.src.agents.builder_agent import BuilderAgent
 from orchestrator.src.validation.schemas import TaskSpec
-from orchestrator.src.core.models import Project
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
