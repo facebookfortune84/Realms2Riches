@@ -1,7 +1,6 @@
 import pytest
 import os
 import json
-import subprocess
 import sys
 sys.path.append(os.getcwd())
 from datetime import datetime

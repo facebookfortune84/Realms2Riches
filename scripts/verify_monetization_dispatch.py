@@ -7,7 +7,6 @@ sys.path.append(os.getcwd())
 
 from orchestrator.src.core.orchestrator import Orchestrator
 from orchestrator.src.logging.logger import get_logger
-from orchestrator.src.validation.schemas import TaskSpec
 
 logger = get_logger("DISPATCH_VERIFIER")
 

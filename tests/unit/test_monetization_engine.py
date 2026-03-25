@@ -1,9 +1,7 @@
 import pytest
-import os
 import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from orchestrator.src.core.monetization.engine import MonetizationEngine
-from orchestrator.src.core.config import settings
 
 @pytest.fixture
 def mock_catalog_file(tmp_path):

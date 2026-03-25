@@ -5,7 +5,6 @@ import re
 from typing import List, Dict, Any
 from datetime import datetime, timedelta
 from orchestrator.src.tools.base import BaseTool, ToolConfig
-from orchestrator.src.validation.schemas import ToolInvocation
 
 logger = logging.getLogger(__name__)
 

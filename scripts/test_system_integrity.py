@@ -1,8 +1,6 @@
 import asyncio
 import os
 import sys
-import json
-import logging
 from sqlalchemy import text
 from arq import create_pool
 from arq.connections import RedisSettings
@@ -11,7 +9,6 @@ sys.path.append(os.getcwd())
 
 from orchestrator.src.core.orchestrator import Orchestrator
 from orchestrator.src.logging.logger import get_logger
-from orchestrator.src.logging.telemetry import telemetry
 from orchestrator.src.core.database import AsyncSessionLocal
 from orchestrator.src.core.config import settings
 

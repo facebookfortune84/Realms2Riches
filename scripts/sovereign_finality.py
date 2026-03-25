@@ -1,7 +1,6 @@
 import asyncio
 import os
 import sys
-import time
 import subprocess
 
 # Ensure orchestrator is in path
@@ -46,8 +45,8 @@ async def sovereign_finality_loop():
     # STEP 5: FINAL REPORT
     print("\n" + "="*60)
     print("🏆 SOVEREIGN FINALITY CYCLE COMPLETE")
-    print(f"📍 EVIDENCE: data/marketing/evidence/")
-    print(f"📊 DASHBOARD: data/marketing/swarm_visualization.html")
+    print("📍 EVIDENCE: data/marketing/evidence/")
+    print("📊 DASHBOARD: data/marketing/swarm_visualization.html")
     print("="*60 + "\n")
 
 if __name__ == "__main__":

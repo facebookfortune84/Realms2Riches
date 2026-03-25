@@ -2,7 +2,6 @@ import hashlib
 import json
 import os
 from datetime import datetime
-from pathlib import Path
 
 REGISTRY_FILE = "data/lineage/hash_registry.json"
 

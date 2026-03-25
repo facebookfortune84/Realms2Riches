@@ -21,6 +21,14 @@ Write-Host "`n  R E A L M S   2   R I C H E S" -ForegroundColor Magenta -Backgro
 Write-Host "  S O V E R E I G N   M A T R I X" -ForegroundColor Green -BackgroundColor Black
 Write-Host "  v10.0.0 | FULL PRODUCTION SYNC SYSTEM`n" -ForegroundColor Gray
 
+# --- 0. CODE HYGIENE ---
+Write-Host "[0/7] Ensuring Code Hygiene (Ruff)..." -ForegroundColor Cyan
+try {
+    ruff check --fix .
+} catch {
+    Write-Warning "Ruff check failed. Please ensure 'ruff' is installed."
+}
+
 # --- 1. CORE & ENVIRONMENT SYNC ---
 Write-Host "[1/7] Syncing Primary -> Secondary Core..." -ForegroundColor Cyan
 try {
@@ -50,6 +58,10 @@ if (Test-Path "data/lineage/hash_registry.json") {
     if (-not (Test-Path "core_secondary/data/lineage")) { New-Item -ItemType Directory -Path "core_secondary/data/lineage" -Force }
     Copy-Item "data/lineage/hash_registry.json" "core_secondary/data/lineage/hash_registry.json" -Force
 }
+
+# --- 3.5 DNS CONFIGURATION ---
+Write-Host "[3.5/7] Checking Domain Routing..." -ForegroundColor Cyan
+python infra/scripts/setup_domain_routing.py
 
 # --- 4. GIT OPERATIONS (LOCAL -> REMOTE SYNC) ---
 if (-not $LocalOnly) {
@@ -92,6 +104,10 @@ docker-compose -f infra/docker/docker-compose.yml up -d db redis adminer
 # Start Primary API
 Start-Process python -ArgumentList "-m", "arq", "run", "orchestrator.src.core.worker.WorkerSettings" -NoNewWindow
 Start-Process uvicorn -ArgumentList "orchestrator.src.core.api:app --host 0.0.0.0 --port 8000 --reload" -NoNewWindow
+
+# --- 5.5 FUNNEL OPTIMIZATION ---
+Write-Host "[5.5/7] Igniting Funnel Optimizer Daemon..." -ForegroundColor Cyan
+Start-Process python -ArgumentList "scripts/funnel_optimizer_daemon.py" -NoNewWindow
 
 # --- 6. SECONDARY CORE (FALLBACK) ---
 Write-Host "[6/7] Initializing Secondary Core Fallback..." -ForegroundColor Magenta

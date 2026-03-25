@@ -2,9 +2,8 @@ import asyncio
 import os
 import sys
 import json
-import logging
 from datetime import datetime
-from typing import List, Dict
+from typing import Dict
 
 # Ensure imports
 sys.path.append(os.getcwd())

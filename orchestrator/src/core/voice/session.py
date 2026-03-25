@@ -1,5 +1,4 @@
 import asyncio
-import uuid
 from typing import Dict, Any, Optional
 from enum import Enum, auto
 from orchestrator.src.core.voice.interfaces import STTAdapter, TTSAdapter

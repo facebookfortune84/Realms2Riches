@@ -2,7 +2,6 @@ import sys
 import os
 sys.path.append(os.getcwd())
 
-import pytest
 import os
 from orchestrator.src.tools.multiplication_tools import OutreachSwarmTool, SEOContentFactoryTool
 from orchestrator.src.validation.schemas import ToolConfig, ToolInvocation

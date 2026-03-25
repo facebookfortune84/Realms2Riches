@@ -1,7 +1,7 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from sqlalchemy import select, update, func
+from sqlalchemy import select
 from orchestrator.src.core.database import AsyncSessionLocal
 from orchestrator.src.core.models import SmtpAccount, OutreachLog, Lead
 from orchestrator.src.logging.logger import get_logger

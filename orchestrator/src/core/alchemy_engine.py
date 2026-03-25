@@ -1,9 +1,6 @@
 import os
-import json
 import re
-import hashlib
 from datetime import datetime
-from sqlalchemy import Integer, Column, String, Float, ForeignKey
 from orchestrator.src.logging.logger import get_logger
 
 logger = get_logger(__name__)
@@ -101,7 +98,7 @@ Bypass the waitlist. Secure your Sovereign assets immediately:
             else:
                 price_val = p_data.get("price", 0)
                 
-            link = p_data.get("checkout_url", f"https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02") # Use fallback live link
+            link = p_data.get("checkout_url", "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02") # Use fallback live link
             content += f"- **[{p_data['name']} (${price_val})]({link})**: {p_data['description']}\n"
     except Exception as e:
         logger.error(f"Alchemy: Market injection failed: {e}")

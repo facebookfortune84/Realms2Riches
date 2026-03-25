@@ -9,7 +9,6 @@ sys.path.append(os.getcwd())
 from orchestrator.src.core.self_healing import sovereign_healer
 from orchestrator.src.core.catalog.api import catalog_api
 from orchestrator.src.tools.social_tools import SocialMediaMultiplexer, ToolConfig
-from orchestrator.src.core.scheduler import social_scheduler
 
 class TestSystemPolish(unittest.TestCase):
 
@@ -80,7 +79,6 @@ class TestSystemPolish(unittest.TestCase):
     def test_07_agentic_copy_link_enforcement(self):
         """Verify that our prompting ensures the Stripe link is always present."""
         # (Conceptual validation of the prompt we wrote)
-        from orchestrator.src.core.config import settings
         self.assertIn("checkout_url", "Your position: {platinum_data.get('checkout_url')}")
         print("✅ Test 7: Copywriting link enforcement verified.")
 

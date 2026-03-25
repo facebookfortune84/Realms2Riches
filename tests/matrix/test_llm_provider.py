@@ -3,7 +3,6 @@ import os
 sys.path.append(os.getcwd())
 
 import json
-import pytest
 from orchestrator.src.core.llm_provider import GroqProvider, OpenAIProvider, get_llm_provider
 
 def test_groq_mock_response():

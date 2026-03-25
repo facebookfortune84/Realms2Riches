@@ -1,6 +1,5 @@
 import stripe
-import logging
-from fastapi import APIRouter, Request, HTTPException, Depends
+from fastapi import APIRouter, Request, HTTPException
 from orchestrator.src.core.config import settings
 from orchestrator.src.logging.logger import get_logger
 

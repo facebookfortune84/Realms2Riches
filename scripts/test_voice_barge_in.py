@@ -5,9 +5,8 @@ import os
 
 sys.path.append(os.getcwd())
 
-from orchestrator.src.core.voice.session import VoiceSession, VoiceSessionState
+from orchestrator.src.core.voice.session import VoiceSession
 from orchestrator.src.core.voice.mock_adapters import MockSTTAdapter, MockTTSAdapter
-from orchestrator.src.core.orchestrator import Orchestrator
 
 # Setup Logger
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')

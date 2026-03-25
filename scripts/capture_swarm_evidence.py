@@ -1,7 +1,6 @@
 import asyncio
 import os
 import sys
-import time
 from playwright.async_api import async_playwright
 
 # Ensure orchestrator is in path

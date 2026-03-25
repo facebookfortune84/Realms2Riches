@@ -1,8 +1,7 @@
 import uuid
 import logging
 from enum import Enum
-from typing import List, Dict, Any, Optional
-import json
+from typing import List, Dict, Optional
 import os
 import asyncio
 import random
@@ -106,7 +105,7 @@ class SwarmAgent:
             ticketing_system.resolve_ticket(ticket, action)
             work_duration = random.uniform(1.0, 5.0)
         elif "upgrade" in ticket.title.lower() or "stream" in ticket.title.lower():
-            action = f"Successfully injected structural upgrades using oracle schemas."
+            action = "Successfully injected structural upgrades using oracle schemas."
             ticketing_system.resolve_ticket(ticket, action)
             work_duration = random.uniform(2.0, 8.0)
         else:

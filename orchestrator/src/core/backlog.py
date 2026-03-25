@@ -1,8 +1,6 @@
 import asyncio
 import logging
 import random
-from typing import List, Dict, Any
-from orchestrator.src.core.config import settings
 from orchestrator.src.core.self_healing import sovereign_healer
 
 logger = logging.getLogger(__name__)

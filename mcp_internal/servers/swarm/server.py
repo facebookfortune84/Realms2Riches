@@ -1,7 +1,6 @@
 import logging
 import httpx
 from mcp.server.fastmcp import FastMCP
-from orchestrator.src.core.config import settings
 
 import sys
 # Configure logging to stderr

@@ -1,5 +1,5 @@
 import hashlib
-from typing import List, Dict
+from typing import List
 from orchestrator.src.validation.schemas import AgentConfig
 from orchestrator.src.agents.prompts import SOFTWARE_ENGINEER_PROMPT
 

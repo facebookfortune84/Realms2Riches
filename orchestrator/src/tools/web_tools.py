@@ -1,5 +1,3 @@
-import requests
-from bs4 import BeautifulSoup
 from typing import Dict, Any, List
 from orchestrator.src.tools.base import BaseTool, ToolConfig
 from orchestrator.src.validation.schemas import ToolInvocation

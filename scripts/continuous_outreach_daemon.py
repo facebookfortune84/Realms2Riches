@@ -2,11 +2,8 @@ import asyncio
 import os
 import sys
 import json
-import random
-import time
 import subprocess # For launching extraction swarm
-from datetime import datetime
-from typing import List, Dict, Any
+from typing import List, Dict
 from sqlalchemy.future import select
 from arq import create_pool
 from arq.connections import RedisSettings

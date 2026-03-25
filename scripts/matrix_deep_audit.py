@@ -1,11 +1,8 @@
 import asyncio
 import os
 import sys
-import json
 import logging
-import requests
 import time
-from typing import Dict, Any
 from datetime import datetime
 
 # Add root to sys.path

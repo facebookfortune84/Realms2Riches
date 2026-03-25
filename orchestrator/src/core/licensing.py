@@ -2,7 +2,6 @@ import os
 import json
 import base64
 import time
-from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives import serialization
 
 # --- CONFIGURATION (In Prod, inject PUBLIC_KEY via Env/Build) ---

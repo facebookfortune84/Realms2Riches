@@ -1,7 +1,6 @@
 import unittest
 import sys
 import os
-from unittest.mock import MagicMock
 
 sys.path.append(os.getcwd())
 

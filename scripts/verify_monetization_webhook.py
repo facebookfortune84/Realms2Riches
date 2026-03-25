@@ -1,8 +1,6 @@
 import requests
-import json
 import uuid
 import time
-from datetime import datetime
 
 WEBHOOK_URL = "http://localhost:8000/api/v1/monetization/webhook"
 

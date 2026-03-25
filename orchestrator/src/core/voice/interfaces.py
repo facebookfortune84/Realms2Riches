@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import AsyncGenerator, Generator, Optional, Any
+from typing import AsyncGenerator
 
 class STTAdapter(ABC):
     @abstractmethod

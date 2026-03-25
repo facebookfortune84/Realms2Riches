@@ -3,7 +3,6 @@ import random
 import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-from orchestrator.src.core.config import settings
 from orchestrator.src.tools.social_tools import SocialMediaMultiplexer, ToolConfig
 from orchestrator.src.core.alchemy_engine import get_all_posts
 
@@ -40,7 +39,7 @@ class SocialScheduler:
         
         from orchestrator.src.core.catalog.api import catalog_api
         from orchestrator.src.core.orchestrator import Orchestrator
-        from orchestrator.src.validation.conversion_auditor import LinkBeautifier, ConversionAuditor
+        from orchestrator.src.validation.conversion_auditor import ConversionAuditor
         
         o = Orchestrator()
         products = catalog_api.get_products()

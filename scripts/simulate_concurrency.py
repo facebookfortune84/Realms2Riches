@@ -6,8 +6,6 @@ import os
 
 sys.path.append(os.getcwd())
 
-from orchestrator.src.core.orchestrator import Orchestrator
-from orchestrator.src.core.api import app, startup_event
 
 # Mock logging config
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

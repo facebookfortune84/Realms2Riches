@@ -1,8 +1,6 @@
-import pytest
 from fastapi.testclient import TestClient
 from orchestrator.src.core.api import app
 from orchestrator.src.core.orchestrator import Orchestrator
-from orchestrator.src.tools.base import BaseTool
 
 client = TestClient(app)
 

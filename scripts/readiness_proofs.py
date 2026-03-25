@@ -1,8 +1,5 @@
 import os
-import requests
-import json
 import logging
-import asyncio
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -54,11 +51,11 @@ def verify_readiness():
         else:
             logger.error(f"❌ {name} FAILED")
 
-        print(f"=========================================")
+        print("=========================================")
         print(f"READINESS SCORE: {proofs}/25 ({proofs/25*100}%)")
         if proofs == 25:
-            print(f"STATUS: 10000% READY FOR LAUNCH")
-        print(f"=========================================")
+            print("STATUS: 10000% READY FOR LAUNCH")
+        print("=========================================")
 
 if __name__ == "__main__":
     # Ensure prompts file exists for check 24

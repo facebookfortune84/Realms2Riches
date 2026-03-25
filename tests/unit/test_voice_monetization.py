@@ -3,8 +3,7 @@ import os
 sys.path.append(os.getcwd())
 
 import pytest
-import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 from orchestrator.src.core.voice.session import VoiceSession, VoiceSessionState
 from orchestrator.src.core.voice.mock_adapters import MockSTTAdapter, MockTTSAdapter
 from orchestrator.src.core.orchestrator import Orchestrator

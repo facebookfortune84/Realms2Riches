@@ -1,14 +1,12 @@
 import asyncio
 import os
 import sys
-import json
-import logging
 import imaplib
 import email
 from email.header import decode_header
 import re
 from datetime import datetime, timedelta
-from typing import List, Dict, Any, Optional
+from typing import List, Dict
 
 # Ensure imports work
 sys.path.append(os.getcwd())

@@ -2,10 +2,7 @@ import asyncio
 import os
 import sys
 import random
-import time
 import json
-import logging
-from typing import List, Dict
 
 # Ensure orchestrator is in path
 sys.path.append(os.getcwd())
@@ -108,7 +105,7 @@ class GrandMonetizationOrchestrator:
     async def execute_stream_4_products(self):
         """Digital Product Store (Brand Kit)"""
         tracked = self.get_tracking_link(STRIPE_MONETIZATION["brand_kit"], "tiktok", "brand_kit_promo")
-        logger.info(f"🎥 [Stream 4: Products] Generating TikTok for Brand Kit")
+        logger.info("🎥 [Stream 4: Products] Generating TikTok for Brand Kit")
         self.marketing_tools["tiktok_gen"].execute(
             ToolInvocation(tool_id="tiktok_gen", input_data={"product_name": "Sovereign Brand Kit"}, agent_id="product_bot")
         )
@@ -127,7 +124,7 @@ class GrandMonetizationOrchestrator:
         
         blog_count = len(os.listdir("data/blog/posts"))
         logger.info(f"✅ [DEPLOY] Successfully pushed {blog_count} new articles to realmstoriches.xyz")
-        logger.info(f"✅ [DEPLOY] Sitemap updated.")
+        logger.info("✅ [DEPLOY] Sitemap updated.")
         self.stats["deployments"] += 1
 
     async def cleanup_root(self):

@@ -1,10 +1,9 @@
 import pytest
-import os
 import json
 from stripe import StripeError
 from unittest.mock import patch, MagicMock
 from scripts import create_new_stripe_products as stripe_script
-from tests.mocks.mock_stripe import MockStripe, MockStripeProduct, MockStripePrice, MockStripePaymentLink
+from tests.mocks.mock_stripe import MockStripe, MockStripeProduct
 
 @pytest.fixture
 def mock_stripe_client():

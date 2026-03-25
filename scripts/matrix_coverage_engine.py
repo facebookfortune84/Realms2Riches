@@ -8,8 +8,6 @@ from datetime import datetime
 sys.path.append(os.getcwd())
 
 from orchestrator.src.core.orchestrator import Orchestrator
-from orchestrator.src.logging.telemetry import telemetry
-from orchestrator.src.core.self_healing import sovereign_healer
 
 logger = logging.getLogger("COVERAGE_ENGINE")
 
@@ -27,23 +25,23 @@ class MatrixCoverageEngine:
         print("================================================")
         
         # Vector Group 1: SOP Compliance (50 passes)
-        print(f"Phase 1: Probing 50 SOP Vectors...")
+        print("Phase 1: Probing 50 SOP Vectors...")
         sop_dir = "data/oracle/sop"
         sops = [f for f in os.listdir(sop_dir) if f.endswith(".md")]
         for i, sop in enumerate(sops[:50]):
             self.report["passes"].append({"id": f"SOP_{i+1}", "status": "VERIFIED", "target": sop})
         
         # Vector Group 2: Tool Integrity (30 passes)
-        print(f"Phase 2: Probing 30 Tool Capability Vectors...")
+        print("Phase 2: Probing 30 Tool Capability Vectors...")
         for i in range(30):
             self.report["passes"].append({"id": f"TOOL_{i+1}", "status": "VERIFIED", "capability": f"Vector_{i+1}"})
 
         # Vector Group 3: Self-Healing & Persistence (26 passes)
-        print(f"Phase 3: Probing 26 Infrastructure Vectors...")
+        print("Phase 3: Probing 26 Infrastructure Vectors...")
         for i in range(26):
             self.report["passes"].append({"id": f"INFRA_{i+1}", "status": "VERIFIED"})
 
-        print(f"✅ 106 Passes Complete. System state is CRYSTALLINE.")
+        print("✅ 106 Passes Complete. System state is CRYSTALLINE.")
         return len(self.report["passes"])
 
 async def execute_coverage():

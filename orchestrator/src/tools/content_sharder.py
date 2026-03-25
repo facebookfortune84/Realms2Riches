@@ -1,5 +1,4 @@
-import json
-from typing import Dict, Any, List
+from typing import Dict, Any
 from orchestrator.src.tools.base import BaseTool, ToolConfig
 
 class ContentSharderTool(BaseTool):
@@ -20,7 +19,7 @@ class ContentSharderTool(BaseTool):
             ],
             "twitter": [
                 f"🧵 1/5: The future of agentic work: {source_text[:140]}",
-                f"2/5: Deep dive into the Sovereign Matrix. #R2R"
+                "2/5: Deep dive into the Sovereign Matrix. #R2R"
             ],
             "blog_summary": f"Executive Summary: {source_text[:200]}...",
             "email_copy": f"Subject: The Intelligence Briefing\n\nHello Founder,\n\nWe've analyzed {source_text[:100]} and found interesting results."

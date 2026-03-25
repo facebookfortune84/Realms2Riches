@@ -1,8 +1,6 @@
 import os
-import json
 import logging
 import sys
-from typing import List, Dict, Any
 from orchestrator.src.core.catalog.api import catalog_api
 from orchestrator.src.core.config import settings
 

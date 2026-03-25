@@ -2,10 +2,7 @@ import asyncio
 import requests
 import os
 import sys
-import json
-import hashlib
 import time
-from typing import Dict, Any
 
 # Ensure path
 sys.path.append(os.getcwd())

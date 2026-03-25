@@ -1,5 +1,4 @@
 import os
-import random
 
 output_dir = "data/assets/products"
 os.makedirs(output_dir, exist_ok=True)
