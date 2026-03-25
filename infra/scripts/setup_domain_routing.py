@@ -1,6 +1,4 @@
 import os
-import sys
-import subprocess
 
 def setup_domain_routing():
     print("🌐 REALMS2RICHES SOVEREIGN DOMAIN SETUP")
@@ -60,16 +58,16 @@ server {{
     # 2. DNS Instructions
     print("\n📡 DNS UPDATE INSTRUCTIONS (ACTION REQUIRED)")
     print("------------------------------------------")
-    print(f"1. Log in to your domain registrar (GoDaddy, Namecheap, Cloudflare, etc.).")
+    print("1. Log in to your domain registrar (GoDaddy, Namecheap, Cloudflare, etc.).")
     print(f"2. Navigate to DNS Settings for '{domain}'.")
-    print(f"3. Add an 'A Record':")
-    print(f"   - Type: A")
-    print(f"   - Name: @")
-    print(f"   - Value: [YOUR_VPS_IP_ADDRESS]")
-    print(f"   - TTL: Automatic/300")
-    print(f"4. Add a 'CNAME Record':")
-    print(f"   - Type: CNAME")
-    print(f"   - Name: www")
+    print("3. Add an 'A Record':")
+    print("   - Type: A")
+    print("   - Name: @")
+    print("   - Value: [YOUR_VPS_IP_ADDRESS]")
+    print("   - TTL: Automatic/300")
+    print("4. Add a 'CNAME Record':")
+    print("   - Type: CNAME")
+    print("   - Name: www")
     print(f"   - Value: {domain}")
     print("\n✅ Once DNS propagates (1-24 hours), your sovereign funnel will be live.")
 

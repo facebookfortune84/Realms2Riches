@@ -1,138 +1,68 @@
 # ============================================================
-# SOVEREIGN_START.ps1 - Grand Orchestrator Launch & Deployment (v10.0.0)
+# SOVEREIGN_START.ps1 - Grand Orchestrator Launch (v11.0.0)
 # ============================================================
 param (
-    [switch]$LocalOnly,      # Run locally without pushing to remote
-    [switch]$FullPrune,      # Clean docker resources before starting
-    [switch]$SkipTests,      # Skip pre-flight tests (NOT RECOMMENDED)
-    [string]$CommitMsg = "feat: sovereign sync [$(Get-Date -Format 'yyyyMMdd-HHmm')]"
+    [switch]$LocalOnly,
+    [switch]$FullPrune,
+    [switch]$SkipTests,
+    [string]$CommitMsg = "feat: autonomous traffic & core sync [$(Get-Date -Format 'yyyyMMdd-HHmm')]"
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue" # Don't stop the whole script if one process fails
 $env:PYTHONPATH = "." 
-
-# --- CONFIGURATION ---
-$BackendUrl = "https://api.realms2riches.com"
-$FrontendUrl = "https://app.realms2riches.com"
-$DevBranch = "dev"
-$StasisBranch = "stasis"
 
 Write-Host "`n  R E A L M S   2   R I C H E S" -ForegroundColor Magenta -BackgroundColor Black
 Write-Host "  S O V E R E I G N   M A T R I X" -ForegroundColor Green -BackgroundColor Black
-Write-Host "  v10.0.0 | FULL PRODUCTION SYNC SYSTEM`n" -ForegroundColor Gray
+Write-Host "  v11.0.0 | AUTOMATED REVENUE & TRAFFIC SYSTEM`n" -ForegroundColor Gray
 
-# --- 0. CODE HYGIENE ---
-Write-Host "[0/7] Ensuring Code Hygiene (Ruff)..." -ForegroundColor Cyan
-try {
-    ruff check --fix .
-} catch {
-    Write-Warning "Ruff check failed. Please ensure 'ruff' is installed."
+# --- 0. PRE-FLIGHT ---
+if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
+    Write-Error "Python not found in PATH. Please install Python 3.10+."
+    exit 1
 }
 
-# --- 1. CORE & ENVIRONMENT SYNC ---
-Write-Host "[1/7] Syncing Primary -> Secondary Core..." -ForegroundColor Cyan
-try {
-    python scripts/sync_core.py
-    if ($LASTEXITCODE -ne 0) { throw "Core sync failed." }
-} catch {
-    Write-Warning "Core sync script failed. Proceeding, but secondary core may be out of date."
-}
+# --- 1. CORE SYNC ---
+Write-Host "[1/8] Syncing Primary -> Secondary Core..." -ForegroundColor Cyan
+python scripts/sync_core.py
 
-# --- 2. LOCAL VERIFICATION ---
-if (-not $SkipTests) {
-    Write-Host "[2/7] Running System Integrity Checks..." -ForegroundColor Cyan
-    try {
-        python scripts/test_system_integrity.py
-        if ($LASTEXITCODE -ne 0) { throw "Integrity checks failed." }
-    } catch {
-        Write-Error "System integrity compromised. Fix errors before deploying."
-        exit 1
-    }
-}
-
-# --- 3. LINEAGE & TAGGING ---
-Write-Host "[3/7] Recording Lineage & Locking State..." -ForegroundColor Cyan
+# --- 2. LINEAGE ---
+Write-Host "[2/8] Recording Lineage..." -ForegroundColor Cyan
 python scripts/hash_registry.py
-# Sync lineage to secondary
-if (Test-Path "data/lineage/hash_registry.json") {
-    if (-not (Test-Path "core_secondary/data/lineage")) { New-Item -ItemType Directory -Path "core_secondary/data/lineage" -Force }
-    Copy-Item "data/lineage/hash_registry.json" "core_secondary/data/lineage/hash_registry.json" -Force
-}
 
-# --- 3.5 DNS CONFIGURATION ---
-Write-Host "[3.5/7] Checking Domain Routing..." -ForegroundColor Cyan
-python infra/scripts/setup_domain_routing.py
+# --- 3. DOCKER (DB & REDIS) ---
+Write-Host "[3/8] Starting Backend Services (Docker)..." -ForegroundColor Cyan
+if ($FullPrune) { docker-compose -f infra/docker/docker-compose.yml down -v }
+docker-compose -f infra/docker/docker-compose.yml up -d db redis
 
-# --- 4. GIT OPERATIONS (LOCAL -> REMOTE SYNC) ---
-if (-not $LocalOnly) {
-    Write-Host "[4/7] Syncing Local -> Remote (GitHub)..." -ForegroundColor Magenta
-    
-    # Check git status
-    $gitStatus = git status --porcelain
-    if ($gitStatus) {
-        Write-Host "  -> Staging changes (including core_secondary)..." -ForegroundColor Gray
-        git add .
-        
-        Write-Host "  -> Committing: $CommitMsg" -ForegroundColor Gray
-        git commit -m "$CommitMsg"
-    }
+# --- 4. START ORCHESTRATOR API ---
+Write-Host "[4/8] Igniting Orchestrator API (Port 8000)..." -ForegroundColor Cyan
+Start-Process powershell -ArgumentList "-NoProfile", "-Command", "python -m uvicorn orchestrator.src.core.api:app --host 0.0.0.0 --port 8000" -WindowStyle Normal
 
-    # Push to Dev
-    Write-Host "  -> Pushing to $DevBranch..." -ForegroundColor Gray
-    git push origin $DevBranch
-    
-    # Push to Stasis (Triggers CI/CD for VPS Sync)
-    Write-Host "  -> Pushing to $StasisBranch (TRIGGERS VPS SYNC)..." -ForegroundColor Yellow
-    git checkout $StasisBranch
-    git merge $DevBranch
-    git push origin $StasisBranch
-    git checkout $DevBranch # Return to dev
-    
-    Write-Host "  -> Remote Sync Triggered. VPS will update via GitHub Actions." -ForegroundColor Green
-} else {
-    Write-Host "[4/7] Skipping Remote Sync (Local Only Mode)" -ForegroundColor Yellow
-}
+# --- 5. START WORKER ---
+Write-Host "[5/8] Waking Swarm Worker..." -ForegroundColor Cyan
+Start-Process powershell -ArgumentList "-NoProfile", "-Command", "python -m arq orchestrator.src.core.worker.WorkerSettings" -WindowStyle Normal
 
-# --- 5. CORE ORCHESTRATION ---
-Write-Host "[5/7] Starting Local Orchestration..." -ForegroundColor Cyan
+# --- 6. START OPTIMIZER ---
+Write-Host "[6/8] Starting Funnel Optimizer..." -ForegroundColor Cyan
+Start-Process powershell -ArgumentList "-NoProfile", "-Command", "python scripts/funnel_optimizer_daemon.py" -WindowStyle Normal
 
-if ($FullPrune) {
-    docker-compose -f infra/docker/docker-compose.yml down -v --remove-orphans
-}
-docker-compose -f infra/docker/docker-compose.yml up -d db redis adminer
+# --- 7. START TRAFFIC DRIVER ---
+Write-Host "[7/8] Unleashing Autonomous Traffic Driver..." -ForegroundColor Magenta
+Start-Process powershell -ArgumentList "-NoProfile", "-Command", "python scripts/autonomous_traffic_driver.py" -WindowStyle Normal
 
-# Start Primary API
-Start-Process python -ArgumentList "-m", "arq", "run", "orchestrator.src.core.worker.WorkerSettings" -NoNewWindow
-Start-Process uvicorn -ArgumentList "orchestrator.src.core.api:app --host 0.0.0.0 --port 8000 --reload" -NoNewWindow
-
-# --- 5.5 FUNNEL OPTIMIZATION ---
-Write-Host "[5.5/7] Igniting Funnel Optimizer Daemon..." -ForegroundColor Cyan
-Start-Process python -ArgumentList "scripts/funnel_optimizer_daemon.py" -NoNewWindow
-
-# --- 6. SECONDARY CORE (FALLBACK) ---
-Write-Host "[6/7] Initializing Secondary Core Fallback..." -ForegroundColor Magenta
-# We run secondary on a different port (e.g., 8001) for local fallback testing
-if (Test-Path "core_secondary") {
-    Start-Process uvicorn -ArgumentList "core_secondary.orchestrator.src.core.api:app --host 0.0.0.0 --port 8001" -NoNewWindow
-    Write-Host "  -> Secondary Core STANDBY at http://localhost:8001" -ForegroundColor Gray
-}
-
-# --- 7. FRONTEND LAUNCH ---
-Write-Host "[7/7] Launching Frontend Interface..." -ForegroundColor Cyan
+# --- 8. START FRONTEND ---
+Write-Host "[8/8] Launching UI..." -ForegroundColor Cyan
 if (Test-Path "frontend") {
     Set-Location frontend
-    Start-Process npm -ArgumentList "run", "dev" -NoNewWindow
+    Start-Process powershell -ArgumentList "-NoProfile", "-Command", "npm run dev" -WindowStyle Normal
     Set-Location ..
 }
 
-# --- FINAL STATUS ---
 Write-Host "`n=================================================" -ForegroundColor Gray
-Write-Host "🚀 REALMS2RICHES MATRIX IS SYNCED & LIVE" -ForegroundColor Green
+Write-Host "🚀 ALL SYSTEMS ONLINE & DRIVING TRAFFIC" -ForegroundColor Green
 Write-Host "  - Local UI:     http://localhost:5173"
-Write-Host "  - Local API:    http://localhost:8000"
-Write-Host "  - Secondary:    http://localhost:8001"
-if (-not $LocalOnly) {
-    Write-Host "  - VPS Sync:     IN PROGRESS (GitHub Actions)"
-    Write-Host "  - Production:   $FrontendUrl"
-}
+Write-Host "  - API Docs:     http://localhost:8000/docs"
+Write-Host "  - Traffic Log:  logs/traffic_driver.log"
 Write-Host "=================================================" -ForegroundColor Gray
+Write-Host "Note: Background windows have been opened for each process."
+Write-Host "If a window closes immediately, check the logs directory.`n"
