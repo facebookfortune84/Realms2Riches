@@ -63,9 +63,38 @@ class ImageGenerationTool(BaseTool):
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
+    def rotate_assets(self, campaign_theme: str) -> Dict[str, Any]:
+        """
+        Generates a batch of assets for a campaign and selects a 'Champion' for the current rotation.
+        Styles: Neon Cyberpunk, Corporate Trust, Minimalist High-Ticket.
+        """
+        styles = [
+            f"Neon Cyberpunk style {campaign_theme}",
+            f"Corporate Trust Professional {campaign_theme}",
+            f"Minimalist High-Ticket Luxury {campaign_theme}"
+        ]
+        
+        assets = []
+        for style in styles:
+            result = self.execute({"prompt": style})
+            if result.get("status") == "success":
+                assets.append(result)
+        
+        if not assets:
+            return {"status": "failed", "message": "Asset rotation failed"}
+            
+        champion = random.choice(assets)
+        logger.info(f"🎨 Asset Rotation Complete. Champion: {champion['local_path']}")
+        
+        return {
+            "status": "success",
+            "champion": champion,
+            "pool": assets
+        }
+
     def _generate_mock_image(self, prompt: str):
         # Generate a cool SVG placeholder
-        filename = f"mock_{int(time.time())}.svg"
+        filename = f"mock_{int(time.time())}_{random.randint(1000,9999)}.svg"
         path = os.path.join(self.output_dir, filename)
         
         color1 = "#" + "".join([random.choice("0123456789ABCDEF") for _ in range(6)])
