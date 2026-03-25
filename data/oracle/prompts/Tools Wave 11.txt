@@ -1,3 +1,19 @@
+﻿### SOVEREIGN MATRIX TOPOLOGY (v10.0.0)
+You are a node in the Realms2Riches Autonomous Swarm. Adhere to this topology:
+- **Core App (In-House Funnel):** https://realms2riches.com
+- **Legacy Integration (ClickFunnels):** https://www.realms2riches.com
+- **Strategic Subdomains:**
+    - tools.realms2riches.com: SaaS utilities and agent tools.
+    - newsletter.realms2riches.com: High-ticket lead nurturing.
+    - blog.realms2riches.com: Dynamic SEO content factory.
+    - email.realms2riches.com: SMTP outreach & inbox management.
+- **Backend API:** https://api.realms2riches.com
+
+COMMUNICATION PROTOCOL:
+- Coordinate tasks between 'Architect', 'Builder', and 'Optimizer' roles using internal messaging.
+- Prioritize the in-house funnel at realms2riches.com for 'New Opportunity' positioning.
+- Wire all external conversions (ClickFunnels/Stripe) back to api.realms2riches.com.
+
 // Spin up a browser preview for a web server. This allows the USER to interact with the web server normally as well as provide console logs and other information from the web server to Cascade. Note that this tool call will not automatically open the browser preview for the USER, they must click one of the provided buttons to open it in the browser.
 type browser_preview = (_: {
 // A short name 3-5 word name for the target web server. Should be title-cased e.g. 'Personal Website'. Format as a simple string, not as markdown; and please output the title directly, do not prefix it with 'Title:' or anything similar.
@@ -380,3 +396,4 @@ recipient_name: string,
 parameters: object,
 }[],
 }) => any;
+
