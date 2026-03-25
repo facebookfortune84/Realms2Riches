@@ -143,53 +143,8 @@ class BuilderAgent:
 
         # Landing Page
         landing_spec = next((p for p in funnel_spec.get("pages", []) if p["type"] == "landing_page"), {})
-        landing_jsx = f"""
-import React from 'react';
-import {{ useNavigate }} from 'react-router-dom';
-import {{ ArrowRight, CheckCircle }} from 'lucide-react';
-
-const LandingPage = () => {{
-  const navigate = useNavigate();
-
-  return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
-      {{/* HERO SECTION */}}
-      <section className="bg-white py-20 px-6 text-center shadow-sm">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl font-extrabold tracking-tight mb-6 leading-tight text-indigo-900">
-            {landing_spec.get('headline', 'Headline Missing')}
-          </h1>
-          <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-            {landing_spec.get('subheadline', 'Subheadline Missing')}
-          </p>
-          <button 
-            onClick={{() => navigate('/upsell')}}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-full text-lg shadow-xl transform transition hover:scale-105 flex items-center justify-center mx-auto"
-          >
-            {landing_spec.get('cta_text', 'Get Access Now')} <ArrowRight className="ml-2" />
-          </button>
-        </div>
-      </section>
-
-      {{/* BULLETS / STACK */}}
-      <section className="py-16 px-6">
-        <div className="max-w-3xl mx-auto bg-white p-10 rounded-2xl shadow-lg border border-gray-100">
-          <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Here is What You Get:</h2>
-          <div className="space-y-4">
-            {(landing_spec.get('bullets', []) or ['Benefit 1', 'Benefit 2']).map((bullet, i) => (
-                f'<div key={{i}} className="flex items-start"><CheckCircle className="text-green-500 mr-3 mt-1 flex-shrink-0" /><div><span className="font-semibold text-lg">{{bullet}}</span></div></div>'
-            )).replace("'", '"')}
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-}};
-
-export default LandingPage;
-"""
-        # Fix the f-string map loop which is complex to embed directly
-        # Simplified replacement for the dynamic part above to ensure valid python string generation
+        
+        # Generate bullets JSX first to avoid complex f-string issues
         bullets_jsx = ""
         for bullet in (landing_spec.get('bullets', []) or ['Benefit 1', 'Benefit 2']):
             bullets_jsx += f"""
@@ -243,9 +198,9 @@ const LandingPage = () => {{
 export default LandingPage;
 """
 
-
         with open(os.path.join(src_path, "pages", "LandingPage.js"), "w", encoding="utf-8") as f:
             f.write(landing_jsx)
+
 
         # Upsell Page
         upsell_spec = next((p for p in funnel_spec.get("pages", []) if p["type"] == "upsell_page"), {})
