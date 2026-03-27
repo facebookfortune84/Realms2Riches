@@ -1,0 +1,42 @@
+[
+  {
+    "id": "cf_trial",
+    "name": "ClickFunnels Free 14 Day Trial",
+    "link": "https://www.clickfunnels.com/signup-flow?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b",
+    "assets_path": "data/assets/cf_trial",
+    "type": "ignition",
+    "bridge_page_url": "https://www.realms2riches.com/bridge/cf-trial"
+  },
+  {
+    "id": "ofa_challenge",
+    "name": "One Funnel Away Challenge",
+    "link": "https://www.onefunnelaway.com/?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b",
+    "assets_path": "data/assets/ofa_challenge",
+    "type": "growth",
+    "bridge_page_url": "https://www.realms2riches.com/bridge/ofa"
+  },
+  {
+    "id": "plr_funnels",
+    "name": "PLR Funnels",
+    "link": "https://www.plrfunnels.com/plr?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b",
+    "assets_path": "data/assets/plr_funnels",
+    "type": "product",
+    "bridge_page_url": "https://www.realms2riches.com/bridge/plr"
+  },
+  {
+    "id": "cf_99_bundle",
+    "name": "3 Months of ClickFunnels for $99",
+    "link": "https://www.clickfunnels.com/3-months-for-99?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b",
+    "assets_path": "data/assets/cf_99_bundle",
+    "type": "value",
+    "bridge_page_url": "https://www.realms2riches.com/bridge/bundle"
+  },
+  {
+    "id": "all_in_secrets",
+    "name": "I'm All In - Funnel Builder Secrets",
+    "link": "https://www.imallin.com/?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b",
+    "assets_path": "data/assets/all_in_secrets",
+    "type": "high_ticket",
+    "bridge_page_url": "https://www.realms2riches.com/bridge/secrets"
+  }
+]

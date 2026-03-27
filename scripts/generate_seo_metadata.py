@@ -1,71 +1,38 @@
 import os
 import json
-import logging
+import datetime
 
-logger = logging.getLogger("SEO_Generator")
+def generate_seo_assets():
+    with open("data/affiliates/click_funnels/campaigns.json", "r") as f:
+        campaigns = json.load(f)
 
-def generate_sitemap():
-    """Generates a dynamic sitemap.xml for all programmatic niches."""
-    base_url = "https://api.realms2riches.com"
-    niche_dir = "data/store/niches"
-    
-    if not os.path.exists(niche_dir):
-        logger.warning("No niches found. Skipping sitemap.")
-        return
-
-    sitemap_content = [
-        '<?xml version="1.0" encoding="UTF-8"?>',
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-    ]
-
-    # Add main pages
-    routes = ["/", "/blog", "/metrics"]
-    for route in routes:
-        sitemap_content.append(f"  <url><loc>{base_url}{route}</loc><priority>1.0</priority></url>")
-
-    # Add all niche pages
-    for niche_file in os.listdir(niche_dir):
-        if niche_file.endswith(".json"):
-            slug = niche_file.replace(".json", "")
-            sitemap_content.append(f"  <url><loc>{base_url}/niche/{slug}</loc><priority>0.8</priority></url>")
-
-    sitemap_content.append("</urlset>")
-    
-    with open("data/store/sitemap.xml", "w") as f:
-        f.write("\n".join(sitemap_content))
-    
-    logger.info(f"✅ SEO: Generated sitemap with {len(os.listdir(niche_dir))} niche pages.")
-
-def update_niche_schemas():
-    """Injects JSON-LD schema into niche configurations."""
-    niche_dir = "data/store/niches"
-    if not os.path.exists(niche_dir): return
-
-    for niche_file in os.listdir(niche_dir):
-        path = os.path.join(niche_dir, niche_file)
-        with open(path, "r") as f:
-            data = json.load(f)
-        
-        # Add Schema.org metadata
-        data["schema"] = {
-            "@context": "https://schema.org",
-            "@type": "SoftwareApplication",
-            "name": data["title"],
-            "description": data["description"],
-            "applicationCategory": "BusinessApplication",
-            "operatingSystem": "Web",
-            "offers": {
-                "@type": "Offer",
-                "price": "2999.00",
-                "priceCurrency": "USD"
-            }
+    # 1. Generate Metadata for React Pages
+    seo_meta = {}
+    for camp in campaigns:
+        seo_meta[camp['id']] = {
+            "title": f"{camp['name']} | Realms2Riches Sovereign Partner",
+            "description": f"Launch your business with {camp['name']}. Access the exclusive bridge page and bonus assets from Realms2Riches.",
+            "canonical": camp['bridge_page_url'],
+            "robots": "index, follow"
         }
-        
-        with open(path, "w") as f:
-            json.dump(data, f, indent=2)
+
+    with open("frontend/src/seo_config.json", "w") as sf:
+        json.dump(seo_meta, sf, indent=2)
+
+    # 2. Generate Sitemap.xml for Search Console
+    sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    for camp in campaigns:
+        sitemap_content += f"""  <url>
+    <loc>{camp['bridge_page_url']}</loc>
+    <lastmod>{datetime.date.today().isoformat()}</lastmod>
+    <priority>1.0</priority>
+  </url>\n"""
+    sitemap_content += "</urlset>"
+
+    with open("frontend/public/sitemap.xml", "w") as sm:
+        sm.write(sitemap_content)
+
+    print("✅ SEO Engine Updated: Sitemap and Metadata generated for ClickFunnels Campaigns.")
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    update_niche_schemas()
-    generate_sitemap()
-
+    generate_seo_assets()
