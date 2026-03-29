@@ -1,0 +1,24 @@
+{
+  "id": "legal-manual-follow-up-singapore",
+  "title": "Autonomous Legal Revenue Agent for Singapore",
+  "headline": "Stop Manual Follow-up in your Legal Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for Legal professionals in Singapore.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "Legal",
+  "region": "Singapore",
+  "pain_point": "Manual Follow-up",
+  "image_url": "/marketing/images/legal.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous Legal Revenue Agent for Singapore",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for Legal professionals in Singapore.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

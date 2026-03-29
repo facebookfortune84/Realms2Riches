@@ -1,0 +1,25 @@
+governance:
+  version: "1.0"
+  rules:
+    - id: "require_tests"
+      description: "All code changes must be accompanied by tests."
+      severity: "high"
+      check_function: "check_test_coverage"
+      
+    - id: "no_secrets"
+      description: "No hardcoded secrets in source code."
+      severity: "critical"
+      check_function: "scan_for_secrets"
+      
+    - id: "docker_labels"
+      description: "Docker images must have metadata labels."
+      severity: "medium"
+      check_function: "validate_docker_labels"
+
+  deployment_gates:
+    dev:
+      - "no_secrets"
+    prod:
+      - "require_tests"
+      - "no_secrets"
+      - "docker_labels"

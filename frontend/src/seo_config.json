@@ -1,0 +1,32 @@
+{
+  "cf_trial": {
+    "title": "ClickFunnels Free 14 Day Trial | Realms2Riches Sovereign Partner",
+    "description": "Launch your business with ClickFunnels Free 14 Day Trial. Access the exclusive bridge page and bonus assets from Realms2Riches.",
+    "canonical": "https://www.realms2riches.com/bridge/cf-trial",
+    "robots": "index, follow"
+  },
+  "ofa_challenge": {
+    "title": "One Funnel Away Challenge | Realms2Riches Sovereign Partner",
+    "description": "Launch your business with One Funnel Away Challenge. Access the exclusive bridge page and bonus assets from Realms2Riches.",
+    "canonical": "https://www.realms2riches.com/bridge/ofa",
+    "robots": "index, follow"
+  },
+  "plr_funnels": {
+    "title": "PLR Funnels | Realms2Riches Sovereign Partner",
+    "description": "Launch your business with PLR Funnels. Access the exclusive bridge page and bonus assets from Realms2Riches.",
+    "canonical": "https://www.realms2riches.com/bridge/plr",
+    "robots": "index, follow"
+  },
+  "cf_99_bundle": {
+    "title": "3 Months of ClickFunnels for $99 | Realms2Riches Sovereign Partner",
+    "description": "Launch your business with 3 Months of ClickFunnels for $99. Access the exclusive bridge page and bonus assets from Realms2Riches.",
+    "canonical": "https://www.realms2riches.com/bridge/bundle",
+    "robots": "index, follow"
+  },
+  "all_in_secrets": {
+    "title": "I'm All In - Funnel Builder Secrets | Realms2Riches Sovereign Partner",
+    "description": "Launch your business with I'm All In - Funnel Builder Secrets. Access the exclusive bridge page and bonus assets from Realms2Riches.",
+    "canonical": "https://www.realms2riches.com/bridge/secrets",
+    "robots": "index, follow"
+  }
+}

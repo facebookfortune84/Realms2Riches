@@ -1,0 +1,702 @@
+[
+  {
+    "name": "Airbnb",
+    "location": "San Francisco, CA, USA",
+    "description": "Book accommodations around the world.",
+    "batch": "WINTER 2009",
+    "link": "https://www.ycombinator.com/companies/airbnb"
+  },
+  {
+    "name": "DoorDash",
+    "location": "San Francisco, CA, USA",
+    "description": "Restaurant delivery.",
+    "batch": "SUMMER 2013",
+    "link": "https://www.ycombinator.com/companies/doordash"
+  },
+  {
+    "name": "Coinbase",
+    "location": "San Francisco, CA, USA",
+    "description": "Buy, sell, and manage cryptocurrencies.",
+    "batch": "SUMMER 2012",
+    "link": "https://www.ycombinator.com/companies/coinbase"
+  },
+  {
+    "name": "Groww",
+    "location": "Bengaluru, KA, India",
+    "description": "Making financial services simple, transparent and delightful.",
+    "batch": "WINTER 2018",
+    "link": "https://www.ycombinator.com/companies/groww"
+  },
+  {
+    "name": "Instacart",
+    "location": "San Francisco, CA, USA",
+    "description": "Marketplace for grocery delivery and pickup",
+    "batch": "SUMMER 2012",
+    "link": "https://www.ycombinator.com/companies/instacart"
+  },
+  {
+    "name": "Oklo",
+    "location": "Santa Clara, CA, USA",
+    "description": "Emission free, always on power from advanced fission power plants.",
+    "batch": "SUMMER 2014",
+    "link": "https://www.ycombinator.com/companies/oklo"
+  },
+  {
+    "name": "Meesho",
+    "location": "Bengaluru, KA, India",
+    "description": "Democratizing internet commerce for everyone in India",
+    "batch": "SUMMER 2016",
+    "link": "https://www.ycombinator.com/companies/meesho"
+  },
+  {
+    "name": "EquipmentShare",
+    "location": "Columbia, MO, USA",
+    "description": "Cloud solutions for the construction industry.",
+    "batch": "WINTER 2015",
+    "link": "https://www.ycombinator.com/companies/equipmentshare"
+  },
+  {
+    "name": "Dropbox",
+    "location": "San Francisco, CA, USA",
+    "description": "Backup and share files in the cloud.",
+    "batch": "SUMMER 2007",
+    "link": "https://www.ycombinator.com/companies/dropbox"
+  },
+  {
+    "name": "Rigetti Computing",
+    "location": "Berkeley, CA, USA",
+    "description": "Quantum coherent supercomputing.",
+    "batch": "SUMMER 2014",
+    "link": "https://www.ycombinator.com/companies/rigetti-computing"
+  },
+  {
+    "name": "GitLab",
+    "location": "San Francisco, CA, USA",
+    "description": "A complete DevOps platform delivered as a single application.",
+    "batch": "WINTER 2015",
+    "link": "https://www.ycombinator.com/companies/gitlab"
+  },
+  {
+    "name": "BillionToOne",
+    "location": "Menlo Park, CA, USA",
+    "description": "The genetic testing platform detecting and measuring disease.",
+    "batch": "SUMMER 2017",
+    "link": "https://www.ycombinator.com/companies/billiontoone"
+  },
+  {
+    "name": "Matterport",
+    "location": "Sunnyvale, CA, USA",
+    "description": "Turn physical objects and environments into 3D models in seconds.",
+    "batch": "WINTER 2012",
+    "link": "https://www.ycombinator.com/companies/matterport"
+  },
+  {
+    "name": "Amplitude",
+    "location": "San Francisco, CA, USA",
+    "description": "Digital Analytics Platform",
+    "batch": "WINTER 2012",
+    "link": "https://www.ycombinator.com/companies/amplitude"
+  },
+  {
+    "name": "PagerDuty",
+    "location": "San Francisco, CA, USA",
+    "description": "Real-time visibility into critical apps and services all in one place.",
+    "batch": "SUMMER 2010",
+    "link": "https://www.ycombinator.com/companies/pagerduty"
+  },
+  {
+    "name": "Ginkgo Bioworks",
+    "location": "Boston, MA, USA",
+    "description": "Our mission is to make biology easier to engineer.",
+    "batch": "SUMMER 2014",
+    "link": "https://www.ycombinator.com/companies/ginkgo-bioworks"
+  },
+  {
+    "name": "Weave",
+    "location": "Lehi, UT, USA",
+    "description": "Customer communication and payments platform.",
+    "batch": "WINTER 2014",
+    "link": "https://www.ycombinator.com/companies/weave"
+  },
+  {
+    "name": "Pardes Biosciences",
+    "location": "San Francisco, CA, USA",
+    "description": "We break viruses",
+    "batch": "SUMMER 2020",
+    "link": "https://www.ycombinator.com/companies/pardes-bio"
+  },
+  {
+    "name": "Embark Trucks",
+    "location": "San Francisco, CA, USA",
+    "description": "Self-driving semi trucks.",
+    "batch": "WINTER 2016",
+    "link": "https://www.ycombinator.com/companies/embark-trucks"
+  },
+  {
+    "name": "Lucira Health",
+    "location": "Emeryville, CA, USA",
+    "description": "Next generation infectious disease test kits",
+    "batch": "WINTER 2015",
+    "link": "https://www.ycombinator.com/companies/lucira-health"
+  },
+  {
+    "name": "Momentus",
+    "location": "Santa Clara, CA, USA",
+    "description": "The space infrastructure services company",
+    "batch": "SUMMER 2018",
+    "link": "https://www.ycombinator.com/companies/momentus"
+  },
+  {
+    "name": "Segment",
+    "location": "San Francisco, CA, USA",
+    "description": "Software and APIs to collect, clean, and control customer data.",
+    "batch": "SUMMER 2011",
+    "link": "https://www.ycombinator.com/companies/segment"
+  },
+  {
+    "name": "Algolia",
+    "location": "San Francisco, CA, USA",
+    "description": "A developer-friendly and enterprise-grade search API.",
+    "batch": "WINTER 2014",
+    "link": "https://www.ycombinator.com/companies/algolia"
+  },
+  {
+    "name": "Truebill",
+    "location": "Silver Spring, MD, USA",
+    "description": "Live your best financial life",
+    "batch": "WINTER 2016",
+    "link": "https://www.ycombinator.com/companies/truebill"
+  },
+  {
+    "name": "Twitch",
+    "location": "San Francisco, CA, USA",
+    "description": "A global community creating the future of live entertainment.",
+    "batch": "WINTER 2007",
+    "link": "https://www.ycombinator.com/companies/twitch"
+  },
+  {
+    "name": "PlanGrid",
+    "location": "San Francisco, CA, USA",
+    "description": "Mobile applications for the construction industry.",
+    "batch": "WINTER 2012",
+    "link": "https://www.ycombinator.com/companies/plangrid"
+  },
+  {
+    "name": "Bellabeat",
+    "location": "San Francisco, CA, USA",
+    "description": "Tech-powered women's wellness.",
+    "batch": "WINTER 2014",
+    "link": "https://www.ycombinator.com/companies/bellabeat"
+  },
+  {
+    "name": "Cruise",
+    "location": "San Francisco, CA, USA",
+    "description": "Self-driving cars.",
+    "batch": "WINTER 2014",
+    "link": "https://www.ycombinator.com/companies/cruise"
+  },
+  {
+    "name": "Benchling",
+    "location": "San Francisco, CA, USA",
+    "description": "Unlocking the power of biotech with modern software for modern science",
+    "batch": "SUMMER 2012",
+    "link": "https://www.ycombinator.com/companies/benchling"
+  },
+  {
+    "name": "Casetext",
+    "location": "San Francisco, CA, USA",
+    "description": "We make the world's laws free and understandable.",
+    "batch": "SUMMER 2013",
+    "link": "https://www.ycombinator.com/companies/casetext"
+  },
+  {
+    "name": "Bird",
+    "location": "Amsterdam, NH, Netherlands",
+    "description": "The world’s largest omnichannel communications platform",
+    "batch": "SUMMER 2016",
+    "link": "https://www.ycombinator.com/companies/bird"
+  },
+  {
+    "name": "Brex",
+    "location": "San Francisco, CA, USA",
+    "description": "Business accounts, corporate cards, and spend management software.",
+    "batch": "WINTER 2017",
+    "link": "https://www.ycombinator.com/companies/brex"
+  },
+  {
+    "name": "The Athletic",
+    "location": "San Francisco, CA, USA",
+    "description": "Subscription sports media.",
+    "batch": "SUMMER 2016",
+    "link": "https://www.ycombinator.com/companies/the-athletic"
+  },
+  {
+    "name": "Codecademy",
+    "location": "New York, NY, USA",
+    "description": "The leading online learning platform for technical skills.",
+    "batch": "SUMMER 2011",
+    "link": "https://www.ycombinator.com/companies/codecademy"
+  },
+  {
+    "name": "Checkr",
+    "location": "San Francisco, CA, USA",
+    "description": "People infrastructure for the future of work",
+    "batch": "SUMMER 2014",
+    "link": "https://www.ycombinator.com/companies/checkr"
+  },
+  {
+    "name": "Lever",
+    "location": "San Francisco, CA, USA",
+    "description": "Talent Acquisition Suite that combines ATS + Talent CRM",
+    "batch": "SUMMER 2012",
+    "link": "https://www.ycombinator.com/companies/lever"
+  },
+  {
+    "name": "Clipboard",
+    "location": "San Francisco, CA, USA",
+    "description": "Connects workplaces with professionals nearby.",
+    "batch": "WINTER 2017",
+    "link": "https://www.ycombinator.com/companies/clipboard"
+  },
+  {
+    "name": "Heap",
+    "location": "San Francisco, CA, USA",
+    "description": "Captures user interactions with no code to generate analytics.",
+    "batch": "WINTER 2013",
+    "link": "https://www.ycombinator.com/companies/heap"
+  },
+  {
+    "name": "Sendwave",
+    "location": "Boston, MA, USA",
+    "description": "Instant, no fee international remittances.",
+    "batch": "WINTER 2012",
+    "link": "https://www.ycombinator.com/companies/sendwave"
+  },
+  {
+    "name": "Deel",
+    "location": "San Francisco, CA, USA",
+    "description": "The all-in-one HR and payroll platform for global teams",
+    "batch": "WINTER 2019",
+    "link": "https://www.ycombinator.com/companies/deel"
+  },
+  {
+    "name": "Clever",
+    "location": "San Francisco, CA, USA",
+    "description": "The platform that powers technology in the classroom.",
+    "batch": "SUMMER 2012",
+    "link": "https://www.ycombinator.com/companies/clever"
+  },
+  {
+    "name": "Caper",
+    "location": "N/A",
+    "description": "Plug-and-play cashier-less retail powered by computer vision and AI",
+    "batch": "WINTER 2016",
+    "link": "https://www.ycombinator.com/companies/caper"
+  },
+  {
+    "name": "Reddit",
+    "location": "San Francisco, CA, USA",
+    "description": "The frontpage of the internet.",
+    "batch": "SUMMER 2005",
+    "link": "https://www.ycombinator.com/companies/reddit"
+  },
+  {
+    "name": "Fivestars",
+    "location": "San Francisco, CA, USA",
+    "description": "Customer loyalty and payments platform for small businesses.",
+    "batch": "WINTER 2011",
+    "link": "https://www.ycombinator.com/companies/fivestars"
+  },
+  {
+    "name": "Machine Zone",
+    "location": "Palo Alto, CA, USA",
+    "description": "Pioneers of mobile social gaming.",
+    "batch": "WINTER 2008",
+    "link": "https://www.ycombinator.com/companies/machine-zone"
+  },
+  {
+    "name": "Faire",
+    "location": "San Francisco, CA, USA",
+    "description": "The global online platform empowering independent retail.",
+    "batch": "WINTER 2017",
+    "link": "https://www.ycombinator.com/companies/faire"
+  },
+  {
+    "name": "Fivetran",
+    "location": "Oakland, CA, USA",
+    "description": "The leader in automated data movement",
+    "batch": "WINTER 2013",
+    "link": "https://www.ycombinator.com/companies/fivetran"
+  },
+  {
+    "name": "Optimizely",
+    "location": "San Francisco, CA, USA",
+    "description": "The first all-in-one operating system for marketing",
+    "batch": "WINTER 2010",
+    "link": "https://www.ycombinator.com/companies/optimizely"
+  },
+  {
+    "name": "Flexport",
+    "location": "San Francisco, CA, USA",
+    "description": "Platform for global logistics.",
+    "batch": "WINTER 2014",
+    "link": "https://www.ycombinator.com/companies/flexport"
+  },
+  {
+    "name": "WePay",
+    "location": "Redwood City, CA, USA",
+    "description": "Payments for platform businesses.",
+    "batch": "SUMMER 2009",
+    "link": "https://www.ycombinator.com/companies/wepay"
+  },
+  {
+    "name": "Weebly",
+    "location": "San Francisco, CA, USA",
+    "description": "Build a free website that grows with your business.",
+    "batch": "WINTER 2007",
+    "link": "https://www.ycombinator.com/companies/weebly"
+  },
+  {
+    "name": "Flock Safety",
+    "location": "Atlanta, GA, USA",
+    "description": "The first public safety operating system that eliminates crime.",
+    "batch": "SUMMER 2017",
+    "link": "https://www.ycombinator.com/companies/flock-safety"
+  },
+  {
+    "name": "Sqreen",
+    "location": "San Francisco, CA, USA",
+    "description": "Sqreen is the application security platform for the modern enterprise",
+    "batch": "WINTER 2018",
+    "link": "https://www.ycombinator.com/companies/sqreen"
+  },
+  {
+    "name": "NURX",
+    "location": "New York, NY, USA",
+    "description": "Medicine or testing kit, prescribed online and delivered to your door.",
+    "batch": "WINTER 2016",
+    "link": "https://www.ycombinator.com/companies/nurx"
+  },
+  {
+    "name": "Go1",
+    "location": "San Francisco, CA, USA",
+    "description": "A learning platform that enables you to train your staff or customers.",
+    "batch": "SUMMER 2015",
+    "link": "https://www.ycombinator.com/companies/go1"
+  },
+  {
+    "name": "CoreOS",
+    "location": "San Francisco, CA, USA",
+    "description": "Open source tools of modern distributed systems.",
+    "batch": "SUMMER 2013",
+    "link": "https://www.ycombinator.com/companies/coreos"
+  },
+  {
+    "name": "Bear Flag Robotics",
+    "location": "Newark, CA, USA",
+    "description": "Autonomous driving technology for farm tractors.",
+    "batch": "WINTER 2018",
+    "link": "https://www.ycombinator.com/companies/bear-flag-robotics"
+  },
+  {
+    "name": "GOAT Group",
+    "location": "Los Angeles, CA, USA",
+    "description": "Platform for the greatest products from the past, present and future.",
+    "batch": "WINTER 2011",
+    "link": "https://www.ycombinator.com/companies/goat-group"
+  },
+  {
+    "name": "Heroku",
+    "location": "San Francisco, CA, USA",
+    "description": "Enabling developers to build and run applications in the cloud.",
+    "batch": "WINTER 2008",
+    "link": "https://www.ycombinator.com/companies/heroku"
+  },
+  {
+    "name": "GrubMarket",
+    "location": "San Francisco, CA, USA",
+    "description": "AI-powered technology enabler and digital transformer of American…",
+    "batch": "WINTER 2015",
+    "link": "https://www.ycombinator.com/companies/grubmarket"
+  },
+  {
+    "name": "HelloSign",
+    "location": "San Francisco, CA, USA",
+    "description": "eSignature software for small and mid-market businesses.",
+    "batch": "WINTER 2011",
+    "link": "https://www.ycombinator.com/companies/hellosign"
+  },
+  {
+    "name": "Zenefits",
+    "location": "San Francisco, CA, USA",
+    "description": "HR for small businesses: onboarding, payroll and benefits.",
+    "batch": "WINTER 2013",
+    "link": "https://www.ycombinator.com/companies/zenefits"
+  },
+  {
+    "name": "Gusto",
+    "location": "San Francisco, CA, USA",
+    "description": "Provides growing businesses with everything to take care of their team",
+    "batch": "WINTER 2012",
+    "link": "https://www.ycombinator.com/companies/gusto"
+  },
+  {
+    "name": "Honeylove",
+    "location": "Los Angeles, CA, USA",
+    "description": "Honeylove makes functional undergarments for women",
+    "batch": "SUMMER 2018",
+    "link": "https://www.ycombinator.com/companies/honeylove"
+  },
+  {
+    "name": "Modern Fertility",
+    "location": "San Francisco, CA, USA",
+    "description": "At-home fertility test for women who aren't ready for kids right now…",
+    "batch": "SUMMER 2017",
+    "link": "https://www.ycombinator.com/companies/modern-fertility"
+  },
+  {
+    "name": "Cognito",
+    "location": "Palo Alto, CA, USA",
+    "description": "Frictionless, modern identity verification that starts with just a…",
+    "batch": "SUMMER 2014",
+    "link": "https://www.ycombinator.com/companies/cognito"
+  },
+  {
+    "name": "OpenInvest",
+    "location": "San Francisco, CA, USA",
+    "description": "Values based personalization at scale for asset and wealth management",
+    "batch": "SUMMER 2015",
+    "link": "https://www.ycombinator.com/companies/openinvest"
+  },
+  {
+    "name": "Mixpanel",
+    "location": "San Francisco, CA, USA",
+    "description": "Mixpanel is event analytics for builders that need answers.",
+    "batch": "SUMMER 2009",
+    "link": "https://www.ycombinator.com/companies/mixpanel"
+  },
+  {
+    "name": "Paystack",
+    "location": "Lagos, LA, Nigeria",
+    "description": "Modern payments infrastructure for Africa",
+    "batch": "WINTER 2016",
+    "link": "https://www.ycombinator.com/companies/paystack"
+  },
+  {
+    "name": "Moxion Power Co.",
+    "location": "Richmond, CA, USA",
+    "description": "Mobile Energy Storage Technology",
+    "batch": "WINTER 2021",
+    "link": "https://www.ycombinator.com/companies/moxion-power-co"
+  },
+  {
+    "name": "DrChrono",
+    "location": "CA, USA",
+    "description": "The essential platform for modern medical practices and patients.",
+    "batch": "WINTER 2011",
+    "link": "https://www.ycombinator.com/companies/drchrono"
+  },
+  {
+    "name": "OMGPop",
+    "location": "New York, NY, USA",
+    "description": "An independent flash game studio.",
+    "batch": "SUMMER 2006",
+    "link": "https://www.ycombinator.com/companies/omgpop"
+  },
+  {
+    "name": "Newfront",
+    "location": "San Francisco, CA, USA",
+    "description": "Modern insurance brokerage.",
+    "batch": "WINTER 2018",
+    "link": "https://www.ycombinator.com/companies/newfront-insurance"
+  },
+  {
+    "name": "North",
+    "location": "Kitchener, ON, Canada",
+    "description": "Wearable computing hardware: biosignal gesture recognition",
+    "batch": "WINTER 2013",
+    "link": "https://www.ycombinator.com/companies/north"
+  },
+  {
+    "name": "Nowports",
+    "location": "N/A",
+    "description": "The core engine of supply chain in LATAM",
+    "batch": "WINTER 2019",
+    "link": "https://www.ycombinator.com/companies/nowports"
+  },
+  {
+    "name": "Odeko",
+    "location": "New York, NY, USA",
+    "description": "Our operations software makes it easier to run--and grow--your cafe",
+    "batch": "SUMMER 2019",
+    "link": "https://www.ycombinator.com/companies/odeko"
+  },
+  {
+    "name": "GitPrime",
+    "location": "Durango, CO, USA",
+    "description": "Visibility and analytics for software development leaders.",
+    "batch": "WINTER 2016",
+    "link": "https://www.ycombinator.com/companies/gitprime"
+  },
+  {
+    "name": "Proxy",
+    "location": "San Francisco, CA, USA",
+    "description": "Smart ring digital wallet",
+    "batch": "SUMMER 2016",
+    "link": "https://www.ycombinator.com/companies/proxy"
+  },
+  {
+    "name": "FutureAdvisor",
+    "location": "San Francisco, CA, USA",
+    "description": "The online financial management service for everyone.",
+    "batch": "SUMMER 2010",
+    "link": "https://www.ycombinator.com/companies/futureadvisor"
+  },
+  {
+    "name": "Podium",
+    "location": "Lehi, UT, USA",
+    "description": "Get more leads. Make more money.",
+    "batch": "WINTER 2016",
+    "link": "https://www.ycombinator.com/companies/podium"
+  },
+  {
+    "name": "Rappi",
+    "location": "Bogotá, Bogota, Colombia",
+    "description": "On-demand delivery and financial services for Latin America.",
+    "batch": "WINTER 2016",
+    "link": "https://www.ycombinator.com/companies/rappi"
+  },
+  {
+    "name": "Razorpay",
+    "location": "Bengaluru, KA, India",
+    "description": "India's only full-stack financial solutions company for businesses.",
+    "batch": "WINTER 2015",
+    "link": "https://www.ycombinator.com/companies/razorpay"
+  },
+  {
+    "name": "Rippling",
+    "location": "San Francisco, CA, USA",
+    "description": "One place to run all your HR, IT, and Finance. Globally.",
+    "batch": "WINTER 2017",
+    "link": "https://www.ycombinator.com/companies/rippling"
+  },
+  {
+    "name": "Scale AI",
+    "location": "San Francisco, CA, USA",
+    "description": "Data-centric infrastructure to accelerate the development of AI",
+    "batch": "SUMMER 2016",
+    "link": "https://www.ycombinator.com/companies/scale-ai"
+  },
+  {
+    "name": "Scentbird",
+    "location": "New York, NY, USA",
+    "description": "Scentbird is a luxury fragrance subscription service.",
+    "batch": "SUMMER 2015",
+    "link": "https://www.ycombinator.com/companies/scentbird"
+  },
+  {
+    "name": "Scribd",
+    "location": "San Francisco, CA, USA",
+    "description": "World's largest online library.",
+    "batch": "SUMMER 2006",
+    "link": "https://www.ycombinator.com/companies/scribd"
+  },
+  {
+    "name": "ShipBob",
+    "location": "Chicago, IL, USA",
+    "description": "Providing Amazon level logistics to e-commerce businesses.",
+    "batch": "SUMMER 2014",
+    "link": "https://www.ycombinator.com/companies/shipbob"
+  },
+  {
+    "name": "SmartAsset",
+    "location": "New York, NY, USA",
+    "description": "Marketplace connecting consumers to financial advisors",
+    "batch": "SUMMER 2012",
+    "link": "https://www.ycombinator.com/companies/smartasset"
+  },
+  {
+    "name": "Stripe",
+    "location": "San Francisco, CA, USA",
+    "description": "Economic infrastructure for the internet.",
+    "batch": "SUMMER 2009",
+    "link": "https://www.ycombinator.com/companies/stripe"
+  },
+  {
+    "name": "Wave",
+    "location": "Dakar, Dakar Region, Senegal",
+    "description": "Mobile money app for Africa",
+    "batch": "WINTER 2012",
+    "link": "https://www.ycombinator.com/companies/wave"
+  },
+  {
+    "name": "Webflow",
+    "location": "San Francisco, CA, USA",
+    "description": "Professional website design and publishing platform.",
+    "batch": "SUMMER 2013",
+    "link": "https://www.ycombinator.com/companies/webflow"
+  },
+  {
+    "name": "Whatnot",
+    "location": "Los Angeles, CA, USA",
+    "description": "Whatnot is the largest livestream shopping platform in the U.S.",
+    "batch": "WINTER 2020",
+    "link": "https://www.ycombinator.com/companies/whatnot"
+  },
+  {
+    "name": "Zapier",
+    "location": "Mountain View, CA, USA",
+    "description": "The easiest way to automate your work.",
+    "batch": "SUMMER 2012",
+    "link": "https://www.ycombinator.com/companies/zapier"
+  },
+  {
+    "name": "Zepto",
+    "location": "MH, India",
+    "description": "10-Minute Grocery Delivery in India",
+    "batch": "WINTER 2021",
+    "link": "https://www.ycombinator.com/companies/zepto"
+  },
+  {
+    "name": "Focal Systems",
+    "location": "New York, NY, USA",
+    "description": "Building the Operating System for B&M Retail using Deep Learning",
+    "batch": "WINTER 2016",
+    "link": "https://www.ycombinator.com/companies/focal-systems"
+  },
+  {
+    "name": "Mio",
+    "location": "Austin, TX, USA",
+    "description": "Mio powers seamless communication between workplace chat apps.",
+    "batch": "WINTER 2016",
+    "link": "https://www.ycombinator.com/companies/mio"
+  },
+  {
+    "name": "Daily",
+    "location": "San Francisco, CA, USA",
+    "description": "Conversational Voice and Multimodal AI built with Open Source",
+    "batch": "WINTER 2016",
+    "link": "https://www.ycombinator.com/companies/daily"
+  },
+  {
+    "name": "Petcube",
+    "location": "San Francisco, CA, USA",
+    "description": "Petcube is on the mission to improve lives of pets and pet owners…",
+    "batch": "WINTER 2016",
+    "link": "https://www.ycombinator.com/companies/petcube"
+  },
+  {
+    "name": "Outschool",
+    "location": "San Francisco, CA, USA",
+    "description": "A live online learning platform that empowers kids ages 3–18.",
+    "batch": "WINTER 2016",
+    "link": "https://www.ycombinator.com/companies/outschool"
+  },
+  {
+    "name": "Mason",
+    "location": "Seattle, WA, USA",
+    "description": "Mason is the fastest way to take smart devices from idea to end user",
+    "batch": "WINTER 2016",
+    "link": "https://www.ycombinator.com/companies/mason"
+  }
+]

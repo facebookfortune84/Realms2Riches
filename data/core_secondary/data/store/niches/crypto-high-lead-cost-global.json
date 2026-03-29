@@ -1,0 +1,24 @@
+{
+  "id": "crypto-high-lead-cost-global",
+  "title": "Autonomous Crypto Revenue Agent for Global",
+  "headline": "Stop High Lead Cost in your Crypto Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for Crypto professionals in Global.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "Crypto",
+  "region": "Global",
+  "pain_point": "High Lead Cost",
+  "image_url": "/marketing/images/crypto.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous Crypto Revenue Agent for Global",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for Crypto professionals in Global.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

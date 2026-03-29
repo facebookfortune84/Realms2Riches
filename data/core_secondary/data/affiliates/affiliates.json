@@ -1,0 +1,16 @@
+[
+  {
+    "name": "DigitalOcean",
+    "description": "Simple, scalable cloud computing.",
+    "category": "Hosting",
+    "url": "https://m.do.co/c/affiliate-placeholder",
+    "badges": ["Recommended"]
+  },
+  {
+    "name": "PostHog",
+    "description": "Product analytics suite.",
+    "category": "Analytics",
+    "url": "https://posthog.com/?ref=affiliate-placeholder",
+    "badges": ["Stack Fit"]
+  }
+]

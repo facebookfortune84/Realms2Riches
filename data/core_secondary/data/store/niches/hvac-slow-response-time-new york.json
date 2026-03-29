@@ -1,0 +1,24 @@
+{
+  "id": "hvac-slow-response-time-new york",
+  "title": "Autonomous HVAC Revenue Agent for New York",
+  "headline": "Stop Slow Response Time in your HVAC Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for HVAC professionals in New York.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "HVAC",
+  "region": "New York",
+  "pain_point": "Slow Response Time",
+  "image_url": "/marketing/images/hvac.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous HVAC Revenue Agent for New York",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for HVAC professionals in New York.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

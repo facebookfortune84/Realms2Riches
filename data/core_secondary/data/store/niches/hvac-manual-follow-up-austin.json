@@ -1,0 +1,24 @@
+{
+  "id": "hvac-manual-follow-up-austin",
+  "title": "Autonomous HVAC Revenue Agent for Austin",
+  "headline": "Stop Manual Follow-up in your HVAC Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for HVAC professionals in Austin.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "HVAC",
+  "region": "Austin",
+  "pain_point": "Manual Follow-up",
+  "image_url": "/marketing/images/hvac.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous HVAC Revenue Agent for Austin",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for HVAC professionals in Austin.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

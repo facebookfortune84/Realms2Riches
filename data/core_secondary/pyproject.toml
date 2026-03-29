@@ -1,0 +1,75 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "orchestrator"
+version = "0.1.0"
+description = "Platinum Sovereign Agentic Orchestrator"
+authors = ["Titan Orchestrator <orchestrator@sovereign.ai>"]
+readme = "README.md"
+packages = [{include = "orchestrator"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pydantic = "^2.10.0"
+pydantic-settings = "^2.2.1"
+openai = "^1.58.0"
+groq = "^0.15.0"
+fastapi = "^0.115.0"
+uvicorn = "^0.27.0"
+sqlalchemy = "^2.0.36"
+psycopg2-binary = "^2.9.9"
+asyncpg = "^0.29.0"
+pandas = "^2.2.1"
+chromadb = "^0.4.24"
+pyyaml = "^6.0.1"
+python-dotenv = "^1.0.1"
+docker = "^7.1.0"
+gitpython = "^3.1.43"
+tenacity = "^8.2.3"
+stripe = ">=11.12.0"
+cryptography = "^42.0.7"
+aiohttp = "^3.9.5"
+beautifulsoup4 = "^4.12.4"
+httpx = "^0.27.0"
+starlette = "^0.37.2"
+apscheduler = "^3.10.4"
+playwright = "^1.45.0"
+google-auth-oauthlib = "^1.2.4"
+google-api-python-client = "^2.131.0"
+google-auth-httplib2 = "^0.2.0"
+nest-asyncio = "^1.6.0"
+mcp = "^1.2.0"
+redis = "^5.0.3"
+arq = "^0.26.0"
+jinja2 = "^3.1.4"
+alembic = "^1.13.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+ruff = "^0.1.0"
+mypy = "^1.8.0"
+black = "^24.0.0"
+pre-commit = "^3.6.0"
+pytest-asyncio = "^1.3.0"
+
+[tool.poetry.scripts]
+start = "orchestrator.src.core.api:app"
+yolo = "scripts.yolo_mode_monetization:activate_yolo_mode"
+verify = "scripts.test_system_integrity:main"
+lineage = "scripts.hash_registry:main"
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]

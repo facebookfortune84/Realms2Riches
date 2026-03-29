@@ -1,0 +1,24 @@
+{
+  "id": "insurance-low-conversion-austin",
+  "title": "Autonomous Insurance Revenue Agent for Austin",
+  "headline": "Stop Low Conversion in your Insurance Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for Insurance professionals in Austin.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "Insurance",
+  "region": "Austin",
+  "pain_point": "Low Conversion",
+  "image_url": "/marketing/images/insurance.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous Insurance Revenue Agent for Austin",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for Insurance professionals in Austin.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

@@ -155,6 +155,14 @@ class FastDeployMonetizationStream(BaseStream):
             f"Link: {self.links[0]}."
         )
 
+class PhantomTelephonyStream(BaseStream):
+    def generate_task(self) -> str:
+        lead = self.get_real_lead()
+        return (
+            f"Execute a high-ticket voice pitch to {lead.get('name', 'Founder')} ({lead.get('phone', '1-555-0199')}) using 'phantom_telephony'. "
+            f"Script: 'This is the Jarvis 3.5 Orchestration Interface. We have identified a strategic deployment opportunity for your business sector. Secure your Sovereign license at {self.links[0]}.'"
+        )
+
 class MonetizationEngine:
     def __init__(self):
         self._products = []
@@ -172,7 +180,8 @@ class MonetizationEngine:
             DataLicensingAPIStream("DataLicensingAPI", [STRIPE_MONETIZATION.get("jarvis_custom", "")]),
             SEOTrafficStream("SEOTraffic", [STRIPE_MONETIZATION.get("jarvis_basic", "")]),
             ColdOutreachStream("ColdOutreach", [STRIPE_MONETIZATION.get("jarvis_custom", "")]),
-            FastDeployMonetizationStream("FastDeploy", [STRIPE_MONETIZATION.get("startup_accelerator", "")])
+            FastDeployMonetizationStream("FastDeploy", [STRIPE_MONETIZATION.get("startup_accelerator", "")]),
+            PhantomTelephonyStream("PhantomTelephony", [STRIPE_MONETIZATION.get("jarvis_premium", "")])
         ]
 
     def _load_catalog(self):

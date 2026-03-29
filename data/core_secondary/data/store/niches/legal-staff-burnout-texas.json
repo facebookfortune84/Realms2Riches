@@ -1,0 +1,24 @@
+{
+  "id": "legal-staff-burnout-texas",
+  "title": "Autonomous Legal Revenue Agent for Texas",
+  "headline": "Stop Staff Burnout in your Legal Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for Legal professionals in Texas.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "Legal",
+  "region": "Texas",
+  "pain_point": "Staff Burnout",
+  "image_url": "/marketing/images/legal.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous Legal Revenue Agent for Texas",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for Legal professionals in Texas.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

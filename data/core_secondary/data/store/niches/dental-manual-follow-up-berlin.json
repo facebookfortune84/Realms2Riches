@@ -1,0 +1,24 @@
+{
+  "id": "dental-manual-follow-up-berlin",
+  "title": "Autonomous Dental Revenue Agent for Berlin",
+  "headline": "Stop Manual Follow-up in your Dental Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for Dental professionals in Berlin.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "Dental",
+  "region": "Berlin",
+  "pain_point": "Manual Follow-up",
+  "image_url": "/marketing/images/dental.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous Dental Revenue Agent for Berlin",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for Dental professionals in Berlin.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

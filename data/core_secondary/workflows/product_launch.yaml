@@ -1,0 +1,39 @@
+workflow_id: product_launch_v1
+name: High-Level Productized Service Launch
+description: Coordination of Architect, Code Engineer, Marketing, and Revenue agents to launch a new offer.
+
+steps:
+  - id: 1_discovery_design
+    agent: architect_planner
+    task: "Analyze the requested service, define the UVP, and break down technical/marketing requirements."
+    outputs: ["product_spec.md", "architecture_plan.md"]
+
+  - id: 2_core_implementation
+    agent: code_engineer
+    task: "Implement the backend API endpoints and frontend landing page/UI components."
+    dependencies: [1_discovery_design]
+    outputs: ["src/api/v1/routes/new_service.py", "src/ui/pages/NewService.tsx"]
+
+  - id: 3_billing_setup
+    agent: revenue_agent
+    task: "Configure Stripe products, pricing links, and webhook handlers for the new service."
+    dependencies: [1_discovery_design]
+    outputs: ["data/catalog/stripe_products.json", "src/api/v1/webhooks/stripe_handler.py"]
+
+  - id: 4_marketing_campaign
+    agent: marketing_agent
+    task: "Generate high-converting email sequences, social scripts (TikTok/LI), and SEO content."
+    dependencies: [1_discovery_design, 2_core_implementation]
+    outputs: ["data/marketing/campaigns/launch_sequence.md", "data/marketing/scripts/tiktok_viral.md"]
+
+  - id: 5_industrial_testing
+    agent: qa_engineer
+    task: "Execute unit, integration, and live E2E tests against the new service (Vercel/ngrok)."
+    dependencies: [2_core_implementation, 3_billing_setup]
+    outputs: ["tests/e2e/test_new_service_launch.py", "data/marketing/evidence/launch_proof.png"]
+
+  - id: 6_final_launch
+    agent: devops_engineer
+    task: "Merge branch, run final diagnostics, and deploy to production swarm."
+    dependencies: [5_industrial_testing]
+    outputs: ["ops/reports/launch_v5_report.md"]

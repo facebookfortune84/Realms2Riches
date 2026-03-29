@@ -1,0 +1,37 @@
+[
+  {
+    "id": "cf_trial",
+    "name": "ClickFunnels Free 14 Day Trial",
+    "link": "https://www.clickfunnels.com/signup-flow?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b",
+    "assets_path": "data/assets/Click_Funnels_Free_14_Day_Trial_Assets",
+    "type": "ignition"
+  },
+  {
+    "id": "ofa_challenge",
+    "name": "One Funnel Away Challenge",
+    "link": "https://www.onefunnelaway.com/?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b",
+    "assets_path": "data/assets/OFA_Assets",
+    "type": "growth"
+  },
+  {
+    "id": "plr_funnels",
+    "name": "PLR Funnels",
+    "link": "https://www.plrfunnels.com/plr?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b",
+    "assets_path": "data/assets/PLR_Funnel_Assets",
+    "type": "product"
+  },
+  {
+    "id": "cf_99_bundle",
+    "name": "3 Months of ClickFunnels for $99",
+    "link": "https://www.clickfunnels.com/3-months-for-99?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b",
+    "assets_path": "data/assets/3_Months_for_99_Assets",
+    "type": "value"
+  },
+  {
+    "id": "all_in_secrets",
+    "name": "I'm All In - Funnel Builder Secrets",
+    "link": "https://www.imallin.com/?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b",
+    "assets_path": "data/assets/Im_All_In_Assets",
+    "type": "high_ticket"
+  }
+]
