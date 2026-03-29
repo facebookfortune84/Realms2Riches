@@ -34,7 +34,7 @@ export default function HighTicketHub() {
           setOffers(DUMMY_OFFERS); // Fallback to dummy offers if API fails
         }
       } catch (error) {
-        console.<0xC2><0xA0>error("Error fetching high-ticket offers:", error);
+        console.error("Error fetching high-ticket offers:", error);
         setOffers(DUMMY_OFFERS); // Fallback to dummy offers on network error
       } finally {
         setLoading(false);
