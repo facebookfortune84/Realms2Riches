@@ -1,0 +1,50 @@
+{
+  "name": "realms2riches",
+  "version": "1.0.0",
+  "description": "A fully autonomous, multi-agent system powered by Groq for high-speed agentic reasoning. Capable of generating complete, tested, and containerized software projects from high-level specifications.",
+  "main": "orchestrator/src/core/api.py",
+  "directories": {
+    "doc": "docs",
+    "test": "tests",
+    "scripts": "scripts"
+  },
+  "scripts": {
+    "start": "poetry run uvicorn orchestrator.src.core.api:app --reload",
+    "test": "poetry run pytest tests/",
+    "yolo": "poetry run python scripts/yolo_mode_monetization.py",
+    "verify:integrity": "poetry run python scripts/test_system_integrity.py",
+    "verify:production": "poetry run python scripts/verify_production_capabilities.py",
+    "lineage:lock": "poetry run python scripts/hash_registry.py",
+    "stripe:listen": "stripe listen --forward-to localhost:8000/api/v1/webhook",
+    "stripe:trigger": "stripe trigger charge.succeeded",
+    "dev:ui": "npm run start --prefix frontend",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/facebookfortune84/Realms2Riches.git"
+  },
+  "keywords": [
+    "autonomous",
+    "agents",
+    "monetization",
+    "swarm",
+    "groq",
+    "stripe"
+  ],
+  "author": "Realms2Riches Operator",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/facebookfortune84/Realms2Riches/issues"
+  },
+  "homepage": "https://github.com/facebookfortune84/Realms2Riches#readme",
+  "devDependencies": {
+    "@google/gemini-cli": "^0.30.0",
+    "prettier": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "python": ">=3.11.0"
+  }
+}

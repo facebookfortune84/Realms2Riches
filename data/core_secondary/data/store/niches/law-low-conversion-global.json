@@ -1,0 +1,24 @@
+{
+  "id": "law-low-conversion-global",
+  "title": "Autonomous Law Revenue Agent for Global",
+  "headline": "Stop Low Conversion in your Law Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for Law professionals in Global.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "Law",
+  "region": "Global",
+  "pain_point": "Low Conversion",
+  "image_url": "/marketing/images/law.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous Law Revenue Agent for Global",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for Law professionals in Global.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

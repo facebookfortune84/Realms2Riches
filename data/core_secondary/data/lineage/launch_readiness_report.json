@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-03-09T02:43:37.691724",
+  "status": "READY",
+  "checks": {
+    "config": {
+      "status": "pass",
+      "missing": []
+    },
+    "database": {
+      "status": "pass"
+    },
+    "catalog": {
+      "status": "pass",
+      "count": 3
+    },
+    "marketing": {
+      "status": "pass"
+    },
+    "tests": {
+      "status": "pass",
+      "exit_code": 0
+    },
+    "governance": {
+      "git_tag": "no-tag",
+      "lineage_manifest": false
+    }
+  }
+}

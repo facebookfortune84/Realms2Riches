@@ -1,0 +1,24 @@
+{
+  "id": "dental-slow-response-time-california",
+  "title": "Autonomous Dental Revenue Agent for California",
+  "headline": "Stop Slow Response Time in your Dental Practice today.",
+  "description": "The Sovereign Matrix delivers 24/7 automated conversion for Dental professionals in California.",
+  "cta_link": "https://buy.stripe.com/5kQcN5aHLdIdbAS4dd8so02",
+  "industry": "Dental",
+  "region": "California",
+  "pain_point": "Slow Response Time",
+  "image_url": "/marketing/images/dental.png",
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Autonomous Dental Revenue Agent for California",
+    "description": "The Sovereign Matrix delivers 24/7 automated conversion for Dental professionals in California.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "2999.00",
+      "priceCurrency": "USD"
+    }
+  }
+}

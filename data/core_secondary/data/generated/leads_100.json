@@ -1,0 +1,902 @@
+[
+  {
+    "id": null,
+    "name": "Airbnb",
+    "yc_link": "https://www.ycombinator.com/companies/airbnb",
+    "website": "http://airbnb.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "DoorDash",
+    "yc_link": "https://www.ycombinator.com/companies/doordash",
+    "website": "http://doordash.com",
+    "email": "favicon@2x.ico",
+    "linkedin": null,
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Coinbase",
+    "yc_link": "https://www.ycombinator.com/companies/coinbase",
+    "website": "https://www.coinbase.com",
+    "email": "satoshi@nakamoto.com",
+    "linkedin": "https://www.linkedin.com/company/coinbase",
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Groww",
+    "yc_link": "https://www.ycombinator.com/companies/groww",
+    "website": "https://groww.in",
+    "email": "grievances@groww.in",
+    "linkedin": null,
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Instacart",
+    "yc_link": "https://www.ycombinator.com/companies/instacart",
+    "website": "https://www.instacart.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Oklo",
+    "yc_link": "https://www.ycombinator.com/companies/oklo",
+    "website": "http://oklo.com",
+    "email": "bizdev@oklo.com",
+    "linkedin": "https://www.linkedin.com/company/7588209",
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Meesho",
+    "yc_link": "https://www.ycombinator.com/companies/meesho",
+    "website": "http://www.meesho.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "EquipmentShare",
+    "yc_link": "https://www.ycombinator.com/companies/equipmentshare",
+    "website": "https://www.equipmentshare.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/equipmentshare",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Dropbox",
+    "yc_link": "https://www.ycombinator.com/companies/dropbox",
+    "website": "http://dropbox.com",
+    "email": "015d5ce7dd3142cd8fca094a50adbf69@d.dropbox.com",
+    "linkedin": null,
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Rigetti Computing",
+    "yc_link": "https://www.ycombinator.com/companies/rigetti-computing",
+    "website": "http://rigetti.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/rigetti-computing",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "GitLab",
+    "yc_link": "https://www.ycombinator.com/companies/gitlab",
+    "website": "http://gitlab.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/gitlab-com",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "BillionToOne",
+    "yc_link": "https://www.ycombinator.com/companies/billiontoone",
+    "website": "https://www.billiontoone.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/billiontoone",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Matterport",
+    "yc_link": "https://www.ycombinator.com/companies/matterport",
+    "website": "http://matterport.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/matterport",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Amplitude",
+    "yc_link": "https://www.ycombinator.com/companies/amplitude",
+    "website": "https://amplitude.com",
+    "email": "sales@amplitude.com",
+    "linkedin": "https://www.linkedin.com/company/amplitude-analytics",
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "PagerDuty",
+    "yc_link": "https://www.ycombinator.com/companies/pagerduty",
+    "website": "http://pagerduty.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/pagerduty",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Ginkgo Bioworks",
+    "yc_link": "https://www.ycombinator.com/companies/ginkgo-bioworks",
+    "website": "http://ginkgobioworks.com",
+    "email": "email@email.com",
+    "linkedin": "https://www.linkedin.com/company/ginkgo-bioworks",
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Weave",
+    "yc_link": "https://www.ycombinator.com/companies/weave",
+    "website": "http://getweave.com",
+    "email": "brandon@getweave.com",
+    "linkedin": "https://www.linkedin.com/company/weave-communications",
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Pardes Biosciences",
+    "yc_link": "https://www.ycombinator.com/companies/pardes-bio",
+    "website": "http://www.pardesbio.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Embark Trucks",
+    "yc_link": "https://www.ycombinator.com/companies/embark-trucks",
+    "website": "http://embarktrucks.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Lucira Health",
+    "yc_link": "https://www.ycombinator.com/companies/lucira-health",
+    "website": "https://www.lucirahealth.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Momentus",
+    "yc_link": "https://www.ycombinator.com/companies/momentus",
+    "website": "https://momentus.space",
+    "email": "sales@momentus.space",
+    "linkedin": "https://www.linkedin.com/company/momentusinc",
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Segment",
+    "yc_link": "https://www.ycombinator.com/companies/segment",
+    "website": "http://segment.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/twilio-inc-",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Algolia",
+    "yc_link": "https://www.ycombinator.com/companies/algolia",
+    "website": "http://www.algolia.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/algolia",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Truebill",
+    "yc_link": "https://www.ycombinator.com/companies/truebill",
+    "website": "https://www.truebill.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/rocketmoney",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Twitch",
+    "yc_link": "https://www.ycombinator.com/companies/twitch",
+    "website": "http://twitch.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/twitch-tv",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "PlanGrid",
+    "yc_link": "https://www.ycombinator.com/companies/plangrid",
+    "website": "http://plangrid.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/autodesk-construction-cloud",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Bellabeat",
+    "yc_link": "https://www.ycombinator.com/companies/bellabeat",
+    "website": "http://bellabeat.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Cruise",
+    "yc_link": "https://www.ycombinator.com/companies/cruise",
+    "website": "http://getcruise.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Benchling",
+    "yc_link": "https://www.ycombinator.com/companies/benchling",
+    "website": "http://benchling.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/3769390",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Casetext",
+    "yc_link": "https://www.ycombinator.com/companies/casetext",
+    "website": "http://casetext.com",
+    "email": "johnsmith@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/thomson-reuters",
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Bird",
+    "yc_link": "https://www.ycombinator.com/companies/bird",
+    "website": "http://bird.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/birdhq",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Brex",
+    "yc_link": "https://www.ycombinator.com/companies/brex",
+    "website": "https://www.brex.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/brexhq",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "The Athletic",
+    "yc_link": "https://www.ycombinator.com/companies/the-athletic",
+    "website": "https://theathletic.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/the-athletic-media-company",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Codecademy",
+    "yc_link": "https://www.ycombinator.com/companies/codecademy",
+    "website": "http://codecademy.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/codecademy",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Checkr",
+    "yc_link": "https://www.ycombinator.com/companies/checkr",
+    "website": "http://www.checkr.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/checkr-com",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Lever",
+    "yc_link": "https://www.ycombinator.com/companies/lever",
+    "website": "https://www.lever.co/",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/lever-",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Clipboard",
+    "yc_link": "https://www.ycombinator.com/companies/clipboard",
+    "website": "https://www.clipboardhealth.com/careers",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/clipboard-health",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Heap",
+    "yc_link": "https://www.ycombinator.com/companies/heap",
+    "website": "https://heap.io/",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Sendwave",
+    "yc_link": "https://www.ycombinator.com/companies/sendwave",
+    "website": "https://www.sendwave.com",
+    "email": "help@sendwave.com",
+    "linkedin": "https://www.linkedin.com/company/wavemoney",
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Deel",
+    "yc_link": "https://www.ycombinator.com/companies/deel",
+    "website": "https://www.deel.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://linkedin.com/company/deel",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Clever",
+    "yc_link": "https://www.ycombinator.com/companies/clever",
+    "website": "https://clever.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/clever-inc-",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Caper",
+    "yc_link": "https://www.ycombinator.com/companies/caper",
+    "website": "https://www.caper.ai/",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/caper-ai",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Reddit",
+    "yc_link": "https://www.ycombinator.com/companies/reddit",
+    "website": "http://reddit.com",
+    "email": "9f057df6115a4bb488c08ea12a835e6e@error-tracking.reddit.com",
+    "linkedin": null,
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Fivestars",
+    "yc_link": "https://www.ycombinator.com/companies/fivestars",
+    "website": "http://fivestars.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://linkedin.com/company/sumup",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Machine Zone",
+    "yc_link": "https://www.ycombinator.com/companies/machine-zone",
+    "website": "https://www.mz.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Faire",
+    "yc_link": "https://www.ycombinator.com/companies/faire",
+    "website": "https://www.faire.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Fivetran",
+    "yc_link": "https://www.ycombinator.com/companies/fivetran",
+    "website": "http://fivetran.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/fivetran",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Optimizely",
+    "yc_link": "https://www.ycombinator.com/companies/optimizely",
+    "website": "http://optimizely.com",
+    "email": "john.doe@optimizely.com",
+    "linkedin": "https://www.linkedin.com/company/optimizely",
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Flexport",
+    "yc_link": "https://www.ycombinator.com/companies/flexport",
+    "website": "https://www.flexport.com/careers/jobs/",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/flexport",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "WePay",
+    "yc_link": "https://www.ycombinator.com/companies/wepay",
+    "website": "http://wepay.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Weebly",
+    "yc_link": "https://www.ycombinator.com/companies/weebly",
+    "website": "http://weebly.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/weebly",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Flock Safety",
+    "yc_link": "https://www.ycombinator.com/companies/flock-safety",
+    "website": "http://www.flocksafety.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/flock-safety",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Sqreen",
+    "yc_link": "https://www.ycombinator.com/companies/sqreen",
+    "website": "https://www.sqreen.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "NURX",
+    "yc_link": "https://www.ycombinator.com/companies/nurx",
+    "website": "https://www.nurx.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/nurx",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Go1",
+    "yc_link": "https://www.ycombinator.com/companies/go1",
+    "website": "https://go1.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/go1",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "CoreOS",
+    "yc_link": "https://www.ycombinator.com/companies/coreos",
+    "website": "http://coreos.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/red-hat",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Bear Flag Robotics",
+    "yc_link": "https://www.ycombinator.com/companies/bear-flag-robotics",
+    "website": "http://bearflagrobotics.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "GOAT Group",
+    "yc_link": "https://www.ycombinator.com/companies/goat-group",
+    "website": "https://www.goatgroup.com/",
+    "email": "press@goat.com",
+    "linkedin": null,
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Heroku",
+    "yc_link": "https://www.ycombinator.com/companies/heroku",
+    "website": "http://heroku.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/heroku",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "GrubMarket",
+    "yc_link": "https://www.ycombinator.com/companies/grubmarket",
+    "website": "http://grubmarket.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "HelloSign",
+    "yc_link": "https://www.ycombinator.com/companies/hellosign",
+    "website": "https://www.hellosign.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Zenefits",
+    "yc_link": "https://www.ycombinator.com/companies/zenefits",
+    "website": "http://zenefits.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/trinet",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Gusto",
+    "yc_link": "https://www.ycombinator.com/companies/gusto",
+    "website": "https://gusto.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/gustohq",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Honeylove",
+    "yc_link": "https://www.ycombinator.com/companies/honeylove",
+    "website": "https://www.honeylove.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Modern Fertility",
+    "yc_link": "https://www.ycombinator.com/companies/modern-fertility",
+    "website": "https://www.modernfertility.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Cognito",
+    "yc_link": "https://www.ycombinator.com/companies/cognito",
+    "website": "https://cognitohq.com",
+    "email": "sales@cognitohq.com",
+    "linkedin": null,
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "OpenInvest",
+    "yc_link": "https://www.ycombinator.com/companies/openinvest",
+    "website": "http://www.openinvest.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Mixpanel",
+    "yc_link": "https://www.ycombinator.com/companies/mixpanel",
+    "website": "http://mixpanel.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Paystack",
+    "yc_link": "https://www.ycombinator.com/companies/paystack",
+    "website": "https://www.paystack.com",
+    "email": "hello@paystack.com",
+    "linkedin": "https://www.linkedin.com/company/paystack",
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Moxion Power Co.",
+    "yc_link": "https://www.ycombinator.com/companies/moxion-power-co",
+    "website": "https://www.moxionpower.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "DrChrono",
+    "yc_link": "https://www.ycombinator.com/companies/drchrono",
+    "website": "https://www.drchrono.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/drchrono",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "OMGPop",
+    "yc_link": "https://www.ycombinator.com/companies/omgpop",
+    "website": "https://omgpop.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Newfront",
+    "yc_link": "https://www.ycombinator.com/companies/newfront-insurance",
+    "website": "https://www.newfront.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/newfront",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "North",
+    "yc_link": "https://www.ycombinator.com/companies/north",
+    "website": "https://www.bynorth.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Nowports",
+    "yc_link": "https://www.ycombinator.com/companies/nowports",
+    "website": "https://nowports.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/nowports",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Odeko",
+    "yc_link": "https://www.ycombinator.com/companies/odeko",
+    "website": "http://www.odeko.com",
+    "email": "cfreeman@odeko.com",
+    "linkedin": "https://www.linkedin.com/company/officialodeko",
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "GitPrime",
+    "yc_link": "https://www.ycombinator.com/companies/gitprime",
+    "website": "https://www.gitprime.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/appfire",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Proxy",
+    "yc_link": "https://www.ycombinator.com/companies/proxy",
+    "website": "https://proxy.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "FutureAdvisor",
+    "yc_link": "https://www.ycombinator.com/companies/futureadvisor",
+    "website": "http://futureadvisor.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Podium",
+    "yc_link": "https://www.ycombinator.com/companies/podium",
+    "website": "https://podium.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/podiumhq",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Rappi",
+    "yc_link": "https://www.ycombinator.com/companies/rappi",
+    "website": "http://www.rappi.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Razorpay",
+    "yc_link": "https://www.ycombinator.com/companies/razorpay",
+    "website": "https://razorpay.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://linkedin.com/company/razorpay",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Rippling",
+    "yc_link": "https://www.ycombinator.com/companies/rippling",
+    "website": "http://rippling.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/rippling",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Scale AI",
+    "yc_link": "https://www.ycombinator.com/companies/scale-ai",
+    "website": "http://scale.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/scaleai",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Scentbird",
+    "yc_link": "https://www.ycombinator.com/companies/scentbird",
+    "website": "https://www.scentbird.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Scribd",
+    "yc_link": "https://www.ycombinator.com/companies/scribd",
+    "website": "http://scribd.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/Scribd",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "ShipBob",
+    "yc_link": "https://www.ycombinator.com/companies/shipbob",
+    "website": "http://shipbob.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/shipbob",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "SmartAsset",
+    "yc_link": "https://www.ycombinator.com/companies/smartasset",
+    "website": "http://smartasset.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/smartasset-com",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Stripe",
+    "yc_link": "https://www.ycombinator.com/companies/stripe",
+    "website": "http://stripe.com",
+    "email": "jane.diaz@stripe.com",
+    "linkedin": "https://www.linkedin.com/company/stripe",
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Wave",
+    "yc_link": "https://www.ycombinator.com/companies/wave",
+    "website": "https://wave.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Webflow",
+    "yc_link": "https://www.ycombinator.com/companies/webflow",
+    "website": "https://webflow.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/webflow-inc-",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Whatnot",
+    "yc_link": "https://www.ycombinator.com/companies/whatnot",
+    "website": "https://www.whatnot.com",
+    "email": "notifications@stripe.com",
+    "linkedin": "https://www.linkedin.com/company/whatnot-inc",
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Zapier",
+    "yc_link": "https://www.ycombinator.com/companies/zapier",
+    "website": "http://zapier.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/zapier",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Zepto",
+    "yc_link": "https://www.ycombinator.com/companies/zepto",
+    "website": "https://www.zeptonow.com/",
+    "email": "ID-ConsumerHealth_India@reckitt.com",
+    "linkedin": "https://www.linkedin.com/company/zeptonow",
+    "status": "success"
+  },
+  {
+    "id": null,
+    "name": "Focal Systems",
+    "yc_link": "https://www.ycombinator.com/companies/focal-systems",
+    "website": "http://www.focal.systems",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": null,
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Mio",
+    "yc_link": "https://www.ycombinator.com/companies/mio",
+    "website": "http://m.io",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/message",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Daily",
+    "yc_link": "https://www.ycombinator.com/companies/daily",
+    "website": "https://daily.co",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/dailyco",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Petcube",
+    "yc_link": "https://www.ycombinator.com/companies/petcube",
+    "website": "http://petcube.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/petcube",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Outschool",
+    "yc_link": "https://www.ycombinator.com/companies/outschool",
+    "website": "http://outschool.com",
+    "email": "robertdemottojr83@gmail.com",
+    "linkedin": "https://www.linkedin.com/company/outschool",
+    "status": "website_found_no_email"
+  },
+  {
+    "id": null,
+    "name": "Mason",
+    "yc_link": "https://www.ycombinator.com/companies/mason",
+    "website": "http://www.bymason.com",
+    "email": "name@company.com",
+    "linkedin": "https://www.linkedin.com/company/mason-america",
+    "status": "success"
+  }
+]

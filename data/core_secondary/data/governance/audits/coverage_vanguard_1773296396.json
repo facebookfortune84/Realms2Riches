@@ -1,0 +1,509 @@
+{
+  "timestamp": "2026-03-12T02:19:56.261879",
+  "passes": [
+    {
+      "id": "SOP_1",
+      "status": "VERIFIED",
+      "target": "GOV_001_TICKET_ISSUANCE.md"
+    },
+    {
+      "id": "SOP_2",
+      "status": "VERIFIED",
+      "target": "GOV_002_PERSONA_RESONANCE.md"
+    },
+    {
+      "id": "SOP_3",
+      "status": "VERIFIED",
+      "target": "GOV_003_REVENUE_RECONCILIATION.md"
+    },
+    {
+      "id": "SOP_4",
+      "status": "VERIFIED",
+      "target": "GOV_004_AUTONOMOUS_BACKLOG.md"
+    },
+    {
+      "id": "SOP_5",
+      "status": "VERIFIED",
+      "target": "GOV_005_TASK_PRIORITIZATION.md"
+    },
+    {
+      "id": "SOP_6",
+      "status": "VERIFIED",
+      "target": "GOV_006_AGENT_ONBOARDING.md"
+    },
+    {
+      "id": "SOP_7",
+      "status": "VERIFIED",
+      "target": "GOV_007_LINEAGE_SIGNATURE.md"
+    },
+    {
+      "id": "SOP_8",
+      "status": "VERIFIED",
+      "target": "LEAD_EXTRACTION.md"
+    },
+    {
+      "id": "SOP_9",
+      "status": "VERIFIED",
+      "target": "MKT_001_TIKTOK_VIRALITY.md"
+    },
+    {
+      "id": "SOP_10",
+      "status": "VERIFIED",
+      "target": "MKT_002_LINKEDIN_AUTHORITY.md"
+    },
+    {
+      "id": "SOP_11",
+      "status": "VERIFIED",
+      "target": "MKT_003_EMAIL_COPYWRITING.md"
+    },
+    {
+      "id": "SOP_12",
+      "status": "VERIFIED",
+      "target": "MKT_004_AD_COPY_PPC.md"
+    },
+    {
+      "id": "SOP_13",
+      "status": "VERIFIED",
+      "target": "MKT_005_SEO_KEYWORD_RESEARCH.md"
+    },
+    {
+      "id": "SOP_14",
+      "status": "VERIFIED",
+      "target": "MKT_006_IMAGE_GEN_PROMPTING.md"
+    },
+    {
+      "id": "SOP_15",
+      "status": "VERIFIED",
+      "target": "MKT_007_VIDEO_EDITING_DIRECTION.md"
+    },
+    {
+      "id": "SOP_16",
+      "status": "VERIFIED",
+      "target": "MKT_008_SOCIAL_MEDIA_BROADCAST.md"
+    },
+    {
+      "id": "SOP_17",
+      "status": "VERIFIED",
+      "target": "MKT_009_LEAD_NURTURE_SEQUENCE.md"
+    },
+    {
+      "id": "SOP_18",
+      "status": "VERIFIED",
+      "target": "MKT_010_BRAND_VOICE_ALIGNMENT.md"
+    },
+    {
+      "id": "SOP_19",
+      "status": "VERIFIED",
+      "target": "MON_001_AFFILIATE_ARBITRAGE.md"
+    },
+    {
+      "id": "SOP_20",
+      "status": "VERIFIED",
+      "target": "MON_002_API_SAAS_BILLING.md"
+    },
+    {
+      "id": "SOP_21",
+      "status": "VERIFIED",
+      "target": "MON_003_LEAD_GEN_BROKER.md"
+    },
+    {
+      "id": "SOP_22",
+      "status": "VERIFIED",
+      "target": "MON_004_DIGITAL_PRODUCT_STORE.md"
+    },
+    {
+      "id": "SOP_23",
+      "status": "VERIFIED",
+      "target": "MON_005_NEWSLETTER_SPONSORSHIP.md"
+    },
+    {
+      "id": "SOP_24",
+      "status": "VERIFIED",
+      "target": "MON_006_PRINT_ON_DEMAND.md"
+    },
+    {
+      "id": "SOP_25",
+      "status": "VERIFIED",
+      "target": "MON_007_PROGRAMMATIC_ADS.md"
+    },
+    {
+      "id": "SOP_26",
+      "status": "VERIFIED",
+      "target": "MON_008_CRYPTO_YIELD_FARMING.md"
+    },
+    {
+      "id": "SOP_27",
+      "status": "VERIFIED",
+      "target": "MON_009_PAID_COMMUNITY.md"
+    },
+    {
+      "id": "SOP_28",
+      "status": "VERIFIED",
+      "target": "MON_010_DATA_LICENSING.md"
+    },
+    {
+      "id": "SOP_29",
+      "status": "VERIFIED",
+      "target": "MON_011_SEO_TRAFFIC.md"
+    },
+    {
+      "id": "SOP_30",
+      "status": "VERIFIED",
+      "target": "MON_012_COLD_OUTREACH.md"
+    },
+    {
+      "id": "SOP_31",
+      "status": "VERIFIED",
+      "target": "MON_013_FAST_DEPLOY.md"
+    },
+    {
+      "id": "SOP_32",
+      "status": "VERIFIED",
+      "target": "OUTREACH_EXECUTION.md"
+    },
+    {
+      "id": "SOP_33",
+      "status": "VERIFIED",
+      "target": "SEC_001_SECRET_PROTECTION.md"
+    },
+    {
+      "id": "SOP_34",
+      "status": "VERIFIED",
+      "target": "SEC_002_SANDBOX_ENFORCEMENT.md"
+    },
+    {
+      "id": "SOP_35",
+      "status": "VERIFIED",
+      "target": "SEC_003_PHISHING_DEFENSE.md"
+    },
+    {
+      "id": "SOP_36",
+      "status": "VERIFIED",
+      "target": "SEC_004_IP_REPUTATION_MANAGEMENT.md"
+    },
+    {
+      "id": "SOP_37",
+      "status": "VERIFIED",
+      "target": "SEC_005_DATA_PRIVACY_GDPR.md"
+    },
+    {
+      "id": "SOP_38",
+      "status": "VERIFIED",
+      "target": "SEC_006_INJECTION_PREVENTION.md"
+    },
+    {
+      "id": "SOP_39",
+      "status": "VERIFIED",
+      "target": "SEC_007_RATE_LIMITING_SMTP.md"
+    },
+    {
+      "id": "SOP_40",
+      "status": "VERIFIED",
+      "target": "SEC_008_STASIS_BRANCH_LOCK.md"
+    },
+    {
+      "id": "SOP_41",
+      "status": "VERIFIED",
+      "target": "SEC_009_VIRTUAL_ENV_ISOLATION.md"
+    },
+    {
+      "id": "SOP_42",
+      "status": "VERIFIED",
+      "target": "SEC_010_AUDIT_TRAIL_INTEGRITY.md"
+    },
+    {
+      "id": "SOP_43",
+      "status": "VERIFIED",
+      "target": "SELF_HEALING.md"
+    },
+    {
+      "id": "SOP_44",
+      "status": "VERIFIED",
+      "target": "TEC_001_DB_SCHEMA_MIGRATION.md"
+    },
+    {
+      "id": "SOP_45",
+      "status": "VERIFIED",
+      "target": "TEC_002_DEPENDENCY_AUDIT.md"
+    },
+    {
+      "id": "SOP_46",
+      "status": "VERIFIED",
+      "target": "TEC_003_LOG_ROTATION.md"
+    },
+    {
+      "id": "SOP_47",
+      "status": "VERIFIED",
+      "target": "TEC_004_RAG_MEMORY_INDEXING.md"
+    },
+    {
+      "id": "SOP_48",
+      "status": "VERIFIED",
+      "target": "TEC_005_DOCKER_CONTAINER_UPKEEP.md"
+    },
+    {
+      "id": "SOP_49",
+      "status": "VERIFIED",
+      "target": "TEC_006_API_KEY_ROTATION.md"
+    },
+    {
+      "id": "SOP_50",
+      "status": "VERIFIED",
+      "target": "TEC_007_ERROR_HANDLING_HARDENING.md"
+    },
+    {
+      "id": "TOOL_1",
+      "status": "VERIFIED",
+      "capability": "Vector_1"
+    },
+    {
+      "id": "TOOL_2",
+      "status": "VERIFIED",
+      "capability": "Vector_2"
+    },
+    {
+      "id": "TOOL_3",
+      "status": "VERIFIED",
+      "capability": "Vector_3"
+    },
+    {
+      "id": "TOOL_4",
+      "status": "VERIFIED",
+      "capability": "Vector_4"
+    },
+    {
+      "id": "TOOL_5",
+      "status": "VERIFIED",
+      "capability": "Vector_5"
+    },
+    {
+      "id": "TOOL_6",
+      "status": "VERIFIED",
+      "capability": "Vector_6"
+    },
+    {
+      "id": "TOOL_7",
+      "status": "VERIFIED",
+      "capability": "Vector_7"
+    },
+    {
+      "id": "TOOL_8",
+      "status": "VERIFIED",
+      "capability": "Vector_8"
+    },
+    {
+      "id": "TOOL_9",
+      "status": "VERIFIED",
+      "capability": "Vector_9"
+    },
+    {
+      "id": "TOOL_10",
+      "status": "VERIFIED",
+      "capability": "Vector_10"
+    },
+    {
+      "id": "TOOL_11",
+      "status": "VERIFIED",
+      "capability": "Vector_11"
+    },
+    {
+      "id": "TOOL_12",
+      "status": "VERIFIED",
+      "capability": "Vector_12"
+    },
+    {
+      "id": "TOOL_13",
+      "status": "VERIFIED",
+      "capability": "Vector_13"
+    },
+    {
+      "id": "TOOL_14",
+      "status": "VERIFIED",
+      "capability": "Vector_14"
+    },
+    {
+      "id": "TOOL_15",
+      "status": "VERIFIED",
+      "capability": "Vector_15"
+    },
+    {
+      "id": "TOOL_16",
+      "status": "VERIFIED",
+      "capability": "Vector_16"
+    },
+    {
+      "id": "TOOL_17",
+      "status": "VERIFIED",
+      "capability": "Vector_17"
+    },
+    {
+      "id": "TOOL_18",
+      "status": "VERIFIED",
+      "capability": "Vector_18"
+    },
+    {
+      "id": "TOOL_19",
+      "status": "VERIFIED",
+      "capability": "Vector_19"
+    },
+    {
+      "id": "TOOL_20",
+      "status": "VERIFIED",
+      "capability": "Vector_20"
+    },
+    {
+      "id": "TOOL_21",
+      "status": "VERIFIED",
+      "capability": "Vector_21"
+    },
+    {
+      "id": "TOOL_22",
+      "status": "VERIFIED",
+      "capability": "Vector_22"
+    },
+    {
+      "id": "TOOL_23",
+      "status": "VERIFIED",
+      "capability": "Vector_23"
+    },
+    {
+      "id": "TOOL_24",
+      "status": "VERIFIED",
+      "capability": "Vector_24"
+    },
+    {
+      "id": "TOOL_25",
+      "status": "VERIFIED",
+      "capability": "Vector_25"
+    },
+    {
+      "id": "TOOL_26",
+      "status": "VERIFIED",
+      "capability": "Vector_26"
+    },
+    {
+      "id": "TOOL_27",
+      "status": "VERIFIED",
+      "capability": "Vector_27"
+    },
+    {
+      "id": "TOOL_28",
+      "status": "VERIFIED",
+      "capability": "Vector_28"
+    },
+    {
+      "id": "TOOL_29",
+      "status": "VERIFIED",
+      "capability": "Vector_29"
+    },
+    {
+      "id": "TOOL_30",
+      "status": "VERIFIED",
+      "capability": "Vector_30"
+    },
+    {
+      "id": "INFRA_1",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_2",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_3",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_4",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_5",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_6",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_7",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_8",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_9",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_10",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_11",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_12",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_13",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_14",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_15",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_16",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_17",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_18",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_19",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_20",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_21",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_22",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_23",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_24",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_25",
+      "status": "VERIFIED"
+    },
+    {
+      "id": "INFRA_26",
+      "status": "VERIFIED"
+    }
+  ]
+}

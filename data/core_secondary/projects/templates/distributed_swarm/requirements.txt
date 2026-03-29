@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+requests
+asyncio
+python-dotenv
+groq
+openai
+playwright
+aiohttp

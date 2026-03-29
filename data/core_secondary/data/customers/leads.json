@@ -1,0 +1,1352 @@
+[
+  {
+    "name": "Airbnb",
+    "description": "Book accommodations around the world.",
+    "yc_link": "https://www.ycombinator.com/companies/airbnb",
+    "website": "http://airbnb.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3348.359\"",
+    "nurtured": true
+  },
+  {
+    "name": "DoorDash",
+    "description": "Restaurant delivery.",
+    "yc_link": "https://www.ycombinator.com/companies/doordash",
+    "website": "http://doordash.com",
+    "email": "favicon@2x.ico",
+    "timestamp": "\"3348.328\"",
+    "nurtured": true
+  },
+  {
+    "name": "Coinbase",
+    "description": "Buy, sell, and manage cryptocurrencies.",
+    "yc_link": "https://www.ycombinator.com/companies/coinbase",
+    "website": "https://www.coinbase.com",
+    "email": "satoshi@nakamoto.com",
+    "timestamp": "\"3348.359\"",
+    "nurtured": true
+  },
+  {
+    "name": "Groww",
+    "description": "Making financial services simple, transparent and delightful.",
+    "yc_link": "https://www.ycombinator.com/companies/groww",
+    "website": "https://groww.in",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3386.921\"",
+    "nurtured": true
+  },
+  {
+    "name": "Instacart",
+    "description": "Marketplace for grocery delivery and pickup",
+    "yc_link": "https://www.ycombinator.com/companies/instacart",
+    "website": "https://www.instacart.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3386.921\"",
+    "nurtured": true
+  },
+  {
+    "name": "Oklo",
+    "description": "Emission free, always on power from advanced fission power plants.",
+    "yc_link": "https://www.ycombinator.com/companies/oklo",
+    "website": "http://oklo.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3386.859\"",
+    "nurtured": true
+  },
+  {
+    "name": "Meesho",
+    "description": "Democratizing internet commerce for everyone in India",
+    "yc_link": "https://www.ycombinator.com/companies/meesho",
+    "website": "http://www.meesho.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3298.625\"",
+    "nurtured": true
+  },
+  {
+    "name": "EquipmentShare",
+    "description": "Cloud solutions for the construction industry.",
+    "yc_link": "https://www.ycombinator.com/companies/equipmentshare",
+    "website": "https://www.equipmentshare.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3386.859\"",
+    "nurtured": true
+  },
+  {
+    "name": "Dropbox",
+    "description": "Backup and share files in the cloud.",
+    "yc_link": "https://www.ycombinator.com/companies/dropbox",
+    "website": "http://dropbox.com",
+    "email": "015d5ce7dd3142cd8fca094a50adbf69@d.dropbox.com",
+    "timestamp": "\"3386.921\"",
+    "nurtured": true
+  },
+  {
+    "name": "Rigetti Computing",
+    "description": "Quantum coherent supercomputing.",
+    "yc_link": "https://www.ycombinator.com/companies/rigetti-computing",
+    "website": "http://rigetti.com",
+    "email": "support@rigetti.com",
+    "timestamp": "\"3348.343\"",
+    "nurtured": true
+  },
+  {
+    "name": "GitLab",
+    "description": "A complete DevOps platform delivered as a single application.",
+    "yc_link": "https://www.ycombinator.com/companies/gitlab",
+    "website": "http://gitlab.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3393.984\"",
+    "nurtured": true
+  },
+  {
+    "name": "BillionToOne",
+    "description": "The genetic testing platform detecting and measuring disease.",
+    "yc_link": "https://www.ycombinator.com/companies/billiontoone",
+    "website": "https://www.billiontoone.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3396.5\"",
+    "nurtured": true
+  },
+  {
+    "name": "Matterport",
+    "description": "Turn physical objects and environments into 3D models in seconds.",
+    "yc_link": "https://www.ycombinator.com/companies/matterport",
+    "website": "http://matterport.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3395.656\"",
+    "nurtured": true
+  },
+  {
+    "name": "Amplitude",
+    "description": "Digital Analytics Platform",
+    "yc_link": "https://www.ycombinator.com/companies/amplitude",
+    "website": "https://amplitude.com",
+    "email": "sales@amplitude.com",
+    "timestamp": "\"3400.734\"",
+    "nurtured": true
+  },
+  {
+    "name": "PagerDuty",
+    "description": "Real-time visibility into critical apps and services all in one place.",
+    "yc_link": "https://www.ycombinator.com/companies/pagerduty",
+    "website": "http://pagerduty.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3400.937\"",
+    "nurtured": true
+  },
+  {
+    "name": "Ginkgo Bioworks",
+    "description": "Our mission is to make biology easier to engineer.",
+    "yc_link": "https://www.ycombinator.com/companies/ginkgo-bioworks",
+    "website": "http://ginkgobioworks.com",
+    "email": "email@email.com",
+    "timestamp": "\"3401.25\"",
+    "nurtured": true
+  },
+  {
+    "name": "Weave",
+    "description": "Customer communication and payments platform.",
+    "yc_link": "https://www.ycombinator.com/companies/weave",
+    "website": "http://getweave.com",
+    "email": "brandon@getweave.com",
+    "timestamp": "\"3401.234\"",
+    "nurtured": true
+  },
+  {
+    "name": "Pardes Biosciences",
+    "description": "We break viruses",
+    "yc_link": "https://www.ycombinator.com/companies/pardes-bio",
+    "website": "http://www.pardesbio.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3394.875\"",
+    "nurtured": true
+  },
+  {
+    "name": "Embark Trucks",
+    "description": "Self-driving semi trucks.",
+    "yc_link": "https://www.ycombinator.com/companies/embark-trucks",
+    "website": "http://embarktrucks.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3395.031\"",
+    "nurtured": true
+  },
+  {
+    "name": "Lucira Health",
+    "description": "Next generation infectious disease test kits",
+    "yc_link": "https://www.ycombinator.com/companies/lucira-health",
+    "website": "https://www.lucirahealth.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3394.937\"",
+    "nurtured": true
+  },
+  {
+    "name": "Momentus",
+    "description": "The space infrastructure services company",
+    "yc_link": "https://www.ycombinator.com/companies/momentus",
+    "website": "https://momentus.space",
+    "email": "sales@momentus.space",
+    "timestamp": "\"3405.234\"",
+    "nurtured": true
+  },
+  {
+    "name": "Segment",
+    "description": "Software and APIs to collect, clean, and control customer data.",
+    "yc_link": "https://www.ycombinator.com/companies/segment",
+    "website": "http://segment.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3407.406\"",
+    "nurtured": true
+  },
+  {
+    "name": "Algolia",
+    "description": "A developer-friendly and enterprise-grade search API.",
+    "yc_link": "https://www.ycombinator.com/companies/algolia",
+    "website": "http://www.algolia.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3408.828\"",
+    "nurtured": true
+  },
+  {
+    "name": "Truebill",
+    "description": "Live your best financial life",
+    "yc_link": "https://www.ycombinator.com/companies/truebill",
+    "website": "https://www.truebill.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3406.109\"",
+    "nurtured": true
+  },
+  {
+    "name": "Twitch",
+    "description": "A global community creating the future of live entertainment.",
+    "yc_link": "https://www.ycombinator.com/companies/twitch",
+    "website": "http://twitch.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3408.265\"",
+    "nurtured": true
+  },
+  {
+    "name": "PlanGrid",
+    "description": "Mobile applications for the construction industry.",
+    "yc_link": "https://www.ycombinator.com/companies/plangrid",
+    "website": "http://plangrid.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3409.781\"",
+    "nurtured": true
+  },
+  {
+    "name": "Bellabeat",
+    "description": "Tech-powered women's wellness.",
+    "yc_link": "https://www.ycombinator.com/companies/bellabeat",
+    "website": "http://bellabeat.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3406.796\"",
+    "nurtured": true
+  },
+  {
+    "name": "Cruise",
+    "description": "Self-driving cars.",
+    "yc_link": "https://www.ycombinator.com/companies/cruise",
+    "website": "http://getcruise.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3407.89\"",
+    "nurtured": true
+  },
+  {
+    "name": "Benchling",
+    "description": "Unlocking the power of biotech with modern software for modern science",
+    "yc_link": "https://www.ycombinator.com/companies/benchling",
+    "website": "http://benchling.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3410.734\"",
+    "nurtured": true
+  },
+  {
+    "name": "Casetext",
+    "description": "We make the world's laws free and understandable.",
+    "yc_link": "https://www.ycombinator.com/companies/casetext",
+    "website": "http://casetext.com",
+    "email": "johnsmith@gmail.com",
+    "timestamp": "\"3412.781\"",
+    "nurtured": true
+  },
+  {
+    "name": "Bird",
+    "description": "The world\u00e2\u20ac\u2122s largest omnichannel communications platform",
+    "yc_link": "https://www.ycombinator.com/companies/bird",
+    "website": "http://bird.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3417.484\"",
+    "nurtured": true
+  },
+  {
+    "name": "Brex",
+    "description": "Business accounts, corporate cards, and spend management software.",
+    "yc_link": "https://www.ycombinator.com/companies/brex",
+    "website": "https://www.brex.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3423.406\"",
+    "nurtured": true
+  },
+  {
+    "name": "The Athletic",
+    "description": "Subscription sports media.",
+    "yc_link": "https://www.ycombinator.com/companies/the-athletic",
+    "website": "https://theathletic.com",
+    "email": "support@theathletic.com",
+    "timestamp": "\"3426.0\"",
+    "nurtured": true
+  },
+  {
+    "name": "Codecademy",
+    "description": "The leading online learning platform for technical skills.",
+    "yc_link": "https://www.ycombinator.com/companies/codecademy",
+    "website": "http://codecademy.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3425.609\"",
+    "nurtured": true
+  },
+  {
+    "name": "Checkr",
+    "description": "People infrastructure for the future of work",
+    "yc_link": "https://www.ycombinator.com/companies/checkr",
+    "website": "http://www.checkr.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3424.343\"",
+    "nurtured": true
+  },
+  {
+    "name": "Lever",
+    "description": "Talent Acquisition Suite that combines ATS + Talent CRM",
+    "yc_link": "https://www.ycombinator.com/companies/lever",
+    "website": "https://www.lever.co/",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3426.0\"",
+    "nurtured": true
+  },
+  {
+    "name": "Clipboard",
+    "description": "Connects workplaces with professionals nearby.",
+    "yc_link": "https://www.ycombinator.com/companies/clipboard",
+    "website": "https://www.clipboardhealth.com/careers",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3418.312\"",
+    "nurtured": true
+  },
+  {
+    "name": "Heap",
+    "description": "Captures user interactions with no code to generate analytics.",
+    "yc_link": "https://www.ycombinator.com/companies/heap",
+    "website": "https://heap.io/",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3426.203\"",
+    "nurtured": true
+  },
+  {
+    "name": "Sendwave",
+    "description": "Instant, no fee international remittances.",
+    "yc_link": "https://www.ycombinator.com/companies/sendwave",
+    "website": "https://www.sendwave.com",
+    "email": "help@sendwave.com",
+    "timestamp": "\"3427.578\"",
+    "nurtured": true
+  },
+  {
+    "name": "Deel",
+    "description": "The all-in-one HR and payroll platform for global teams",
+    "yc_link": "https://www.ycombinator.com/companies/deel",
+    "website": "https://www.deel.com/",
+    "email": "support@deel.com",
+    "timestamp": "\"3430.546\"",
+    "nurtured": true
+  },
+  {
+    "name": "Clever",
+    "description": "The platform that powers technology in the classroom.",
+    "yc_link": "https://www.ycombinator.com/companies/clever",
+    "website": "https://clever.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3433.14\"",
+    "nurtured": true
+  },
+  {
+    "name": "Caper",
+    "description": "Plug-and-play cashier-less retail powered by computer vision and AI",
+    "yc_link": "https://www.ycombinator.com/companies/caper",
+    "website": "https://www.caper.ai/",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3437.125\"",
+    "nurtured": true
+  },
+  {
+    "name": "Reddit",
+    "description": "The frontpage of the internet.",
+    "yc_link": "https://www.ycombinator.com/companies/reddit",
+    "website": "http://reddit.com",
+    "email": "9f057df6115a4bb488c08ea12a835e6e@error-tracking.reddit.com",
+    "timestamp": "\"3434.984\"",
+    "nurtured": true
+  },
+  {
+    "name": "Fivestars",
+    "description": "Customer loyalty and payments platform for small businesses.",
+    "yc_link": "https://www.ycombinator.com/companies/fivestars",
+    "website": "http://fivestars.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3440.359\"",
+    "nurtured": true
+  },
+  {
+    "name": "Machine Zone",
+    "description": "Pioneers of mobile social gaming.",
+    "yc_link": "https://www.ycombinator.com/companies/machine-zone",
+    "website": "https://www.mz.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3433.953\"",
+    "nurtured": true
+  },
+  {
+    "name": "Faire",
+    "description": "The global online platform empowering independent retail.",
+    "yc_link": "https://www.ycombinator.com/companies/faire",
+    "website": "https://www.faire.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3436.187\"",
+    "nurtured": true
+  },
+  {
+    "name": "Fivetran",
+    "description": "The leader in automated data movement",
+    "yc_link": "https://www.ycombinator.com/companies/fivetran",
+    "website": "http://fivetran.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3439.984\"",
+    "nurtured": true
+  },
+  {
+    "name": "Optimizely",
+    "description": "The first all-in-one operating system for marketing",
+    "yc_link": "https://www.ycombinator.com/companies/optimizely",
+    "website": "http://optimizely.com",
+    "email": "john.doe@optimizely.com",
+    "timestamp": "\"3439.218\"",
+    "nurtured": true
+  },
+  {
+    "name": "Flexport",
+    "description": "Platform for global logistics.",
+    "yc_link": "https://www.ycombinator.com/companies/flexport",
+    "website": "https://www.flexport.com/careers/jobs/",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3438.437\"",
+    "nurtured": true
+  },
+  {
+    "name": "WePay",
+    "description": "Payments for platform businesses.",
+    "yc_link": "https://www.ycombinator.com/companies/wepay",
+    "website": "http://wepay.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3440.0\"",
+    "nurtured": true
+  },
+  {
+    "name": "Weebly",
+    "description": "Build a free website that grows with your business.",
+    "yc_link": "https://www.ycombinator.com/companies/weebly",
+    "website": "http://weebly.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3442.296\"",
+    "nurtured": true
+  },
+  {
+    "name": "Flock Safety",
+    "description": "The first public safety operating system that eliminates crime.",
+    "yc_link": "https://www.ycombinator.com/companies/flock-safety",
+    "website": "http://www.flocksafety.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3444.406\"",
+    "nurtured": true
+  },
+  {
+    "name": "Sqreen",
+    "description": "Sqreen is the application security platform for the modern enterprise",
+    "yc_link": "https://www.ycombinator.com/companies/sqreen",
+    "website": "https://www.sqreen.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3442.953\"",
+    "nurtured": true
+  },
+  {
+    "name": "NURX",
+    "description": "Medicine or testing kit, prescribed online and delivered to your door.",
+    "yc_link": "https://www.ycombinator.com/companies/nurx",
+    "website": "https://www.nurx.com/",
+    "email": "support@nurx.co",
+    "timestamp": "\"3446.593\"",
+    "nurtured": true
+  },
+  {
+    "name": "Go1",
+    "description": "A learning platform that enables you to train your staff or customers.",
+    "yc_link": "https://www.ycombinator.com/companies/go1",
+    "website": "https://go1.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3448.39\"",
+    "nurtured": true
+  },
+  {
+    "name": "CoreOS",
+    "description": "Open source tools of modern distributed systems.",
+    "yc_link": "https://www.ycombinator.com/companies/coreos",
+    "website": "http://coreos.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3452.765\"",
+    "nurtured": true
+  },
+  {
+    "name": "Bear Flag Robotics",
+    "description": "Autonomous driving technology for farm tractors.",
+    "yc_link": "https://www.ycombinator.com/companies/bear-flag-robotics",
+    "website": "http://bearflagrobotics.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3448.734\"",
+    "nurtured": true
+  },
+  {
+    "name": "GOAT Group",
+    "description": "Platform for the greatest products from the past, present and future.",
+    "yc_link": "https://www.ycombinator.com/companies/goat-group",
+    "website": "https://www.goatgroup.com/",
+    "email": "press@goat.com",
+    "timestamp": "\"3449.468\"",
+    "nurtured": true
+  },
+  {
+    "name": "Heroku",
+    "description": "Enabling developers to build and run applications in the cloud.",
+    "yc_link": "https://www.ycombinator.com/companies/heroku",
+    "website": "http://heroku.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3452.796\"",
+    "nurtured": true
+  },
+  {
+    "name": "GrubMarket",
+    "description": "AI-powered technology enabler and digital transformer of American\u00e2\u20ac\u00a6",
+    "yc_link": "https://www.ycombinator.com/companies/grubmarket",
+    "website": "http://grubmarket.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3452.812\"",
+    "nurtured": true
+  },
+  {
+    "name": "HelloSign",
+    "description": "eSignature software for small and mid-market businesses.",
+    "yc_link": "https://www.ycombinator.com/companies/hellosign",
+    "website": "https://www.hellosign.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3454.859\"",
+    "nurtured": true
+  },
+  {
+    "name": "Zenefits",
+    "description": "HR for small businesses: onboarding, payroll and benefits.",
+    "yc_link": "https://www.ycombinator.com/companies/zenefits",
+    "website": "http://zenefits.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3454.781\"",
+    "nurtured": true
+  },
+  {
+    "name": "Gusto",
+    "description": "Provides growing businesses with everything to take care of their team",
+    "yc_link": "https://www.ycombinator.com/companies/gusto",
+    "website": "https://gusto.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3453.14\"",
+    "nurtured": true
+  },
+  {
+    "name": "Honeylove",
+    "description": "Honeylove makes functional undergarments for women",
+    "yc_link": "https://www.ycombinator.com/companies/honeylove",
+    "website": "https://www.honeylove.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3457.343\"",
+    "nurtured": true
+  },
+  {
+    "name": "Modern Fertility",
+    "description": "At-home fertility test for women who aren't ready for kids right now\u00e2\u20ac\u00a6",
+    "yc_link": "https://www.ycombinator.com/companies/modern-fertility",
+    "website": "https://www.modernfertility.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3462.875\"",
+    "nurtured": true
+  },
+  {
+    "name": "Cognito",
+    "description": "Frictionless, modern identity verification that starts with just a\u00e2\u20ac\u00a6",
+    "yc_link": "https://www.ycombinator.com/companies/cognito",
+    "website": "https://cognitohq.com",
+    "email": "support@cognitohq.com",
+    "timestamp": "\"3458.984\"",
+    "nurtured": true
+  },
+  {
+    "name": "OpenInvest",
+    "description": "Values based personalization at scale for asset and wealth management",
+    "yc_link": "https://www.ycombinator.com/companies/openinvest",
+    "website": "http://www.openinvest.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3458.781\"",
+    "nurtured": true
+  },
+  {
+    "name": "Mixpanel",
+    "description": "Mixpanel is event analytics for builders that need answers.",
+    "yc_link": "https://www.ycombinator.com/companies/mixpanel",
+    "website": "http://mixpanel.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3464.093\"",
+    "nurtured": true
+  },
+  {
+    "name": "Paystack",
+    "description": "Modern payments infrastructure for Africa",
+    "yc_link": "https://www.ycombinator.com/companies/paystack",
+    "website": "https://www.paystack.com",
+    "email": "hello@paystack.com",
+    "timestamp": "\"3462.531\"",
+    "nurtured": true
+  },
+  {
+    "name": "Moxion Power Co.",
+    "description": "Mobile Energy Storage Technology",
+    "yc_link": "https://www.ycombinator.com/companies/moxion-power-co",
+    "website": "https://www.moxionpower.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3460.156\"",
+    "nurtured": true
+  },
+  {
+    "name": "DrChrono",
+    "description": "The essential platform for modern medical practices and patients.",
+    "yc_link": "https://www.ycombinator.com/companies/drchrono",
+    "website": "https://www.drchrono.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3461.984\"",
+    "nurtured": true
+  },
+  {
+    "name": "OMGPop",
+    "description": "An independent flash game studio.",
+    "yc_link": "https://www.ycombinator.com/companies/omgpop",
+    "website": "https://omgpop.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3462.546\"",
+    "nurtured": true
+  },
+  {
+    "name": "Newfront",
+    "description": "Modern insurance brokerage.",
+    "yc_link": "https://www.ycombinator.com/companies/newfront-insurance",
+    "website": "https://www.newfront.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3467.593\"",
+    "nurtured": true
+  },
+  {
+    "name": "North",
+    "description": "Wearable computing hardware: biosignal gesture recognition",
+    "yc_link": "https://www.ycombinator.com/companies/north",
+    "website": "https://www.bynorth.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3463.953\"",
+    "nurtured": true
+  },
+  {
+    "name": "Nowports",
+    "description": "The core engine of supply chain in LATAM",
+    "yc_link": "https://www.ycombinator.com/companies/nowports",
+    "website": "https://nowports.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3469.812\"",
+    "nurtured": true
+  },
+  {
+    "name": "Odeko",
+    "description": "Our operations software makes it easier to run--and grow--your cafe",
+    "yc_link": "https://www.ycombinator.com/companies/odeko",
+    "website": "http://www.odeko.com",
+    "email": "cfreeman@odeko.com",
+    "timestamp": "\"3470.781\"",
+    "nurtured": true
+  },
+  {
+    "name": "GitPrime",
+    "description": "Visibility and analytics for software development leaders.",
+    "yc_link": "https://www.ycombinator.com/companies/gitprime",
+    "website": "https://www.gitprime.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3472.921\"",
+    "nurtured": true
+  },
+  {
+    "name": "Proxy",
+    "description": "Smart ring digital wallet",
+    "yc_link": "https://www.ycombinator.com/companies/proxy",
+    "website": "https://proxy.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3473.265\"",
+    "nurtured": true
+  },
+  {
+    "name": "FutureAdvisor",
+    "description": "The online financial management service for everyone.",
+    "yc_link": "https://www.ycombinator.com/companies/futureadvisor",
+    "website": "http://futureadvisor.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3470.218\"",
+    "nurtured": true
+  },
+  {
+    "name": "Podium",
+    "description": "Get more leads. Make more money.",
+    "yc_link": "https://www.ycombinator.com/companies/podium",
+    "website": "https://podium.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3472.468\"",
+    "nurtured": true
+  },
+  {
+    "name": "Rappi",
+    "description": "On-demand delivery and financial services for Latin America.",
+    "yc_link": "https://www.ycombinator.com/companies/rappi",
+    "website": "http://www.rappi.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3475.25\"",
+    "nurtured": true
+  },
+  {
+    "name": "Razorpay",
+    "description": "India's only full-stack financial solutions company for businesses.",
+    "yc_link": "https://www.ycombinator.com/companies/razorpay",
+    "website": "https://razorpay.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3475.375\"",
+    "nurtured": true
+  },
+  {
+    "name": "Rippling",
+    "description": "One place to run all your HR, IT, and Finance. Globally.",
+    "yc_link": "https://www.ycombinator.com/companies/rippling",
+    "website": "http://rippling.com/",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3479.625\"",
+    "nurtured": true
+  },
+  {
+    "name": "Scale AI",
+    "description": "Data-centric infrastructure to accelerate the development of AI",
+    "yc_link": "https://www.ycombinator.com/companies/scale-ai",
+    "website": "http://scale.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3476.828\"",
+    "nurtured": true
+  },
+  {
+    "name": "Scentbird",
+    "description": "Scentbird is a luxury fragrance subscription service.",
+    "yc_link": "https://www.ycombinator.com/companies/scentbird",
+    "website": "https://www.scentbird.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3476.859\"",
+    "nurtured": true
+  },
+  {
+    "name": "Scribd",
+    "description": "World's largest online library.",
+    "yc_link": "https://www.ycombinator.com/companies/scribd",
+    "website": "http://scribd.com",
+    "email": "welcome_header_left_stripe@2x.cf02c415.webp",
+    "timestamp": "\"3488.625\"",
+    "nurtured": true
+  },
+  {
+    "name": "ShipBob",
+    "description": "Providing Amazon level logistics to e-commerce businesses.",
+    "yc_link": "https://www.ycombinator.com/companies/shipbob",
+    "website": "http://shipbob.com",
+    "email": "flags@2x.webp",
+    "timestamp": "\"3488.64\"",
+    "nurtured": true
+  },
+  {
+    "name": "SmartAsset",
+    "description": "Marketplace connecting consumers to financial advisors",
+    "yc_link": "https://www.ycombinator.com/companies/smartasset",
+    "website": "http://smartasset.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3488.312\"",
+    "nurtured": true
+  },
+  {
+    "name": "Stripe",
+    "description": "Economic infrastructure for the internet.",
+    "yc_link": "https://www.ycombinator.com/companies/stripe",
+    "website": "http://stripe.com",
+    "email": "jane.diaz@stripe.com",
+    "timestamp": "\"3489.265\"",
+    "nurtured": true
+  },
+  {
+    "name": "Wave",
+    "description": "Mobile money app for Africa",
+    "yc_link": "https://www.ycombinator.com/companies/wave",
+    "website": "https://wave.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3492.921\"",
+    "nurtured": true
+  },
+  {
+    "name": "Webflow",
+    "description": "Professional website design and publishing platform.",
+    "yc_link": "https://www.ycombinator.com/companies/webflow",
+    "website": "https://webflow.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3495.546\"",
+    "nurtured": true
+  },
+  {
+    "name": "Whatnot",
+    "description": "Whatnot is the largest livestream shopping platform in the U.S.",
+    "yc_link": "https://www.ycombinator.com/companies/whatnot",
+    "website": "https://www.whatnot.com",
+    "email": "sellersupport@whatnot.com",
+    "timestamp": "\"3492.031\"",
+    "nurtured": true
+  },
+  {
+    "name": "Zapier",
+    "description": "The easiest way to automate your work.",
+    "yc_link": "https://www.ycombinator.com/companies/zapier",
+    "website": "http://zapier.com",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3495.921\"",
+    "nurtured": true
+  },
+  {
+    "name": "Zepto",
+    "description": "10-Minute Grocery Delivery in India",
+    "yc_link": "https://www.ycombinator.com/companies/zepto",
+    "website": "https://www.zeptonow.com/",
+    "email": "support@zeptonow.com",
+    "timestamp": "\"3495.546\"",
+    "nurtured": true
+  },
+  {
+    "name": "Focal Systems",
+    "description": "Building the Operating System for B&M Retail using Deep Learning",
+    "yc_link": "https://www.ycombinator.com/companies/focal-systems",
+    "website": "http://www.focal.systems",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3496.078\"",
+    "nurtured": true
+  },
+  {
+    "name": "Mio",
+    "description": "Mio powers seamless communication between workplace chat apps.",
+    "yc_link": "https://www.ycombinator.com/companies/mio",
+    "website": "http://m.io",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3497.39\"",
+    "nurtured": true
+  },
+  {
+    "name": "Daily",
+    "description": "Conversational Voice and Multimodal AI built with Open Source",
+    "yc_link": "https://www.ycombinator.com/companies/daily",
+    "website": "https://daily.co",
+    "email": "robertdemottojr83@gmail.com",
+    "timestamp": "\"3498.015\"",
+    "nurtured": true
+  },
+  {
+    "name": "Petcube",
+    "description": "Petcube is on the mission to improve lives of pets and pet owners\u00e2\u20ac\u00a6",
+    "yc_link": "https://www.ycombinator.com/companies/petcube",
+    "website": "http://petcube.com",
+    "email": "info@petcube.com",
+    "timestamp": "\"3497.593\"",
+    "nurtured": true
+  },
+  {
+    "name": "Outschool",
+    "description": "A live online learning platform that empowers kids ages 3\u00e2\u20ac\u201c18.",
+    "yc_link": "https://www.ycombinator.com/companies/outschool",
+    "website": "http://outschool.com",
+    "email": "support@outschool.com",
+    "timestamp": "\"3498.484\"",
+    "nurtured": true
+  },
+  {
+    "name": "Mason",
+    "description": "Mason is the fastest way to take smart devices from idea to end user",
+    "yc_link": "https://www.ycombinator.com/companies/mason",
+    "website": "http://www.bymason.com",
+    "email": "name@company.com",
+    "timestamp": "\"3498.5\"",
+    "nurtured": true
+  },
+  {
+    "name": "illogicalabc",
+    "email": "illogicalabc@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Save Claude tokens with semantic search powered by SQLite and Ollama",
+    "url": "https://github.com/ory/lumen/tree/main",
+    "timestamp": "2026-03-18T16:00:01.698612",
+    "nurtured": true
+  },
+  {
+    "name": "zakmcintyre",
+    "email": "zakmcintyre@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: ThoughtTrack \u2013 On-device thought capture with NLP-powered resurfacing",
+    "url": "https://apps.apple.com/us/app/thoughttrack-voice-capture/id6758325880",
+    "timestamp": "2026-03-18T16:00:01.698628",
+    "nurtured": true
+  },
+  {
+    "name": "ahmedlhanafy",
+    "email": "ahmedlhanafy@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Yapper \u2013 free, open-source alternative to Superwhisper for macOS",
+    "url": "https://github.com/ahmedlhanafy/yapper",
+    "timestamp": "2026-03-18T16:00:01.698643",
+    "nurtured": true
+  },
+  {
+    "name": "theGlenn",
+    "email": "theGlenn@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Xybrid \u2013 run LLM and speech locally in your app (no back end, Rust)",
+    "url": "https://github.com/xybrid-ai/xybrid",
+    "timestamp": "2026-03-18T16:00:01.698964",
+    "nurtured": true
+  },
+  {
+    "name": "visiwig",
+    "email": "visiwig@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: I built 48 lightweight SVG backgrounds you can copy/paste",
+    "url": "https://www.svgbackgrounds.com/set/free-svg-backgrounds-and-patterns/",
+    "timestamp": "2026-03-18T16:00:01.698989",
+    "nurtured": true
+  },
+  {
+    "name": "AnatoleLucet",
+    "email": "AnatoleLucet@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Loom, a Component Framework for Go",
+    "url": "https://loomui.dev/blog/introducing-loom/",
+    "timestamp": "2026-03-18T16:00:01.699026",
+    "nurtured": true
+  },
+  {
+    "name": "sohamrj",
+    "email": "sohamrj@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: SentrySearch \u2013 Semantic search over dashcam footage",
+    "url": "https://github.com/ssrajadh/sentrysearch",
+    "timestamp": "2026-03-18T16:00:01.699072",
+    "nurtured": true
+  },
+  {
+    "name": "bahaghazghazi",
+    "email": "bahaghazghazi@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: AgentPay \u2013 Let AI agents pay for APIs autonomously",
+    "url": null,
+    "timestamp": "2026-03-18T16:00:01.699127",
+    "nurtured": true
+  },
+  {
+    "name": "KerryJones",
+    "email": "KerryJones@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: DealCred \u2013 Verified Reviews for Real Estate Deals",
+    "url": "https://dealcred.com/",
+    "timestamp": "2026-03-18T16:00:01.699164",
+    "nurtured": true
+  },
+  {
+    "name": "vhsdev",
+    "email": "vhsdev@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Birdcage \u2013 Secure remote access for personal AI",
+    "url": "https://github.com/vhscom/birdcage",
+    "timestamp": "2026-03-18T16:00:01.699169",
+    "nurtured": true
+  },
+  {
+    "name": "yohannesgk",
+    "email": "yohannesgk@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: BlacksmithAI \u2013 AI\u2011Assisted Penetration Testing Framework (Beta, Free)",
+    "url": "https://bs.kahanlabs.com",
+    "timestamp": "2026-03-18T16:00:01.699260",
+    "nurtured": true
+  },
+  {
+    "name": "zhangshuaikang",
+    "email": "zhangshuaikang@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: PixelSwift \u2013 Image compression that never uploads your files",
+    "url": "https://pixelswift.site",
+    "timestamp": "2026-03-18T16:00:01.699271",
+    "nurtured": true
+  },
+  {
+    "name": "dreynow",
+    "email": "dreynow@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Agent Trust \u2013 Cryptographic identity and reputation for AI agents",
+    "url": "https://github.com/kanoniv/agent-trust",
+    "timestamp": "2026-03-18T16:00:01.699278",
+    "nurtured": true
+  },
+  {
+    "name": "sergiusiv",
+    "email": "sergiu_robert@protonmail.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: iPhone-gated local actions on Mac",
+    "url": null,
+    "timestamp": "2026-03-18T16:00:01.699476",
+    "nurtured": true
+  },
+  {
+    "name": "FadySGhatas",
+    "email": "FadySGhatas@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Habits, an open-source builder and runtime for automations and apps",
+    "url": null,
+    "timestamp": "2026-03-18T16:00:01.699622",
+    "nurtured": true
+  },
+  {
+    "name": "terryops",
+    "email": "terryops@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Tools.video \u2013 Browser-native video processing at 50 GB scale",
+    "url": null,
+    "timestamp": "2026-03-18T16:00:01.699820",
+    "nurtured": true
+  },
+  {
+    "name": "enzovn",
+    "email": "enzovn@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Lukan \u2013 An open-source agentic workstation in a single Rust binary",
+    "url": "https://lukan.ai",
+    "timestamp": "2026-03-18T16:00:01.700050",
+    "nurtured": true
+  },
+  {
+    "name": "dfskGT",
+    "email": "dfskGT@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: LocalSquash \u2013 A local web UI for FFmpeg.wasm",
+    "url": "https://localsquash.com",
+    "timestamp": "2026-03-18T16:00:01.700257",
+    "nurtured": true
+  },
+  {
+    "name": "ahd94",
+    "email": "ahd94@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: A 30-minute course to get up to speed on how AI agents work",
+    "url": null,
+    "timestamp": "2026-03-18T16:00:01.700326",
+    "nurtured": true
+  },
+  {
+    "name": "frntn",
+    "email": "frntn@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: PlanckClaw an AI agent in 6832 bytes of x86-64 assembly",
+    "url": "https://github.com/frntn/planckclaw",
+    "timestamp": "2026-03-18T16:00:01.700510",
+    "nurtured": true
+  },
+  {
+    "name": "gemanor",
+    "email": "gemanor@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Permit MCP Gateway \u2013 Fine-Grained Authorization and IGA for MCP",
+    "url": "https://www.permit.io/mcp-gateway",
+    "timestamp": "2026-03-18T16:00:01.700793",
+    "nurtured": true
+  },
+  {
+    "name": "plsft",
+    "email": "plsft@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: I turned GitHub's contribution graph into a life journal",
+    "url": "https://lifetale.io/launch",
+    "timestamp": "2026-03-18T16:00:01.700942",
+    "nurtured": true
+  },
+  {
+    "name": "paynedigital",
+    "email": "paynedigital@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: On-device meeting transcription for your Mac",
+    "url": null,
+    "timestamp": "2026-03-18T16:00:01.701146",
+    "nurtured": true
+  },
+  {
+    "name": "sethd",
+    "email": "sethd@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Atria \u2013 terminal UI for managing multiple coding agents",
+    "url": "https://github.com/sethdeckard/atria",
+    "timestamp": "2026-03-18T16:00:01.701204",
+    "nurtured": true
+  },
+  {
+    "name": "Daminoup",
+    "email": "Daminoup@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: WattSeal \u2013 PC power consumption monitor",
+    "url": "https://github.com/Daminoup88/WattSeal",
+    "timestamp": "2026-03-18T16:00:01.701283",
+    "nurtured": true
+  },
+  {
+    "name": "Havunen",
+    "email": "Havunen@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: GitComet speedy Git GUI written in Rust end-to-end",
+    "url": "https://gitcomet.dev/",
+    "timestamp": "2026-03-18T16:00:01.701353",
+    "nurtured": true
+  },
+  {
+    "name": "skenderbeu",
+    "email": "skenderbeu@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: SHTMLs \u2013 HTML pastebin where the AI uploads its own output",
+    "url": null,
+    "timestamp": "2026-03-18T16:00:01.701447",
+    "nurtured": true
+  },
+  {
+    "name": "grasper_",
+    "email": "grasper_@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Deploybase CLI \u2013 Search GPU and LLM pricing from your terminal",
+    "url": "https://github.com/nicalevras/deploybase-cli",
+    "timestamp": "2026-03-18T16:00:01.701490",
+    "nurtured": true
+  },
+  {
+    "name": "jackgladowsky",
+    "email": "jackgladowsky@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: MCP Certify \u2013 Auto-test MCP servers for security and compliance",
+    "url": "https://github.com/jackgladowsky/mcp-certify",
+    "timestamp": "2026-03-18T16:00:01.701562",
+    "nurtured": true
+  },
+  {
+    "name": "victorbuilds",
+    "email": "victorbuilds@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: NC Web \u2013 Norton Commander for the web, built with vanilla JavaScript",
+    "url": "https://github.com/victorantos/NC",
+    "timestamp": "2026-03-18T16:00:01.701566",
+    "nurtured": true
+  },
+  {
+    "name": "jballanc",
+    "email": "jballanc@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Vibe \u2013 a language for humans and AI to reason about programs together",
+    "url": "http://vibe-lang.org",
+    "timestamp": "2026-03-18T16:00:01.701670",
+    "nurtured": true
+  },
+  {
+    "name": "g3z",
+    "email": "g3z@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: JSON GUI, a fast GUI to view, navigate and process JSON files",
+    "url": "https://github.com/pingsrl/json-gui",
+    "timestamp": "2026-03-18T16:00:01.701687",
+    "nurtured": true
+  },
+  {
+    "name": "scaelere",
+    "email": "scaelere@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Open-Source Configuration-Based Secure Access to your Home Network",
+    "url": "https://github.com/rijkaard/nginx-quick-relay/",
+    "timestamp": "2026-03-18T16:00:01.701740",
+    "nurtured": true
+  },
+  {
+    "name": "faustoct",
+    "email": "faustoct@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Website lets you post only once for life",
+    "url": "https://opo.fausto.me/",
+    "timestamp": "2026-03-18T16:00:01.701754",
+    "nurtured": true
+  },
+  {
+    "name": "nmauro1",
+    "email": "nic@virlo.ai",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: I built a short-form content intelligence tool for media buyers",
+    "url": "https://virlo.ai",
+    "timestamp": "2026-03-18T16:00:01.701848",
+    "nurtured": true
+  },
+  {
+    "name": "metaphorical",
+    "email": "metaphorical@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Pts.py \u2013 Visual thinking in code",
+    "url": "https://ptspy.org/",
+    "timestamp": "2026-03-18T16:00:01.701866",
+    "nurtured": true
+  },
+  {
+    "name": "aarmenante",
+    "email": "aarmenante@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Bento \u2013 Save and restore multi-monitor app layouts",
+    "url": "https://bentodesktop.com",
+    "timestamp": "2026-03-18T16:00:01.701869",
+    "nurtured": true
+  },
+  {
+    "name": "exalted",
+    "email": "exalted@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Balsamiq Wireframes MCP",
+    "url": "https://www.youtube.com/watch?v=lfBP_7pV1AY",
+    "timestamp": "2026-03-18T16:00:01.701871",
+    "nurtured": true
+  },
+  {
+    "name": "mindsaspire",
+    "email": "mindsaspire@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Ranvier \u2013 Prefix-aware routing for LLM inference",
+    "url": "https://ranvier.systems/2026/03/16/why-your-load-balancer-is-wasting-your-gpus.html",
+    "timestamp": "2026-03-18T16:00:01.701875",
+    "nurtured": true
+  },
+  {
+    "name": "fatwang2",
+    "email": "fatwang2@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Ibkr-CLI \u2013 A local-first Interactive Brokers CLI built for AI agents",
+    "url": "https://github.com/fatwang2/ibkr-cli",
+    "timestamp": "2026-03-18T16:00:01.702029",
+    "nurtured": true
+  },
+  {
+    "name": "ulinycoin",
+    "email": "ulinycoin@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Studio \u2013 a drag-and-drop PDF workspace for multi-document workflows",
+    "url": "https://localpdf.online/app/studio",
+    "timestamp": "2026-03-18T16:00:01.702164",
+    "nurtured": true
+  },
+  {
+    "name": "sillendev",
+    "email": "sillendev@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: WeFrames One shared photo a day from Apple Shared Albums",
+    "url": null,
+    "timestamp": "2026-03-18T16:00:01.702201",
+    "nurtured": true
+  },
+  {
+    "name": "FdezRomero",
+    "email": "FdezRomero@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: KonbiniAPI \u2013 One API for Instagram and TikTok Data, Same JSON Shape",
+    "url": "https://konbiniapi.com",
+    "timestamp": "2026-03-18T16:00:01.702303",
+    "nurtured": true
+  },
+  {
+    "name": "DonYin",
+    "email": "DonYin@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Applemail \u2013 Cursor skill for full macOS Mail.app control",
+    "url": "https://github.com/Don-Yin/apple-mail",
+    "timestamp": "2026-03-18T16:00:01.702305",
+    "nurtured": true
+  },
+  {
+    "name": "igor-peregudov",
+    "email": "igor-peregudov@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Elisym \u2013 Open protocol for AI agents to discover and pay each other",
+    "url": null,
+    "timestamp": "2026-03-18T16:00:01.702515",
+    "nurtured": true
+  },
+  {
+    "name": "brokerandy25",
+    "email": "brokerandy25@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Vestigo \u2013 A local Git forensics tool to find technical debt",
+    "url": "https://www.3squaredcircles.com/GetStarted/",
+    "timestamp": "2026-03-18T16:00:01.702523",
+    "nurtured": true
+  },
+  {
+    "name": "kevin-hs-sohn",
+    "email": "kevin-hs-sohn@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Hipocampus \u2013 Persistent memory harness for AI agents",
+    "url": "https://github.com/kevin-hs-sohn/hipocampus",
+    "timestamp": "2026-03-18T16:00:01.702525",
+    "nurtured": true
+  },
+  {
+    "name": "aarush-prakash",
+    "email": "aarush-prakash@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: FileBit AES-256 file vault for macOS, zero network requests",
+    "url": null,
+    "timestamp": "2026-03-18T16:00:01.702804",
+    "nurtured": true
+  },
+  {
+    "name": "brian_r_hall",
+    "email": "brian_r_hall@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Faramesh \u2013 open-source runtime enforcement for AI agents",
+    "url": "https://faramesh.dev/",
+    "timestamp": "2026-03-18T16:00:01.702874",
+    "nurtured": true
+  },
+  {
+    "name": "superchargeext",
+    "email": "superchargeext@news.ycombinator.com",
+    "source": "HackerNews_ShowHN",
+    "interest": "Show HN: Site got cited by Claude and ChatGPT in under a week",
+    "url": "https://www.superchargebrowser.com/",
+    "timestamp": "2026-03-18T16:00:01.702887",
+    "nurtured": true
+  }
+]

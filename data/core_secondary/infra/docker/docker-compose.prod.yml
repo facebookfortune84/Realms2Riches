@@ -1,0 +1,55 @@
+services:
+  orchestrator-api:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.orchestrator
+    command: uvicorn orchestrator.src.core.api:app --host 0.0.0.0 --port 8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "swarm.project.name=realms2riches"
+      - "swarm.project.version=3.9.1-PLATINUM"
+    env_file:
+      - ../../.env.prod
+    environment:
+      - POSTGRES_HOST=postgres
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ../../data:/app/data
+      - ../../projects:/app/projects
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+  worker:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.worker
+    env_file:
+      - ../../.env.prod
+    environment:
+      - POSTGRES_HOST=postgres
+    volumes:
+      - ../../data:/app/data
+      - ../../projects:/app/projects
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15
+    env_file:
+      - ../../.env.prod
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
