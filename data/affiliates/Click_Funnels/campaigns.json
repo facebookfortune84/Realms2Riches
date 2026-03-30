@@ -1,26 +1,16 @@
 [
   {
-    "product_id": "prod_cf_trial",
-    "name": "ClickFunnels 14-Day Free Trial",
-    "description": "Start your ignition phase with zero tech skills. Launch your first funnel by Friday.",
-    "images": ["https://www.realmstoriches.xyz/img/service-digitalgrowthmonthly-300.webp"],
-    "active": true,
-    "price_id": "price_cf_trial",
-    "price_amount": 0.0,
-    "currency": "usd",
-    "interval": "month",
-    "payment_link": "https://www.clickfunnels.com/signup-flow?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b"
+    "id": "complete_swarm",
+    "product_id": "prod_swarm_ultimate",
+    "name": "Complete Sovereign Swarm",
+    "description": "A fully functional, Dockerized 1,000-agent swarm. Includes Genesis Forge, Outreach Daemons, and the Jarvis 3.5 Brain. Ready to deploy on your own VPS.",
+    "price_amount": 4999.0,
+    "payment_link": "https://buy.stripe.com/fZu4gz9DH8nT5cugZZ8so04"
   },
   {
-    "product_id": "prod_ofa",
-    "name": "One Funnel Away Challenge",
-    "description": "The 30-day intensive transformation. Russell Brunson coaches you to the leaderboard.",
-    "images": ["https://www.realmstoriches.xyz/img/service-monthlystartup-600.webp"],
-    "active": true,
-    "price_id": "price_ofa",
-    "price_amount": 100.0,
-    "currency": "usd",
-    "interval": null,
-    "payment_link": "https://www.onefunnelaway.com/?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b"
+    "id": "cf_trial",
+    "name": "ClickFunnels 14-Day Trial",
+    "price_amount": 0.0,
+    "payment_link": "https://www.clickfunnels.com/signup-flow?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b"
   }
 ]
