@@ -44,6 +44,10 @@ class Settings(BaseSettings):
     SMTP_SERVER: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
 
+    # --- IONOS CLOUD API ---
+    IONOS_PUBLIC_PREFIX: Optional[str] = None
+    IONOS_SECRET: Optional[str] = None
+
     # --- SYNTHESIS & VOICE ---
     VOICE_ENABLED: bool = True
     STT_PROVIDER: str = "openai"
