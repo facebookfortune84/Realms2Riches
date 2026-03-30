@@ -1,37 +1,26 @@
 [
   {
-    "id": "cf_trial",
-    "name": "ClickFunnels Free 14 Day Trial",
-    "link": "https://www.clickfunnels.com/signup-flow?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b",
-    "assets_path": "data/assets/Click_Funnels_Free_14_Day_Trial_Assets",
-    "type": "ignition"
+    "product_id": "prod_cf_trial",
+    "name": "ClickFunnels 14-Day Free Trial",
+    "description": "Start your ignition phase with zero tech skills. Launch your first funnel by Friday.",
+    "images": ["https://www.realmstoriches.xyz/img/service-digitalgrowthmonthly-300.webp"],
+    "active": true,
+    "price_id": "price_cf_trial",
+    "price_amount": 0.0,
+    "currency": "usd",
+    "interval": "month",
+    "payment_link": "https://www.clickfunnels.com/signup-flow?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b"
   },
   {
-    "id": "ofa_challenge",
+    "product_id": "prod_ofa",
     "name": "One Funnel Away Challenge",
-    "link": "https://www.onefunnelaway.com/?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b",
-    "assets_path": "data/assets/OFA_Assets",
-    "type": "growth"
-  },
-  {
-    "id": "plr_funnels",
-    "name": "PLR Funnels",
-    "link": "https://www.plrfunnels.com/plr?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b",
-    "assets_path": "data/assets/PLR_Funnel_Assets",
-    "type": "product"
-  },
-  {
-    "id": "cf_99_bundle",
-    "name": "3 Months of ClickFunnels for $99",
-    "link": "https://www.clickfunnels.com/3-months-for-99?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b",
-    "assets_path": "data/assets/3_Months_for_99_Assets",
-    "type": "value"
-  },
-  {
-    "id": "all_in_secrets",
-    "name": "I'm All In - Funnel Builder Secrets",
-    "link": "https://www.imallin.com/?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b",
-    "assets_path": "data/assets/Im_All_In_Assets",
-    "type": "high_ticket"
+    "description": "The 30-day intensive transformation. Russell Brunson coaches you to the leaderboard.",
+    "images": ["https://www.realmstoriches.xyz/img/service-monthlystartup-600.webp"],
+    "active": true,
+    "price_id": "price_ofa",
+    "price_amount": 100.0,
+    "currency": "usd",
+    "interval": null,
+    "payment_link": "https://www.onefunnelaway.com/?aff=4da8fb2b4f2483faf8957bbdc07ee19f0d27ddc4740038d8b2a41b2efeb4107b"
   }
 ]

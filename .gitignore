@@ -56,3 +56,14 @@ core_secondary/.git
 env_files.txt
 env_dump.txt
 secrets.txt
+_repo_bundle/
+_use_ai_context/
+sovereign_bundle.txt
+repo_tree.txt
+repo_files.txt
+repo_hashes.csv
+repo_inventory.csv
+docker_build_errors.txt
+docker_config.txt
+ionos_facts.txt
+pytest_errors.txt
