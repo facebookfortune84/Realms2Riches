@@ -4,7 +4,7 @@ from orchestrator.src.validation.schemas import ToolConfig
 
 # 150+ Capability Mapping
 CAPABILITIES = {
-    "Cloud_Infra": ["deploy_k8s", "provision_rds", "s3_sync", "lambda_deploy", "terraform_apply", "vpc_secure", "cdn_flush", "iam_audit", "cost_optimize", "ec2_scale"],
+    "Cloud_Infra": ["deploy_k8s", "provision_rds", "s3_sync", "lambda_deploy", "terraform_apply", "vpc_secure", "cdn_flush", "iam_audit", "cost_optimize", "ec2_scale", "list_datacenters", "get_datacenter", "list_servers"],
     "Cyber_Security": ["nmap_scan", "sql_inject_check", "xss_probe", "secret_scan", "dependency_audit", "ssl_verify", "waf_config", "brute_force_protect", "log_anomaly_detect"],
     "Logic_Engineering": ["code_refactor", "unit_test_gen", "pylint_audit", "type_check_enforce", "dead_code_strip", "api_stub_gen", "regex_verify", "complexity_reduce"],
     "Visual_Identity": ["svg_optimize", "color_palette_gen", "font_subset_build", "favicon_pack", "og_image_render", "css_minify", "responsive_probe"],

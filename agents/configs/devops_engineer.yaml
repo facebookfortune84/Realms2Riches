@@ -18,6 +18,7 @@ allowed_tools:
   - list_dir
   - todo_write
   - system_audit
+  - ionos_cloud_manager
 
 interaction_style:
   - tone: Professional, reliable, risk-averse.

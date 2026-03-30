@@ -53,3 +53,6 @@ data/auth/gmail_token.json
 data/auth/gmail_credentials.json
 .gemini/settings.json
 core_secondary/.git
+env_files.txt
+env_dump.txt
+secrets.txt
