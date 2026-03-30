@@ -1,58 +1,57 @@
-# Environments
-.env
-.env.*
-!.env.example
-!.env.sample
-!.env.template
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
+# dependencies
+node_modules/
 venv/
 .venv/
-env/
-ENV/
-build/
-dist/
-*.egg-info/
+
+# python cache
+__pycache__/
+*.py[cod]
 .pytest_cache/
-.coverage
-htmlcov/
-.tox/
-nosetests.xml
-coverage.xml
-*.spec
+.ruff_cache/
+.mypy_cache/
 
-# Node
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-lock.yaml
-package-lock.json
-.next/
-.vercel/
-dist/
-build/
+# env files
+.env
+.env.local
+.env.prod
+.env.prod.bak
+.env.prod.local_backup
+.env.test
+*.env
+!*.env.example
+!*.env.prod.example
 
-# IDEs
-.idea/
-.vscode/
-*.swp
-*.swo
+# databases
+*.db
+*.sqlite
+*.sqlite3
+
+# generated assets
+data/marketing/images/*.svg
+data/marketing/videos/*.mp4
+core_secondary/data/marketing/images/*.svg
+core_secondary/data/marketing/videos/*.mp4
+
+# generated content
+data/blog/report-*.md
+data/blog/posts/*.md
+core_secondary/data/blog/report-*.md
+core_secondary/data/blog/posts/*.md
+data/core_secondary/data/blog/report-*.md
+
+# generated projects
+core_secondary/projects/generated/
+
+# secrets
+data/auth/gmail_credentials.json
+
+# backups
+*.bak
+*_backup
+*.local
+
+# OS/editor
 .DS_Store
 Thumbs.db
-
-# Logs
-logs/
-*.log
-
-# Realms2Riches Specific Secrets
-data/auth/gmail_token.json
-data/auth/gmail_credentials.json
-.gemini/settings.json
-core_secondary/.git
-env_files.txt
-env_dump.txt
-secrets.txt
+.vscode/
+.idea/
