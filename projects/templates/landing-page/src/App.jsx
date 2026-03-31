@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import Home from './pages/Home';
 import Pricing from './pages/Pricing';
 import UnifiedConsole from './pages/UnifiedConsole';
@@ -46,6 +47,7 @@ function App() {
         <Footer />
         <CookieBanner />
         <LeadGenPopup />
+        <Analytics />
       </div>
     </Router>
   );
