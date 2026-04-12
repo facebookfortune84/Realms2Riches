@@ -1,6 +1,6 @@
 {
   "name": "realms2riches",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A fully autonomous, multi-agent system powered by Groq for high-speed agentic reasoning. Capable of generating complete, tested, and containerized software projects from high-level specifications.",
   "main": "orchestrator/src/core/api.py",
   "directories": {
@@ -15,11 +15,12 @@
     "verify:integrity": "poetry run python scripts/test_system_integrity.py",
     "verify:production": "poetry run python scripts/verify_production_capabilities.py",
     "lineage:lock": "poetry run python scripts/hash_registry.py",
-    "stripe:listen": "stripe listen --forward-to localhost:8000/api/v1/webhook",
+    "stripe:listen": "stripe listen --forward-to localhost:8000/api/v1/monetization/webhook",
     "stripe:trigger": "stripe trigger charge.succeeded",
     "dev:ui": "npm run start --prefix frontend",
     "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down"
+    "docker:down": "docker-compose down",
+    "task-master": "task-master"
   },
   "repository": {
     "type": "git",
@@ -40,11 +41,16 @@
   },
   "homepage": "https://github.com/facebookfortune84/Realms2Riches#readme",
   "devDependencies": {
-    "@google/gemini-cli": "^0.30.0",
-    "prettier": "^3.0.0"
+    "@google/gemini-cli": "^0.37.1",
+    "prettier": "^3.0.0",
+    "task-master-ai": "^0.43.1"
   },
   "engines": {
     "node": ">=18.0.0",
     "python": ">=3.11.0"
+  },
+  "overrides": {
+    "diff": "8.0.3"
   }
+  
 }

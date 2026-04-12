@@ -1,5 +1,11 @@
 # Agents
 
+## Where to start each session
+
+1. Read [PATH_FORWARD.md](PATH_FORWARD.md) for the current trajectory and remediation triggers.
+2. Use Taskmaster (`task-master list` / `next` or MCP equivalents) when `.taskmaster/tasks/tasks.json` exists.
+3. Follow the live API list in [architecture/api-endpoints.md](architecture/api-endpoints.md); do not invent paths the SPA depends on.
+
 ## Chief Orchestrator / PM
 *   **Role**: Define project scope, break down tasks, oversee progress.
 *   **Tools**: Git, File Read/Write.

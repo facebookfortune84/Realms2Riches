@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Cpu, Shield, ArrowRight, Download, Terminal, Activity, Globe } from 'lucide-react';
 import NeuralGlobe from '../components/NeuralGlobe';
+import { getApiBase } from '../lib/apiBase';
 
 const GenesisForge = () => {
   const [status, setStatus] = useState('IDLE');
@@ -15,30 +16,31 @@ const GenesisForge = () => {
     setStatus('FORGING');
     setProgress(0);
     
-    // Simulate industrial progress
     const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 2;
-      });
+      setProgress((prev) => (prev >= 96 ? prev : prev + 2));
     }, 100);
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tasks`, {
+      const res = await fetch(`${getApiBase()}/api/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ description: `INITIALIZE COMPANY BLUEPRINT: ${task}` })
       });
       const data = await res.json();
+      clearInterval(interval);
+      setProgress(100);
       if (data.status === 'completed') {
         setStatus('COMPLETE');
-        // Artifact is usually /swarms/swarm_ID.zip
-        setArtifact(`${import.meta.env.VITE_API_URL}/swarms/swarm_${data.result?.task_id?.slice(0,8) || 'latest'}.zip`);
+        const tid = data.task_id || data.result?.task_id || 'latest';
+        const path =
+          data.result?.artifact_url ||
+          `/swarms/swarm_${String(tid).slice(0, 8)}.zip`;
+        setArtifact(path.startsWith('http') ? path : `${getApiBase()}${path.startsWith('/') ? path : `/${path}`}`);
+      } else {
+        setStatus('ERROR');
       }
     } catch (e) {
+      clearInterval(interval);
       setStatus('ERROR');
     }
   };

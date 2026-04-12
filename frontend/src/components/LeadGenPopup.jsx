@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, Sparkles, Download } from 'lucide-react';
+import { getApiBase } from '../lib/apiBase';
 
 export default function LeadGenPopup() {
   const [isOpen, setIsOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [guideUrl, setGuideUrl] = useState('');
-
-  // Use the verified ngrok backend as fallback
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
 
   useEffect(() => {
     const isClosed = localStorage.getItem('leadGenClosed');
@@ -28,7 +26,7 @@ export default function LeadGenPopup() {
     e.preventDefault();
     if (email) {
       try {
-        const response = await fetch(`${BACKEND_URL}/api/leads`, {
+        const response = await fetch(`${getApiBase()}/api/leads`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, source: 'popup' })

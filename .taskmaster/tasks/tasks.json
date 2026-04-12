@@ -1,0 +1,142 @@
+{
+  "master": {
+    "metadata": {
+      "description": "Realms2Riches launch runway and monetization",
+      "lastId": 12
+    },
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Backend API and WebSocket alignment",
+        "description": "REST routes, voice/chamber WebSockets, health, and monetization hooks match documented architecture.",
+        "details": "Implemented in orchestrator (api.py, monetization, workforce, config). Human: confirm production IIS or reverse proxy maps the same paths.",
+        "testStrategy": "poetry run pytest tests/integration/test_api_endpoints.py tests/integration/test_voice_flow.py",
+        "dependencies": [],
+        "status": "done",
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Frontend build and API wiring",
+        "description": "Vite dev proxy and getApiBase/getWsBase so UI hits the real backend in dev and build.",
+        "details": "Human: set production env vars for hosting (Vercel/static + API origin) per docs/DRIFT_PREVENTION.md.",
+        "testStrategy": "npm ci --prefix frontend && npm run build --prefix frontend",
+        "dependencies": [],
+        "status": "done",
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "CI pipeline (backend + frontend)",
+        "description": "GitHub Actions runs pytest subset and frontend build without missing tools.",
+        "details": "Workflow in .github/workflows/main.yml. Human: enable branch protection on main requiring this workflow.",
+        "testStrategy": "Push to dev and confirm Actions green.",
+        "dependencies": [1, 2],
+        "status": "done",
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Repository hygiene and secrets policy",
+        "description": "Ignore mcp.json, lineage noise, local DB; example MCP config only.",
+        "details": "Human: rotate any key that was ever in a tracked file or shared log; store secrets in host env or vault only.",
+        "testStrategy": "git check-ignore .cursor/mcp.json; ensure no sk_live in tracked source.",
+        "dependencies": [],
+        "status": "done",
+        "priority": "critical",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Taskmaster file backlog for launch",
+        "description": "Local tasks.json and PRD for launch/monetization; file storage enabled.",
+        "details": "Optional: run task-master parse-prd on .taskmaster/docs/PRD-launch-monetization-v1.md when AI keys are configured in .env.",
+        "testStrategy": "task-master list --tag master",
+        "dependencies": [],
+        "status": "done",
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Staging end-to-end (test Stripe)",
+        "description": "Validate webhooks and a happy-path user journey in staging with test keys.",
+        "details": "Human: provision staging DB/Redis; set STRIPE_TEST_MODE and test keys; run stripe listen against staging URL.",
+        "testStrategy": "Stripe CLI test events + manual UI smoke on staging hostname.",
+        "dependencies": [3],
+        "status": "pending",
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Legal and policy pages",
+        "description": "Terms, privacy, cookie/refund policy, affiliate disclosures as required by jurisdiction and offers.",
+        "details": "Human-only: attorney or qualified template review before linking from checkout and outreach.",
+        "testStrategy": "Legal sign-off checklist attached to release ticket.",
+        "dependencies": [],
+        "status": "pending",
+        "priority": "critical",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Production DNS and TLS",
+        "description": "api and app hostnames with valid certificates.",
+        "details": "Human: DNS A/AAAA or CNAME to hosting; confirm HSTS and cookie domain policy with frontend env.",
+        "testStrategy": "curl -I https://api.../health and browser padlock on marketing site.",
+        "dependencies": [],
+        "status": "pending",
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Stripe live mode cutover",
+        "description": "Live products/prices, webhook secret, tax settings if applicable.",
+        "details": "Human: Stripe dashboard configuration; paste secrets only into production env, never git.",
+        "testStrategy": "Small real charge + refund in controlled window; webhook delivery 200 in Stripe dashboard.",
+        "dependencies": [6, 7, 8],
+        "status": "pending",
+        "priority": "critical",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Outreach production enablement",
+        "description": "Cold outreach per docs/marketing/COLD_OUTREACH_SOP_v2.md with human-approved lists and copy.",
+        "details": "Human: confirm CAN-SPAM/GDPR constraints; raise sending limits gradually; keep OUTREACH_DRY_RUN until satisfied.",
+        "testStrategy": "Dry-run log review then capped live send with reply monitoring.",
+        "dependencies": [7],
+        "status": "pending",
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Observability and backups",
+        "description": "Centralized logs, uptime checks, DB backups for production.",
+        "details": "Human: choose provider (cloud logging, PagerDuty, etc.) and document runbooks.",
+        "testStrategy": "Simulated failure triggers alert; restore test from backup snapshot.",
+        "dependencies": [8],
+        "status": "pending",
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Release tagging and changelog",
+        "description": "Semantic version tag aligned with package.json and pyproject.toml.",
+        "details": "Human: git tag -a v1.0.1 -m ... after merges; publish GitHub Release notes.",
+        "testStrategy": "Tag points to commit with green CI on main.",
+        "dependencies": [3, 9],
+        "status": "pending",
+        "priority": "low",
+        "subtasks": []
+      }
+    ]
+  }
+}

@@ -57,21 +57,23 @@ class AnalyticsEvent(Base):
 
 class SQLStore:
     def __init__(self, db_url: str = None):
-        # Prefer provided URL, then config setting
-        self.url = db_url or settings.db_config.url
-        
-        # --- Reliability & Scaling: DB Strictness ---
-        if settings.TEST_MODE:
-            self.url = "sqlite:///./test_orchestrator.db" # Force test DB in test mode
+        # Explicit URL (e.g. tests) wins over global settings.
+        if db_url:
+            self.url = db_url
+        elif settings.TEST_MODE:
+            self.url = "sqlite:///./test_orchestrator.db"
             logger.info("SQLStore operating in TEST_MODE with dedicated SQLite database.")
-        elif settings.ENV_MODE == "prod":
+        else:
+            self.url = settings.db_config.url
+
+        # --- Reliability & Scaling: DB Strictness ---
+        if settings.ENV_MODE == "prod":
             if "sqlite://" in self.url:
                 raise ValueError("CRITICAL: SQLite is not allowed in production environment. Configure PostgreSQL.")
             logger.info("SQLStore operating in PROD_MODE with PostgreSQL.")
-        elif not self.url or "sqlite://" in self.url:
-             # Critical fallback for initial dev setup only
-             self.url = "sqlite:///./orchestrator.db"
-             logger.warning("SQLStore falling back to SQLite. Ensure POSTGRES_URL is set for production.")
+        elif not self.url:
+            self.url = "sqlite:///./orchestrator.db"
+            logger.warning("SQLStore falling back to SQLite. Ensure POSTGRES_URL is set for production.")
         
         # Ensure we use the sync driver for this synchronous class
         if "postgresql+asyncpg" in self.url:

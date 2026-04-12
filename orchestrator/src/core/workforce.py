@@ -50,5 +50,13 @@ class WorkforceManager:
     def get_total_payroll(self) -> float:
         return sum(d.accrued_cost for d in self.roster.values())
 
+    def summary(self) -> Dict[str, Any]:
+        """Compact roster snapshot for /health and observability."""
+        return {
+            "roster_size": len(self.roster),
+            "total_payroll": round(self.get_total_payroll(), 4),
+            "agents": [d.to_dict() for d in list(self.roster.values())[:50]],
+        }
+
 # Global Workforce Instance
 workforce = WorkforceManager()

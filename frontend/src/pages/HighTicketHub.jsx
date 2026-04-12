@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Download, Zap, ShieldCheck, Link as LinkIcon } from 'lucide-react';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
+import { getApiBase } from '../lib/apiBase';
 
 // Placeholder for dynamically fetched offers
 // In a real app, this would be fetched from the backend API.
@@ -20,7 +20,7 @@ export default function HighTicketHub() {
   useEffect(() => {
     const fetchOffers = async () => {
       try {
-        const response = await fetch(`${BACKEND_URL}/api/affiliates/high-ticket`);
+        const response = await fetch(`${getApiBase()}/api/affiliates/high-ticket`);
         if (response.ok) {
           const data = await response.json();
           // Ensure offers have unique codes for tracking

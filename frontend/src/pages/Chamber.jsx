@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Terminal, Cpu, HardDrive, Download, AlertCircle } from 'lucide-react';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
+import { getApiBase, getWsBase } from '../lib/apiBase';
 
 export default function Chamber() {
   const [logs, setLogs] = useState([]);
@@ -12,7 +11,7 @@ export default function Chamber() {
 
   useEffect(() => {
     const token = import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || '';
-    const wsUrl = BACKEND_URL.replace('https', 'wss').replace('http', 'ws');
+    const wsUrl = getWsBase();
     const socket = new WebSocket(`${wsUrl}/ws/chamber?token=${token}`);
     socketRef.current = socket;
 
@@ -36,7 +35,7 @@ export default function Chamber() {
             if (urlMatch) {
               setArtifacts(prev => [...prev, {
                 id: Date.now(),
-                url: `${BACKEND_URL}${urlMatch[0]}`,
+                url: `${getApiBase()}${urlMatch[0]}`,
                 name: urlMatch[0].split('/').pop()
               }]);
             }

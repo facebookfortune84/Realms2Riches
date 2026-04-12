@@ -2,74 +2,119 @@
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry]
+[project]
 name = "orchestrator"
-version = "0.1.0"
+version = "0.1.1"
 description = "Platinum Sovereign Agentic Orchestrator"
-authors = ["Titan Orchestrator <orchestrator@sovereign.ai>"]
 readme = "README.md"
-packages = [{include = "orchestrator"}]
+authors = [
+    { name = "Titan Orchestrator", email = "orchestrator@sovereign.ai" }
+]
+requires-python = ">=3.11"
 
-[tool.poetry.dependencies]
-python = "^3.11"
-pydantic = "^2.10.0"
-pydantic-settings = "^2.2.1"
-openai = "^1.58.0"
-groq = "^0.15.0"
-fastapi = "^0.115.0"
-uvicorn = "^0.27.0"
-sqlalchemy = "^2.0.36"
-psycopg2-binary = "^2.9.9"
-asyncpg = "^0.29.0"
-pandas = "^2.2.1"
-chromadb = "^0.4.24"
-pyyaml = "^6.0.1"
-python-dotenv = "^1.0.1"
-docker = "^7.1.0"
-gitpython = "^3.1.43"
-tenacity = "^8.2.3"
-stripe = ">=11.12.0"
-cryptography = "^42.0.7"
-aiohttp = "^3.9.5"
-beautifulsoup4 = "^4.12.4"
-httpx = "^0.27.0"
-starlette = "^0.37.2"
-apscheduler = "^3.10.4"
-playwright = "^1.45.0"
-google-auth-oauthlib = "^1.2.4"
-google-api-python-client = "^2.131.0"
-google-auth-httplib2 = "^0.2.0"
-nest-asyncio = "^1.6.0"
-mcp = "^1.2.0"
-redis = "^5.0.3"
-arq = "^0.26.0"
-jinja2 = "^3.1.4"
-alembic = "^1.13.1"
+dependencies = [
+    "pydantic>=2.10.0,<3.0.0",
+    "pydantic-settings>=2.2.1,<3.0.0",
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.0.0"
-ruff = "^0.1.0"
-mypy = "^1.8.0"
-black = "^24.0.0"
-pre-commit = "^3.6.0"
-pytest-asyncio = "^1.3.0"
+    # LLM + AI
+    "openai>=1.58.0,<2.0.0",
+    "groq>=0.15.0,<1.0.0",
+    "anthropic>=0.92.0,<1.0.0",
+    "google-genai>=1.71.0,<2.0.0",
+    "huggingface-hub>=1.9.2,<2.0.0",
+    "onnxruntime>=1.24.4,<2.0.0",
+    "tokenizers>=0.22.2,<1.0.0",
+    "jiter>=0.13.0,<1.0.0",
 
-[tool.poetry.scripts]
+    # API / Web
+    "fastapi>=0.115.0,<1.0.0",
+    "uvicorn>=0.27.0,<1.0.0",
+    "starlette>=0.37.2,<1.0.0",
+    "python-multipart>=0.0.22,<1.0.0",
+    "email-validator>=2.3.0,<3.0.0",
+    "Authlib>=1.6.9,<2.0.0",
+
+    # Database
+    "sqlalchemy>=2.0.36,<3.0.0",
+    "psycopg2-binary>=2.9.9,<3.0.0",
+    "asyncpg>=0.29.0,<1.0.0",
+    "alembic>=1.13.1,<2.0.0",
+
+    # Redis / Queues
+    "redis>=5.0.3,<6.0.0",
+    "arq>=0.26.0,<1.0.0",
+
+    # Vector DB
+    "chromadb>=0.4.24,<1.0.0",
+
+    # Serialization / Utils
+    "orjson>=3.11.7,<4.0.0",
+    "mmh3>=5.2.0,<6.0.0",
+    "PyPika>=0.51.1,<1.0.0",
+
+    # HTTP / OAuth
+    "httpx>=0.27.0,<1.0.0",
+    "httpx-sse>=0.4.3,<1.0.0",
+    "httptools>=0.7.1,<1.0.0",
+    "requests-oauthlib>=2.0.0,<3.0.0",
+
+    # Google Cloud
+    "google-api-core>=2.30.0,<3.0.0",
+    "google-auth>=2.48.0,<3.0.0",
+    "google-auth-oauthlib>=1.3.0,<2.0.0",
+    "google-auth-httplib2>=0.3.0,<1.0.0",
+    "google-api-python-client>=2.191.0,<3.0.0",
+
+    # Infra
+    "kubernetes>=35.0.0,<36.0.0",
+    "grpcio>=1.62.0,<2.0.0",
+
+    # Analytics
+    "posthog>=5.4.0,<6.0.0",
+
+    # Misc
+    "bcrypt>=5.0.0,<6.0.0",
+    "pybase64>=1.4.3,<2.0.0",
+    "python-dateutil>=2.9.0,<3.0.0",
+    "tzlocal>=5.3.1,<6.0.0",
+
+    # Automation / Tools
+    "playwright>=1.45.0,<2.0.0",
+    "apscheduler>=3.10.4,<4.0.0",
+    "docker>=7.1.0,<8.0.0",
+    "gitpython>=3.1.43,<4.0.0",
+    "tenacity>=8.2.3,<9.0.0",
+    "jinja2>=3.1.4,<4.0.0",
+    "pyyaml>=6.0.1,<7.0.0",
+    "python-dotenv>=1.0.1,<2.0.0",
+    "stripe (>=15.0.1,<16.0.0)",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=1.3.0",
+    "flake8>=7.3.0",
+    "pyright>=1.1.408",
+    "typing_extensions>=4.15.0",
+    "watchfiles>=1.1.1",
+    "rich>=14.3.3",
+    "tqdm>=4.67.3",
+    "typer>=0.24.1",
+    "typer-slim>=0.24.0",
+    "shellingham>=1.5.4",
+]
+
+[project.scripts]
 start = "orchestrator.src.core.api:app"
-yolo = "scripts.yolo_mode_monetization:activate_yolo_mode"
 verify = "scripts.test_system_integrity:main"
 lineage = "scripts.hash_registry:main"
 
-[tool.ruff]
-line-length = 88
-target-version = "py311"
+[tool.poetry]
+packages = [{ include = "orchestrator" }]
 
-[tool.mypy]
-python_version = "3.11"
-strict = true
-ignore_missing_imports = true
-
-[tool.pytest.ini_options]
-asyncio_mode = "strict"
-asyncio_default_fixture_loop_scope = "function"
-testpaths = ["tests"]
+[dependency-groups]
+dev = [
+    "pylint (>=4.0.5,<5.0.0)",
+    "pytest (>=9.0.3,<10.0.0)"
+]

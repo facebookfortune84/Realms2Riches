@@ -1,11 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Zap, ShoppingCart, Info, ShieldAlert, Filter } from 'lucide-react';
 import { trackEvent } from '../lib/analytics';
 import { CMS_COPY } from '../lib/cms';
 import { Testimonials, TrustBadges } from '../components/TrustElements';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
+import { getApiBase } from '../lib/apiBase';
 
 const TABS = [
   { id: 'all', label: 'ALL_MATRIX' },
@@ -25,14 +24,13 @@ export default function Pricing() {
   useEffect(() => {
     trackEvent('page_view', { page: 'pricing' });
     
-    const headers = { 
+    const headers = {
         'X-License-Key': import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || 'mock_dev_key',
-        '': 'true'
     };
     
     const fetchCatalog = async () => {
         try {
-            const res = await fetch(`${BACKEND_URL}/products`, { headers });
+            const res = await fetch(`${getApiBase()}/products`, { headers });
             if (!res.ok) throw new Error('Failed to fetch pricing');
             const data = await res.json();
             if (data && data.length > 0) {

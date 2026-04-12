@@ -12,6 +12,10 @@ __pycache__/
 
 # env files
 .env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
 .env.local
 .env.prod
 .env.prod.bak
@@ -44,6 +48,8 @@ core_secondary/projects/generated/
 
 # secrets
 data/auth/gmail_credentials.json
+data/auth/gmail_token.json
+.gemini/settings.json
 
 # backups
 *.bak
@@ -55,3 +61,55 @@ data/auth/gmail_credentials.json
 Thumbs.db
 .vscode/
 .idea/
+*.swp
+*.swo
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Logs
+logs/
+*.log
+logs
+dev-debug.log
+
+# Realms2Riches runtime (PII / local state)
+data/marketing/leads.json
+orchestrator.db
+orchestrator/orchestrator.db
+core_secondary/.git
+env_files.txt
+env_dump.txt
+secrets.txt
+_repo_bundle/
+_use_ai_context/
+sovereign_bundle.txt
+repo_tree.txt
+repo_files.txt
+repo_hashes.csv
+repo_inventory.csv
+docker_build_errors.txt
+docker_config.txt
+ionos_facts.txt
+pytest_errors.txt
+
+# Node / frontend build outputs
+.next/
+.vercel/
+dist/
+build/
+
+# Task files (Taskmaster markdown export; optional)
+# tasks.json
+# tasks/
+
+# Cursor MCP — may contain API keys and production secrets (never commit)
+.cursor/mcp.json
+
+# Ephemeral lineage snapshots (local drift; regenerate via scripts)
+data/lineage/contribution_*.json
+
+# Playwright / local UI test artifacts
+test-results/

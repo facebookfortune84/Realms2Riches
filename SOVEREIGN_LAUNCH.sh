@@ -25,7 +25,15 @@ echo "🐳 Building/Starting Docker Containers..."
 docker-compose -f infra/docker/docker-compose.yml --env-file "$ENV_FILE" down --remove-orphans
 docker-compose -f infra/docker/docker-compose.yml --env-file "$ENV_FILE" up -d --build
 
-# 4. Connectivity Verification
+# 4. Self-Healing: Catalog Injection
+echo "📦 Ensuring Product Catalog is synced..."
+docker exec docker_orchestrator_1 mkdir -p /app/data/catalog
+if [ -f "data/affiliates/Click_Funnels/campaigns.json" ]; then
+    docker cp data/affiliates/Click_Funnels/campaigns.json docker_orchestrator_1:/app/data/catalog/products.json
+    echo "✅ Campaign data injected into container."
+fi
+
+# 5. Connectivity Verification
 echo "📡 Verifying Backend Connectivity..."
 sleep 5
 HEALTH=$(curl -s http://localhost:8000/health)
