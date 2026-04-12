@@ -1,0 +1,11 @@
+Realms2Riches — Sovereign Strategy Guide (stub)
+===============================================
+
+This is a lightweight placeholder delivered after lead capture.
+Replace with your PDF or rich asset under data/marketing/ and point
+/api/leads guide_url to the served path under /marketing/.
+
+Next steps for operators:
+1. Run the FastAPI backend (port 8000) and Vite frontend.
+2. Parse PRD into Taskmaster when you add .taskmaster/tasks/tasks.json.
+3. Follow docs/PATH_FORWARD.md for the execution queue.

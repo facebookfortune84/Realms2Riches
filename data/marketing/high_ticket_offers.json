@@ -1,0 +1,41 @@
+[
+  {
+    "id": "ht_001",
+    "name": "Authority Hacker Pro",
+    "creator": "Gael Breton & Mark Webster",
+    "niche": "SEO & Authority Sites",
+    "price": "997.00",
+    "currency": "USD",
+    "interval": "one_time",
+    "description": "The ultimate course for building profitable authority websites.",
+    "link": "/affiliates/auth_hacker",
+    "unique_code": "AHPRO-R2R",
+    "image_url": "/assets/affiliates/authority_hacker_pro.png"
+  },
+  {
+    "id": "ht_002",
+    "name": "SaaS Academy",
+    "creator": "Dan Martell",
+    "niche": "SaaS Growth",
+    "price": "4999.00",
+    "currency": "USD",
+    "interval": "one_time",
+    "description": "Comprehensive program for scaling SaaS businesses.",
+    "link": "/affiliates/saas_academy",
+    "unique_code": "SAASMAX-R2R",
+    "image_url": "/assets/affiliates/saas_academy.png"
+  },
+  {
+    "id": "ht_003",
+    "name": "Fintech Innovators Mastermind",
+    "creator": "AI Finance Group",
+    "niche": "Fintech & AI",
+    "price": "2500.00",
+    "currency": "USD",
+    "interval": "monthly",
+    "description": "Exclusive mastermind for fintech leaders leveraging AI.",
+    "link": "/affiliates/fintech_ai",
+    "unique_code": "FINTECHAI-R2R",
+    "image_url": "/assets/affiliates/fintech_ai.png"
+  }
+]
