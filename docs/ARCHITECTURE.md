@@ -1,5 +1,9 @@
 # Architecture Overview
 
+> **Current technical map:** see [architecture/api-endpoints.md](architecture/api-endpoints.md), [architecture/services-and-interactions.md](architecture/services-and-interactions.md), and [architecture/feature-map.md](architecture/feature-map.md).  
+> **Execution spine & Taskmaster:** [PATH_FORWARD.md](PATH_FORWARD.md).  
+> **Human operating model:** [SWARM_DIRECTOR_PLAYBOOK.md](SWARM_DIRECTOR_PLAYBOOK.md).
+
 ## Mission Critical Objective
 Realms2Riches is designed as a **Sovereign Autonomous Monetization Engine**, aiming to capture verifiable first payments and drive revenue across multiple monetization streams. The core objective is relentless execution and continuous verification of all deployed campaigns and features.
 
@@ -8,9 +12,8 @@ Realms2Riches is designed as a **Sovereign Autonomous Monetization Engine**, aim
 -   **Task Queue:** **ARQ** leveraging **Redis** for distributed, persistent, and scalable task management. This replaces direct script execution for many critical paths, ensuring reliability and retries.
 -   **Database:** **PostgreSQL** for robust, relational data storage. Replaces previous file-based systems (`.json`) for leads, logs, and settings, ensuring data integrity and concurrent access.
 -   **AI Core:** Integrated LLM providers (Groq default, OpenAI fallback) for agent reasoning, persona adoption, and dynamic content synthesis. Agents access tools defined in `data/oracle/tools/` and personas from `data/oracle/prompts/`.
--   **Infrastructure:** Containerized using **Docker Compose** (`infra/docker/docker-
-compose.yml`) for local development and deployment. Services include Orchestrator, Worker, PostgreSQL, Redis, and Adminer, with health checks for reliability and resource limits for optimization.
--   **Frontend:** React-based interface utilizing `projects/templates/landing-page/` for user interaction, including the improved Genesis Forge for swarm configuration.
+-   **Infrastructure:** Containerized using **Docker Compose** (`infra/docker/docker-compose.yml`) for local development and deployment. Services include Orchestrator, Worker, PostgreSQL, Redis, and Adminer, with health checks for reliability and resource limits for optimization.
+-   **Frontend:** React + Vite SPA under **`frontend/`** (canonical customer console). Legacy template copies may exist under `projects/templates/`; prefer **`frontend/`** for product work.
 
 ## Core Components
 
@@ -21,7 +24,7 @@ compose.yml`) for local development and deployment. Services include Orchestrato
     -   Provides WebSocket endpoints for real-time interaction (`/ws/voice`, `/ws/chamber`).
     -   Hosts `health`, `telemetry`, `activity` endpoints.
     -   Secured Stripe webhook listener (`/api/v1/monetization/webhook`) with signature verification.
-    *   Exposes `/api/tasks` endpoint to trigger complex operations, including **Genesis Forge** swarm generation, passing detailed configurations (business type, industry, roles, tools, scale).
+    -   Exposes **`POST /api/tasks`** to run the orchestrator to completion (optional `config` triggers **Genesis Forge** zip), plus **`/api/leads`**, **`/api/affiliates/high-ticket`**, **`/api/sovereign/launch`** for the SPA.
     -   Includes `RateLimitMiddleware` for API security.
 
 ### 2. Autonomous Workforce
