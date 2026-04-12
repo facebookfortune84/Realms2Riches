@@ -49,6 +49,12 @@ logs/
 *.log
 
 # Realms2Riches Specific Secrets
+# Lead captures (PII) — created at runtime from POST /api/leads
+data/marketing/leads.json
+
+# Local SQLite created by dev / tests
+orchestrator.db
+orchestrator/orchestrator.db
 data/auth/gmail_token.json
 data/auth/gmail_credentials.json
 .gemini/settings.json
@@ -67,3 +73,30 @@ docker_build_errors.txt
 docker_config.txt
 ionos_facts.txt
 pytest_errors.txt
+
+logs
+dev-debug.log
+# Dependency directories
+# Environment variables
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+
+# Task files
+# tasks.json
+# tasks/
+
+# Cursor MCP — may contain API keys and production secrets (never commit)
+.cursor/mcp.json
+
+# Ephemeral lineage snapshots (local drift; regenerate via scripts)
+data/lineage/contribution_*.json
+
+# Playwright / local UI test artifacts
+test-results/
