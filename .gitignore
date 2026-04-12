@@ -100,3 +100,6 @@ data/lineage/contribution_*.json
 
 # Playwright / local UI test artifacts
 test-results/
+
+# Auto-generated blog audit reports (local only)
+data/blog/report-*.md
