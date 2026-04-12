@@ -113,3 +113,6 @@ data/lineage/contribution_*.json
 
 # Playwright / local UI test artifacts
 test-results/
+
+# Local PyInstaller spec scratch
+build_exe.spec
