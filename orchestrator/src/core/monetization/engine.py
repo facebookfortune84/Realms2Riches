@@ -193,9 +193,11 @@ class MonetizationEngine:
             self._products = []
 
     def get_products_by_stage(self, stage: str) -> List[Dict[str, Any]]:
+        self._load_catalog()
         return [p for p in self._products if p.get("funnel_stage") == stage]
 
     def get_recommendations(self, product_id: str) -> Dict[str, List[Dict[str, Any]]]:
+        self._load_catalog()
         current = next((p for p in self._products if p["id"] == product_id), None)
         if not current:
             return {"upsells": [], "cross_sells": []}
@@ -206,6 +208,7 @@ class MonetizationEngine:
         return {"upsells": upsells, "cross_sells": cross_sells}
 
     def get_entry_offers(self) -> List[Dict[str, Any]]:
+        self._load_catalog()
         return [p for p in self._products if p.get("primary_entry_offer")]
 
     async def run_all_streams(self, orchestrator) -> List[Dict[str, Any]]:

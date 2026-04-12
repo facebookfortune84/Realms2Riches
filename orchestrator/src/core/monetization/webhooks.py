@@ -1,3 +1,11 @@
+"""
+Alternate Stripe webhook router (APIRouter).
+
+**Production path:** `POST /api/v1/monetization/webhook` is implemented on the main
+app in `orchestrator/src/core/api.py` (`unified_stripe_webhook`). This module is kept
+for experiments or future `include_router` consolidation — do not mount both
+handlers on the same path without merging logic.
+"""
 import stripe
 from fastapi import APIRouter, Request, HTTPException
 from orchestrator.src.core.config import settings

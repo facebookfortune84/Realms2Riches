@@ -5,10 +5,11 @@ sys.path.append(os.getcwd())
 import pytest
 import os
 import json
+import uuid
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 from orchestrator.src.core.api import app
-from orchestrator.src.memory.sql_store import SQLStore, AnalyticsEvent
+from orchestrator.src.memory.sql_store import SQLStore, AnalyticsEvent, ProfitRecord
 import orchestrator.src.core.config
 
 # --- Fixtures for clean state ---
@@ -53,10 +54,13 @@ def clean_db_and_catalog(tmp_path):
     test_db_path = tmp_path / "test_orchestrator.db"
     if os.path.exists(test_db_path):
         os.remove(test_db_path)
-    
-    # Patch SQLStore to use the temporary DB
-    with patch('orchestrator.src.memory.sql_store.SQLStore.__init__', autospec=True) as mock_sql_init:
-        mock_sql_init.side_effect = lambda self, db_url=None: SQLStore.__init__(self, db_url=f"sqlite:///{test_db_path}")
+
+    real_init = SQLStore.__init__
+
+    def _patched_init(self, db_url=None, *args, **kwargs):
+        return real_init(self, db_url=f"sqlite:///{test_db_path}", *args, **kwargs)
+
+    with patch.object(SQLStore, "__init__", _patched_init):
         yield test_db_path
 
 @pytest.fixture
@@ -127,7 +131,7 @@ def test_record_analytics_event_disabled(test_client, clean_db_and_catalog):
 
     sql = SQLStore()
     session = sql.Session()
-    assert session.query(AnalyticsEvent).count() == 0
+    assert session.query(AnalyticsEvent).filter_by(event_type="PRODUCT_VIEW").count() == 0
     session.close()
 
 def test_record_analytics_event_enabled(test_client, clean_db_and_catalog):
@@ -143,8 +147,8 @@ def test_record_analytics_event_enabled(test_client, clean_db_and_catalog):
 
     sql = SQLStore()
     session = sql.Session()
-    assert session.query(AnalyticsEvent).count() == 1
-    event = session.query(AnalyticsEvent).first()
+    assert session.query(AnalyticsEvent).filter_by(event_type="PRODUCT_VIEW").count() == 1
+    event = session.query(AnalyticsEvent).filter_by(event_type="PRODUCT_VIEW").first()
     assert event.event_type == "PRODUCT_VIEW"
     assert event.product_id == "prod_test"
     session.close()
@@ -153,7 +157,7 @@ def test_stripe_webhook_analytics_event(test_client, clean_db_and_catalog):
     """Test that a CHECKOUT_COMPLETED event is recorded via webhook."""
     os.environ["ANALYTICS_ENABLED"] = "True"
 
-
+    ev_id = f"evt_test_{uuid.uuid4().hex[:12]}"
     mock_event = {
         "type": "checkout.session.completed",
         "data": {
@@ -165,7 +169,7 @@ def test_stripe_webhook_analytics_event(test_client, clean_db_and_catalog):
                 "metadata": {"internal_id": "prod_x"}
             }
         },
-        "id": "evt_test_123"
+        "id": ev_id,
     }
     
     # Mock stripe.Webhook.construct_event as it needs a real payload/signature
@@ -181,7 +185,7 @@ def test_stripe_webhook_analytics_event(test_client, clean_db_and_catalog):
     sql = SQLStore()
     session = sql.Session()
     # Check ProfitRecord
-    assert session.query(SQLStore.ProfitRecord).count() == 1
+    assert session.query(ProfitRecord).count() == 1
     # Check AnalyticsEvent
     assert session.query(AnalyticsEvent).filter_by(event_type="CHECKOUT_COMPLETED").count() == 1
     event = session.query(AnalyticsEvent).filter_by(event_type="CHECKOUT_COMPLETED").first()

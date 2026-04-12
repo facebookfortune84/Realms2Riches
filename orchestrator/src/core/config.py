@@ -1,4 +1,6 @@
 import os
+import re
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 from orchestrator.src.validation.schemas import DatabaseConfig, MarketingConfig
@@ -85,6 +87,49 @@ class Settings(BaseSettings):
     DRY_RUN_MODE: bool = True
     STRIPE_PUBLISHABLE_KEY: Optional[str] = None
     OUTREACH_TEST_RECIPIENT: str = "robert.demotto@realms2riches.com"
+
+    @field_validator("POSTGRES_PORT", mode="before")
+    @classmethod
+    def _coerce_postgres_port(cls, v):
+        if isinstance(v, int):
+            return v
+        if v is None:
+            return 5432
+        s = str(v).strip()
+        try:
+            return int(s)
+        except ValueError:
+            m = re.match(r"^(\d+)", s)
+            return int(m.group(1)) if m else 5432
+
+    @field_validator("DATABASE_URL", mode="after")
+    @classmethod
+    def _drop_unparseable_database_url(cls, v: Optional[str]) -> Optional[str]:
+        if not v:
+            return v
+        try:
+            from sqlalchemy.engine.url import make_url
+
+            probe = v.replace("postgresql+asyncpg", "postgresql")
+            make_url(probe)
+            return v
+        except Exception:
+            return None
+
+    @field_validator("TELEMETRY_ENABLED", mode="before")
+    @classmethod
+    def _coerce_telemetry_enabled(cls, v):
+        """Accept common truthy/falsey strings; tolerate bad .env placeholders without crashing import."""
+        if isinstance(v, bool):
+            return v
+        if v is None:
+            return True
+        s = str(v).strip().lower()
+        if s in ("true", "1", "yes", "on"):
+            return True
+        if s in ("false", "0", "no", "off", ""):
+            return False
+        return True
 
     # --- PROPERTIES ---
     def validate_monetization_config(self):

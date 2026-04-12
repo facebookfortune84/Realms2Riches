@@ -1,4 +1,6 @@
-from fastapi import FastAPI, Request, HTTPException, BackgroundTasks
+from typing import Dict, Any, Optional, List
+import asyncio
+from fastapi import FastAPI, Request, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect
 from starlette.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
@@ -12,8 +14,8 @@ import stripe
 import random
 from datetime import datetime
 from contextlib import asynccontextmanager
-from typing import Optional
 
+from orchestrator.src.core.workforce import workforce
 from orchestrator.src.core.config import settings
 from orchestrator.src.logging.logger import get_logger
 from orchestrator.src.memory.sql_store import SQLStore
@@ -96,9 +98,17 @@ app.mount("/marketing", StaticFiles(directory="data/marketing"), name="marketing
 app.mount("/swarms", StaticFiles(directory="data/generated/swarms"), name="swarms")
 
 # --- ENDPOINTS ---
+@app.get("/")
+async def root():
+    return {"status": "healthy", "message": "Realms2Riches API is running"}
+
 @app.get("/health")
 async def health_root():
-    return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
+    return {
+        "status": "ok",
+        "timestamp": datetime.utcnow().isoformat(),
+        "agents": workforce.summary()  # or workforce.list(), depending on your API
+    }
 
 @app.get("/health/monetization")
 async def health_monetization():
@@ -198,7 +208,12 @@ async def record_analytics_event(request: Request):
     """
     Lightweight endpoint for recording frontend and backend analytics events.
     """
-    if not getattr(settings, "ANALYTICS_ENABLED", False) and os.getenv("ANALYTICS_ENABLED") != "True":
+    env_raw = os.getenv("ANALYTICS_ENABLED", "")
+    if env_raw != "":
+        analytics_on = env_raw.strip().lower() in ("true", "1", "yes", "on")
+    else:
+        analytics_on = bool(getattr(settings, "ANALYTICS_ENABLED", False))
+    if not analytics_on:
         return {"status": "skipped", "reason": "Analytics disabled"}
 
     try:
@@ -349,6 +364,153 @@ async def track_affiliate_click(affiliate_code: str, request: Request):
         logger.error(f"Error tracking affiliate click for code {affiliate_code}: {e}")
         return JSONResponse({"error": "Failed to track click"}, status_code=500)
 
+# --- SWARM / FRONTEND TASK API ---
+@app.post("/api/tasks")
+async def post_api_tasks(payload: Dict[str, Any]):
+    """
+    Run one orchestrator task (non-streaming) for SPA consoles.
+    Optional `config` triggers Genesis Forge packaging after the agent run.
+    """
+    global orchestrator, activity_log, telemetry_data
+    if not orchestrator or not getattr(orchestrator, "is_ready", False):
+        raise HTTPException(status_code=503, detail="Orchestrator not ready")
+
+    description = (payload.get("description") or "").strip()
+    if not description:
+        raise HTTPException(status_code=400, detail="Missing description")
+
+    project_id = str(payload.get("project_id") or payload.get("source") or "frontend")
+    last: Optional[Dict[str, Any]] = None
+    async for step in orchestrator.submit_task_stream(description, project_id):
+        last = step
+
+    if not last:
+        return {"status": "failed", "error": "No task result", "result": {}}
+
+    if last.get("status") == "failed":
+        return {
+            "status": "failed",
+            "error": last.get("reason", "unknown"),
+            "task_id": last.get("task_id"),
+            "healing": last.get("healing"),
+            "result": {},
+        }
+
+    result = last.get("result") or {}
+    if result.get("status") == "failed":
+        return {
+            "status": "failed",
+            "error": result.get("error", "agent_failed"),
+            "task_id": last.get("task_id"),
+            "result": result,
+        }
+
+    task_id = str(last.get("task_id") or "")
+    normalized = {
+        **result,
+        "task_id": task_id,
+        "agent_id": result.get("agent_name") or result.get("agent_id"),
+    }
+
+    if payload.get("config"):
+        try:
+            from orchestrator.src.core.genesis_forge import GenesisForge
+
+            forge = GenesisForge()
+            cfg = dict(payload["config"])
+            if not cfg.get("name"):
+                cfg["name"] = cfg.get("industry") or "SovereignSwarm"
+            artifact_url = await forge.generate_swarm(cfg)
+            normalized["artifact_url"] = artifact_url
+        except Exception as e:
+            logger.error(f"Genesis Forge failed: {e}")
+            normalized["artifact_error"] = str(e)
+
+    activity_log.append(
+        {
+            "t": datetime.utcnow().isoformat(),
+            "a": normalized.get("agent_id") or "SWARM",
+            "op": "TASK_COMPLETED",
+            "r": (normalized.get("reasoning") or "")[:500],
+        }
+    )
+    telemetry_data["clicks"] = telemetry_data.get("clicks", 0) + 1
+
+    return {"status": "completed", "task_id": task_id, "result": normalized}
+
+
+@app.get("/api/affiliates/high-ticket")
+async def get_high_ticket_affiliates():
+    """Curated high-ticket offers for the affiliate hub (editable JSON)."""
+    path = "data/marketing/high_ticket_offers.json"
+    if os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return data if isinstance(data, list) else data.get("offers", [])
+        except Exception as e:
+            logger.error(f"Failed to load high-ticket offers: {e}")
+    return []
+
+
+@app.post("/api/sovereign/launch")
+async def post_sovereign_launch(request: Request):
+    """Arm sovereign session after optional client-side checks (license header is advisory in dev)."""
+    try:
+        await request.json()
+    except Exception:
+        pass
+    lic = request.headers.get("x-license-key") or request.headers.get("X-License-Key")
+    activity_log.append(
+        {
+            "t": datetime.utcnow().isoformat(),
+            "a": "LAUNCH",
+            "op": "SOVEREIGN_ARM",
+            "r": "Launch handshake acknowledged.",
+        }
+    )
+    return {
+        "status": "active",
+        "message": "Sovereign session armed.",
+        "license_ack": bool(lic),
+    }
+
+
+@app.post("/api/leads")
+async def post_lead(payload: Dict[str, Any]):
+    """Capture marketing leads from the SPA; appends to local JSON store."""
+    email = (payload.get("email") or "").strip()
+    if not email:
+        raise HTTPException(status_code=400, detail="Missing email")
+
+    os.makedirs("data/marketing", exist_ok=True)
+    path = "data/marketing/leads.json"
+    rows: List[Any] = []
+    if os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                rows = json.load(f)
+        except Exception:
+            rows = []
+    if not isinstance(rows, list):
+        rows = []
+    rows.append(
+        {
+            "email": email,
+            "source": payload.get("source", "web"),
+            "t": datetime.utcnow().isoformat(),
+        }
+    )
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(rows, f, indent=2)
+
+    guide_url = "/marketing/SOVEREIGN_GUIDE.txt"
+    if not os.path.exists("data/marketing/SOVEREIGN_GUIDE.txt"):
+        guide_url = ""
+
+    return {"status": "recorded", "guide_url": guide_url}
+
+
 # --- STRIPE WEBHOOK LISTENER ---
 @app.post("/api/v1/monetization/webhook")
 async def unified_stripe_webhook(request: Request, background_tasks: BackgroundTasks):
@@ -441,6 +603,50 @@ async def fulfill_order(session_data: dict):
     customer_email = session_data.get("customer_details", {}).get("email")
     logger.info(f"🚚 Fulfilling order for {customer_email}...")
     # Add real fulfillment logic here (e.g. creating DB entry for Jarvis license)
+
+
+@app.websocket("/ws/voice")
+async def voice_websocket(websocket: WebSocket):
+    """Bidirectional voice control (see tests/integration/test_voice_flow.py)."""
+    global voice_router
+    if not voice_router:
+        await websocket.close(code=1011)
+        return
+    await voice_router.handle_connection(websocket)
+
+
+@app.websocket("/ws/chamber")
+async def chamber_websocket(websocket: WebSocket):
+    """Live activity feed for the Chamber UI (mirrors /api/activity over WebSocket)."""
+    await websocket.accept()
+    await websocket.send_json(
+        {
+            "type": "log",
+            "timestamp": datetime.utcnow().isoformat(),
+            "agent": "SYSTEM",
+            "operation": "CHAMBER_UPLINK",
+            "result": "Recursive feed connected. Streaming matrix activity.",
+        }
+    )
+    seen = len(activity_log)
+    try:
+        while True:
+            await asyncio.sleep(1.0)
+            if len(activity_log) > seen:
+                for entry in activity_log[seen:]:
+                    await websocket.send_json(
+                        {
+                            "type": "log",
+                            "timestamp": entry.get("t", datetime.utcnow().isoformat()),
+                            "agent": entry.get("a", "SYSTEM"),
+                            "operation": entry.get("op", "EVENT"),
+                            "result": entry.get("r", ""),
+                        }
+                    )
+                seen = len(activity_log)
+    except WebSocketDisconnect:
+        logger.info("Chamber websocket client disconnected")
+
 
 if __name__ == "__main__":
     import uvicorn
