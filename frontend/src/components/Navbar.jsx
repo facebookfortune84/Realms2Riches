@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
+import { getApiBase } from '../lib/apiBase';
 
 export default function Navbar() {
   const location = useLocation();
@@ -19,7 +19,7 @@ export default function Navbar() {
       <div className="container mx-auto px-4 flex justify-between items-center">
         <Link to="/" className="flex items-center gap-3 group">
           <img 
-            src={`${BACKEND_URL}/assets/branding/forge_logo.png`} 
+            src={`${getApiBase()}/assets/branding/forge_logo.png`} 
             alt="Realms2Riches" 
             className="h-10 w-auto group-hover:scale-110 transition-transform duration-500"
             onError={(e) => {

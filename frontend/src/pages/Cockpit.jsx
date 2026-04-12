@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff, Send, XCircle, Terminal, Cpu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
+import { getApiBase, getWsBase } from '../lib/apiBase';
 
 export default function Cockpit() {
   const [messages, setMessages] = useState([{ sender: 'system', text: 'Sovereign Neural Link Established. Awaiting directive.' }]);
@@ -30,7 +29,7 @@ export default function Cockpit() {
     setIsThinking(true);
 
     try {
-        const res = await fetch(`${BACKEND_URL}/api/tasks`, {
+        const res = await fetch(`${getApiBase()}/api/tasks`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -69,7 +68,7 @@ export default function Cockpit() {
         setVoiceStatus('Inactive');
     } else {
         const token = import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || '';
-        const wsUrl = BACKEND_URL.replace('https', 'wss').replace('http', 'ws');
+        const wsUrl = getWsBase();
         try {
             const socket = new WebSocket(`${wsUrl}/ws/voice?token=${token}`);
             socket.onopen = () => {

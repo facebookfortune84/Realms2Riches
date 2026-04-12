@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Terminal, Activity, Zap, Shield, TrendingUp, Users, Cpu, Server } from 'lucide-react';
+import { getApiBase } from '../lib/apiBase';
 
 export default function UnifiedConsole() {
   const [activeTab, setActiveTab] = useState('telemetry');
@@ -12,7 +14,7 @@ export default function UnifiedConsole() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/telemetry/stats`);
+        const res = await fetch(`${getApiBase()}/api/telemetry/stats`);
         const data = await res.json();
         setTelemetry(data);
       } catch (e) { console.error(e); }
@@ -20,7 +22,7 @@ export default function UnifiedConsole() {
 
     const fetchLogs = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/activity`);
+        const res = await fetch(`${getApiBase()}/api/activity`);
         const data = await res.json();
         setLogs(data);
       } catch (e) { console.error(e); }
@@ -37,7 +39,7 @@ export default function UnifiedConsole() {
     if (!command.trim()) return;
     setIsProcessing(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tasks`, {
+      const res = await fetch(`${getApiBase()}/api/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ description: command })

@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
+import { getApiBase } from '../lib/apiBase';
 
 export default function Blog() {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    const headers = { 
+    const headers = {
         'X-License-Key': import.meta.env.VITE_SOVEREIGN_LICENSE_KEY || 'mock_dev_key',
-        '': 'true'
     };
-    fetch(`${BACKEND_URL}/api/blog/posts`, { headers })
+    fetch(`${getApiBase()}/api/blog/posts`, { headers })
       .then(res => res.json())
       .then(data => setPosts(data))
       .catch(err => console.error("Blog Load Error:", err));

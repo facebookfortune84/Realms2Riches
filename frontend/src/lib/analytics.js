@@ -1,4 +1,4 @@
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
+import { getApiBase } from './apiBase';
 const ANALYTICS_ENABLED = import.meta.env.VITE_ANALYTICS_ENABLED === 'true';
 
 // Thin abstraction layer for event tracking
@@ -9,7 +9,7 @@ export const trackEvent = async (eventName, payload = {}) => {
   if (!ANALYTICS_ENABLED) return;
 
   try {
-    const res = await fetch(`${BACKEND_URL}/api/v1/analytics/event`, {
+    const res = await fetch(`${getApiBase()}/api/v1/analytics/event`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',

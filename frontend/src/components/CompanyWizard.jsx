@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Building2, Rocket, ShieldCheck, Users, ArrowRight, Check, Box, Cpu, Download, Briefcase, Zap, Settings, Search, LogOut } from 'lucide-react';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
+import { getApiBase } from '../lib/apiBase';
 
 const BUSINESS_TYPES = [
     { id: 'saas', label: 'SaaS / AI App', icon: Cpu },
@@ -79,11 +79,10 @@ export default function CompanyWizard({ isOpen, onClose }) {
   const handleLaunch = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/tasks`, {
+      const response = await fetch(`${getApiBase()}/api/tasks`, {
         method: 'POST',
-        headers: { 
+        headers: {
             'Content-Type': 'application/json',
-            '': 'true' 
         },
         body: JSON.stringify({ 
             description: `INITIALIZE COMPANY BLUEPRINT: ${config.name} (${config.industry})`,
@@ -98,7 +97,7 @@ export default function CompanyWizard({ isOpen, onClose }) {
       });
       const data = await response.json();
       if (data.result?.artifact_url) {
-        window.open(`${BACKEND_URL}${data.result.artifact_url}`, '_blank');
+        window.open(`${getApiBase()}${data.result.artifact_url}`, '_blank');
       }
       setStep(4);
     } catch (e) {
@@ -140,7 +139,7 @@ export default function CompanyWizard({ isOpen, onClose }) {
         <div className="flex justify-between items-start mb-10 relative z-10">
             <div className="flex items-center gap-6">
                 <div className="p-4 bg-primary/10 rounded-3xl border border-primary/30 shadow-[0_0_30px_rgba(0,255,136,0.1)]">
-                    <img src={`${BACKEND_URL}/assets/branding/forge_logo.png`} alt="Forge" className="h-16 w-auto" />
+                    <img src={`${getApiBase()}/assets/branding/forge_logo.png`} alt="Forge" className="h-16 w-auto" />
                 </div>
                 <div>
                     <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase">

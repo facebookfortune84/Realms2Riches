@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
-const API_URL = import.meta.env.VITE_API_URL || "https://api.realms2riches.com";
+import { getApiBase } from '../lib/apiBase';
 
 export default function BlogPost() {
   const { slug } = useParams();
   const [post, setPost] = useState(null);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/blog/posts/${slug}`)
+    fetch(`${getApiBase()}/api/blog/posts/${slug}`)
       .then(res => res.json())
       .then(data => setPost(data))
       .catch(err => console.error("Failed to load post", err));

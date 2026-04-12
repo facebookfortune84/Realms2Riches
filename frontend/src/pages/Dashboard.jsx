@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Shield, Zap, Users, Globe, Database, Cpu, Terminal, Layers, Radio, BarChart3 } from 'lucide-react';
 import CompanyWizard from '../components/CompanyWizard';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
+import { getApiBase } from '../lib/apiBase';
 
 export default function Dashboard() {
   const [metrics, setMetrics] = useState(null);
@@ -20,10 +20,10 @@ export default function Dashboard() {
     };
     try {
       const [mRes, aRes, iRes, tRes] = await Promise.all([
-        fetch(`${BACKEND_URL}/health`, { headers }),
-        fetch(`${BACKEND_URL}/api/activity`, { headers }),
-        fetch(`${BACKEND_URL}/api/integrations/status`, { headers }),
-        fetch(`${BACKEND_URL}/api/telemetry/stats`, { headers })
+        fetch(`${getApiBase()}/health`, { headers }),
+        fetch(`${getApiBase()}/api/activity`, { headers }),
+        fetch(`${getApiBase()}/api/integrations/status`, { headers }),
+        fetch(`${getApiBase()}/api/telemetry/stats`, { headers })
       ]);
       
       const mData = await mRes.json();

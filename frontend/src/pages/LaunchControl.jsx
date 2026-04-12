@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.realms2riches.com";
+import { getApiBase } from '../lib/apiBase';
 
 export default function LaunchControl() {
   const [status, setStatus] = useState('idle'); 
@@ -17,7 +17,7 @@ export default function LaunchControl() {
 
     const probe = async () => {
         try {
-            const res = await fetch(`${BACKEND_URL}/health`, { mode: 'cors' });
+            const res = await fetch(`${getApiBase()}/health`, { mode: 'cors' });
             if (res.ok) setDiag({ backend: 'ONLINE', tunnel: 'ACTIVE' });
             else setDiag({ backend: 'ERROR', tunnel: 'ACTIVE' });
         } catch (e) {
@@ -34,7 +34,7 @@ export default function LaunchControl() {
     setLogs(["> Initiating Signature Handshake...", "> Verifying Master Key..."]);
 
     try {
-        const res = await fetch(`${BACKEND_URL}/api/sovereign/launch`, {
+        const res = await fetch(`${getApiBase()}/api/sovereign/launch`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
