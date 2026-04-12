@@ -14,6 +14,9 @@ env:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "sqlite:///./ci_test.db"
+      STRIPE_TEST_MODE: "YES"
     steps:
       - uses: actions/checkout@v4
 
@@ -55,6 +58,16 @@ jobs:
       - name: Seed product catalog
         run: |
           source .venv/bin/activate
+          mkdir -p data/catalog
+          # Stub minimal CSVs when not present (CI-only seed; real data lives outside git)
+          if [ ! -f data/catalog/products.csv ]; then
+            printf "id,name,description,category\nprod_ci_stub,CI Test Product,Stub for CI,digital\n" \
+              > data/catalog/products.csv
+          fi
+          if [ ! -f data/catalog/prices.csv ]; then
+            printf "product_id,price,currency,interval,stripe_price_id\nprod_ci_stub,0.01,usd,one_time,price_ci_stub\n" \
+              > data/catalog/prices.csv
+          fi
           poetry run python -m orchestrator.src.core.catalog.ingest
 
   frontend:

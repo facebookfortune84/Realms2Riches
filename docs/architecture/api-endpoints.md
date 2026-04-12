@@ -65,11 +65,13 @@ These define their own `FastAPI()` instances for **separate processes** or **cod
 
 ## Router module not mounted on main app
 
+> **Status (2026-04-12): CANONICAL HANDLER IS `api.py`. `webhooks.py` router is a legacy artifact — NOT mounted and NOT used in production. Track removal under Task 13 (cleanup-webhooks).**
+
 | Method | Path | Handler file | Purpose |
 |--------|------|--------------|---------|
-| POST | `/api/v1/monetization/webhook` | `orchestrator/src/core/monetization/webhooks.py` (`stripe_webhook`) | Alternate Stripe webhook implementation |
+| POST | `/api/v1/monetization/webhook` | `orchestrator/src/core/monetization/webhooks.py` (`stripe_webhook`) | **LEGACY — duplicate of `unified_stripe_webhook` in `api.py`. Do not mount.** |
 
-**Note:** `api.py` does **not** call `app.include_router(...)` for this module. The live webhook path is the handler in `api.py` above. The router file is a parallel/alternate implementation.
+**Resolution:** `api.py` line 515 — `unified_stripe_webhook` — is the single canonical Stripe webhook handler. `webhooks.py` defines a separate router that is never mounted via `app.include_router(...)`. It should be deleted in the next cleanup cycle (Task 13).
 
 ---
 

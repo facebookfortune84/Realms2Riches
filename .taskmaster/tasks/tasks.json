@@ -137,6 +137,17 @@
         "priority": "low",
         "subtasks": []
       }
+      {
+        "id": 13,
+        "title": "Remove legacy webhooks.py router artifact",
+        "description": "Delete orchestrator/src/core/monetization/webhooks.py — it is never mounted and duplicates api.py unified_stripe_webhook (line 515). Confirmed 2026-04-12.",
+        "details": "Safe to delete: no include_router call exists in api.py. Canonical handler is unified_stripe_webhook at POST /api/v1/monetization/webhook in api.py. After deletion, run: poetry run pytest tests/integration/test_api_endpoints.py -q to confirm no import references break.",
+        "testStrategy": "poetry run pytest tests/integration/test_api_endpoints.py -q after deletion.",
+        "dependencies": [3],
+        "status": "pending",
+        "priority": "low",
+        "subtasks": []
+      }
     ]
   }
 }
